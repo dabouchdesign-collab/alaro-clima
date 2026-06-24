@@ -3,298 +3,334 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Alaro Clima - Partes de Trabajo</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<title>Alaro Clima</title>
 <style>
-:root{--g:#1D9E75;--gl:#E1F5EE;--gd:#0F6E56;--bg:#F4F4F2;--card:#fff;--b:rgba(0,0,0,.09);--b2:rgba(0,0,0,.15);--tx:#1A1A18;--tx2:#6B6B68;--tx3:#9E9E9B;--red:#A32D2D;--rmd:10px;--rlg:14px}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--tx);font-size:15px;line-height:1.5;overscroll-behavior:none}
-#app{max-width:480px;margin:0 auto;min-height:100vh}
-.hdr{background:var(--card);border-bottom:.5px solid var(--b);padding:0 16px;height:54px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50}
-.hdr-logo{width:34px;height:34px;background:var(--g);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px}
-.hdr-title{font-size:16px;font-weight:600;flex:1;letter-spacing:-.3px}
-.hdr-btn{background:none;border:none;cursor:pointer;color:var(--tx2);width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:22px}
+:root{--g:#1D9E75;--gl:#e8f8f2;--gd:#0e6b50;--bg:#f2f2f0;--w:#fff;--b1:rgba(0,0,0,.08);--b2:rgba(0,0,0,.14);--t1:#181816;--t2:#64645f;--t3:#9e9e9a;--red:#a02828;--r:10px;--rl:14px}
+html,body{height:100%;background:var(--bg);color:var(--t1);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;overscroll-behavior:none}
+#app{max-width:480px;margin:0 auto;min-height:100vh;position:relative}
+/* NAV */
+.hdr{background:var(--w);border-bottom:.5px solid var(--b1);height:52px;display:flex;align-items:center;padding:0 14px;gap:8px;position:sticky;top:0;z-index:40}
+.hdr-ico{width:32px;height:32px;background:var(--g);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px;flex-shrink:0}
+.hdr-tit{font-size:16px;font-weight:600;flex:1}
+.hdr-btn{width:36px;height:36px;border:none;background:none;cursor:pointer;font-size:20px;color:var(--t2);display:flex;align-items:center;justify-content:center;border-radius:8px}
 .hdr-btn:active{background:var(--bg)}
-.screen{display:none;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:calc(100vh - 54px)}
-.screen.active{display:flex}
-.sec-lbl{padding:16px 16px 5px;font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em}
-.cg{background:var(--card);border-top:.5px solid var(--b);border-bottom:.5px solid var(--b);margin-bottom:2px}
-.row{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:.5px solid var(--b);min-height:48px}
-.row:last-child{border-bottom:none}
-.rl{font-size:13px;color:var(--tx2);min-width:96px;flex-shrink:0}
-.row select,.row input{flex:1;border:none;background:none;font-size:15px;color:var(--tx);text-align:right;outline:none;font-family:inherit;min-width:0}
-.row-ta{padding:12px 16px}
-.row-ta textarea{width:100%;border:none;background:none;font-size:15px;color:var(--tx);outline:none;font-family:inherit;resize:none;line-height:1.6;min-height:80px}
-.li{background:var(--card);border-bottom:.5px solid var(--b);padding:13px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:background .08s;min-height:62px}
-.li:first-child{border-top:.5px solid var(--b)}
-.li:active{background:#F0F0EE}
-.av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0;background:var(--gl);color:var(--gd)}
-.li-info{flex:1;min-width:0}
-.li-t{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.li-m{font-size:12px;color:var(--tx2);margin-top:1px}
-.chv{font-size:18px;color:var(--tx3);flex-shrink:0}
-.badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0;background:#EAF3DE;color:#3B6D11}
-.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px}
-.dash-hero{grid-column:1/-1;background:var(--g);border-radius:var(--rlg);padding:18px;cursor:pointer;display:flex;align-items:center;gap:14px}
-.dash-hero:active{opacity:.88}
-.dhi{width:46px;height:46px;background:rgba(255,255,255,.15);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
-.dc{background:var(--card);border:.5px solid var(--b);border-radius:var(--rlg);padding:16px 14px;cursor:pointer}
-.dc:active{opacity:.8}
-.dc-i{font-size:22px;margin-bottom:7px}.dc-l{font-size:13px;font-weight:600}.dc-s{font-size:11px;color:var(--tx2);margin-top:2px}
-.step-bar{padding:10px 16px 2px;display:flex;gap:4px}
+/* SCREENS */
+.scr{display:none;flex-direction:column;min-height:calc(100vh - 52px);overflow-y:auto;-webkit-overflow-scrolling:touch}
+.scr.on{display:flex}
+/* GROUPS */
+.grp{background:var(--w);border-top:.5px solid var(--b1);border-bottom:.5px solid var(--b1);margin-bottom:2px}
+.lbl{padding:14px 14px 4px;font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.06em}
+.fld{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:.5px solid var(--b1);min-height:46px}
+.fld:last-child{border-bottom:none}
+.fld-l{font-size:13px;color:var(--t2);min-width:90px;flex-shrink:0}
+.fld input,.fld select,.fld textarea{flex:1;border:none;background:none;font-size:15px;color:var(--t1);text-align:right;outline:none;font-family:inherit;min-width:0}
+.fld textarea{text-align:left;resize:none;line-height:1.5;padding:2px 0}
+/* LIST ITEMS */
+.item{background:var(--w);border-bottom:.5px solid var(--b1);padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;min-height:60px}
+.item:first-of-type{border-top:.5px solid var(--b1)}
+.item:active{background:#efefed}
+.ava{width:36px;height:36px;border-radius:50%;background:var(--gl);color:var(--gd);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0}
+.item-inf{flex:1;min-width:0}
+.item-t{font-size:14px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item-s{font-size:12px;color:var(--t2);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chev{color:var(--t3);font-size:16px;flex-shrink:0}
+.tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:12px;background:#e5f2e0;color:#2e6b1a;flex-shrink:0}
+/* DASHBOARD */
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px}
+.hero{grid-column:1/-1;background:var(--g);border-radius:var(--rl);padding:16px 18px;cursor:pointer;display:flex;align-items:center;gap:14px}
+.hero:active{opacity:.88}
+.hero-ic{width:44px;height:44px;background:rgba(255,255,255,.18);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.hero-t{font-size:17px;font-weight:600;color:#fff}
+.hero-s{font-size:13px;color:rgba(255,255,255,.72);margin-top:1px}
+.dcard{background:var(--w);border:.5px solid var(--b1);border-radius:var(--rl);padding:14px;cursor:pointer}
+.dcard:active{opacity:.8}
+.dcard-i{font-size:22px;margin-bottom:6px}
+.dcard-l{font-size:13px;font-weight:600}
+.dcard-s{font-size:11px;color:var(--t2);margin-top:2px}
+/* STEPS */
+.steps{display:flex;gap:4px;padding:10px 14px 2px}
 .step{flex:1;height:3px;border-radius:2px;background:var(--b2)}
-.step.done{background:var(--g)}.step.cur{background:#5DCAA5}
-.step-info{padding:3px 16px 10px;font-size:12px;color:var(--tx2)}
-.tipo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 16px 16px}
-.tipo-btn{border:.5px solid var(--b2);background:var(--card);border-radius:var(--rmd);padding:14px 10px;cursor:pointer;text-align:center;font-family:inherit}
-.tipo-btn.sel{background:var(--gl);border-color:var(--g);border-width:1.5px}
-.ti{font-size:22px;margin-bottom:6px;line-height:1}
-.tl{font-size:12px;font-weight:500;color:var(--tx);line-height:1.3}
-.foto-wrap{padding:0 16px 12px}
-.foto-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
-.fthumb{position:relative;aspect-ratio:1;border-radius:var(--rmd);overflow:hidden;background:var(--bg);border:.5px solid var(--b)}
-.fthumb img{width:100%;height:100%;object-fit:cover;display:block}
-.fdel{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.55);border:none;border-radius:50%;width:22px;height:22px;color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.fadd{border:1.5px dashed var(--b2);background:none;border-radius:var(--rmd);padding:13px;cursor:pointer;display:flex;align-items:center;gap:10px;width:100%;font-family:inherit;font-size:14px;color:var(--tx2)}
-#foto-input{display:none}
-.firma-wrap{padding:0 16px 6px}
-.firma-box{border:.5px solid var(--b2);border-radius:var(--rmd);background:var(--card);position:relative;overflow:hidden}
-#firma-canvas{display:block;width:100%;height:160px;cursor:crosshair;touch-action:none}
-.firma-ph{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:13px;color:var(--tx3);pointer-events:none;text-align:center;line-height:1.6}
-.firma-clr{font-size:12px;color:var(--tx2);background:none;border:none;cursor:pointer;padding:6px 0;font-family:inherit}
-.btn-p{background:var(--g);color:#fff;border:none;border-radius:var(--rmd);padding:14px 20px;font-size:15px;font-weight:600;cursor:pointer;width:calc(100% - 32px);margin:0 16px 10px;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px}
-.btn-p:active{opacity:.85}.btn-p:disabled{opacity:.5;cursor:default}
-.btn-s{background:var(--card);color:var(--tx);border:.5px solid var(--b2);border-radius:var(--rmd);padding:13px 20px;font-size:14px;cursor:pointer;width:calc(100% - 32px);margin:0 16px 8px;font-family:inherit}
-.btn-d{background:none;color:var(--red);border:none;padding:12px 20px;font-size:14px;cursor:pointer;width:calc(100% - 32px);margin:0 16px 6px;font-family:inherit}
-.sp{height:20px}
-.sum-card{background:var(--card);border-top:.5px solid var(--b);border-bottom:.5px solid var(--b);margin-bottom:6px}
-.sr{display:flex;justify-content:space-between;align-items:baseline;padding:10px 16px;border-bottom:.5px solid var(--b);font-size:14px}
-.sr:last-child{border-bottom:none}
-.sk{color:var(--tx2)}.sv{font-weight:500;text-align:right;max-width:58%;line-height:1.4}
-.empty{text-align:center;padding:56px 24px}
-.empty .ei{font-size:40px;margin-bottom:10px}
-.empty .et{font-size:14px;font-weight:500;margin-bottom:4px;color:var(--tx2)}
-.empty .es{font-size:13px;color:var(--tx3);line-height:1.6}
-.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(10px);background:#1A1A18;color:#fff;padding:10px 18px;border-radius:24px;font-size:13px;opacity:0;transition:all .25s;pointer-events:none;z-index:200;max-width:calc(100% - 32px);text-align:center}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;display:none;align-items:flex-end}
-.modal-ov.open{display:flex}
-.modal-box{background:var(--card);border-radius:20px 20px 0 0;padding:24px 20px 20px;width:100%;max-width:480px;margin:0 auto}
-.modal-t{font-size:16px;font-weight:600;margin-bottom:8px}
-.modal-s{font-size:14px;color:var(--tx2);margin-bottom:20px;line-height:1.5}
+.step.done{background:var(--g)}.step.cur{background:#5dcaa5}
+.step-lbl{padding:2px 14px 10px;font-size:12px;color:var(--t2)}
+/* TIPO GRID */
+.tipo-g{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 14px 14px}
+.tipo-b{border:.5px solid var(--b2);background:var(--w);border-radius:var(--r);padding:13px 8px;cursor:pointer;text-align:center;font-family:inherit;transition:background .08s}
+.tipo-b.on{background:var(--gl);border-color:var(--g);border-width:1.5px}
+.tipo-em{font-size:20px;margin-bottom:5px}
+.tipo-tx{font-size:12px;font-weight:500;color:var(--t1);line-height:1.3}
+/* FOTOS */
+.foto-wrap{padding:0 14px 14px}
+.foto-g{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.fото{position:relative;aspect-ratio:1;border-radius:var(--r);overflow:hidden;border:.5px solid var(--b1)}
+.fото img{width:100%;height:100%;object-fit:cover;display:block}
+.foto-del{position:absolute;top:3px;right:3px;width:20px;height:20px;background:rgba(0,0,0,.55);border:none;border-radius:50%;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+.foto-add{border:1.5px dashed var(--b2);background:none;border-radius:var(--r);padding:12px;display:flex;align-items:center;gap:10px;width:100%;font-family:inherit;font-size:14px;color:var(--t2);cursor:pointer}
+.foto-add:active{background:rgba(0,0,0,.03)}
+.foto-cnt{font-size:12px;color:var(--t3);text-align:right;margin-top:5px}
+#foto-inp{display:none}
+/* FIRMA */
+.firma-wrap{padding:0 14px 6px}
+.firma-box{border:.5px solid var(--b2);border-radius:var(--r);background:var(--w);position:relative;overflow:hidden}
+#firma-c{display:block;width:100%;height:155px;cursor:crosshair;touch-action:none}
+.firma-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--t3);pointer-events:none;text-align:center;line-height:1.5}
+.firma-clr{font-size:12px;color:var(--t2);background:none;border:none;cursor:pointer;padding:5px 0;font-family:inherit}
+/* BOTONES */
+.btn{background:var(--g);color:#fff;border:none;border-radius:var(--r);padding:13px 18px;font-size:15px;font-weight:600;cursor:pointer;width:calc(100% - 28px);margin:0 14px 10px;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn:active{opacity:.85}.btn:disabled{opacity:.45;cursor:default}
+.btn2{background:var(--w);color:var(--t1);border:.5px solid var(--b2);border-radius:var(--r);padding:12px 18px;font-size:14px;cursor:pointer;width:calc(100% - 28px);margin:0 14px 8px;font-family:inherit}
+.btn2:active{background:#efefed}
+.btnd{background:none;color:var(--red);border:none;padding:11px 18px;font-size:14px;cursor:pointer;width:calc(100% - 28px);margin:0 14px 6px;font-family:inherit}
+.gap{height:18px}
+/* RESUMEN */
+.res-card{background:var(--w);border-top:.5px solid var(--b1);border-bottom:.5px solid var(--b1);margin-bottom:6px}
+.res-row{display:flex;justify-content:space-between;align-items:baseline;padding:9px 14px;border-bottom:.5px solid var(--b1);font-size:14px}
+.res-row:last-child{border-bottom:none}
+.res-k{color:var(--t2)}.res-v{font-weight:500;text-align:right;max-width:60%;line-height:1.4}
+/* EMPTY */
+.empty{text-align:center;padding:52px 20px}
+.empty-i{font-size:38px;margin-bottom:10px}
+.empty-t{font-size:14px;font-weight:500;color:var(--t2);margin-bottom:4px}
+.empty-s{font-size:13px;color:var(--t3);line-height:1.6}
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(8px);background:#1a1a18;color:#fff;padding:9px 16px;border-radius:22px;font-size:13px;opacity:0;transition:all .22s;pointer-events:none;z-index:99;white-space:nowrap;max-width:calc(100% - 28px);text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:80;display:none;align-items:flex-end}
+.modal-bg.on{display:flex}
+.modal{background:var(--w);border-radius:18px 18px 0 0;padding:22px 18px 20px;width:100%;max-width:480px;margin:0 auto}
+.modal-t{font-size:16px;font-weight:600;margin-bottom:6px}
+.modal-s{font-size:14px;color:var(--t2);margin-bottom:18px;line-height:1.5}
 </style>
 </head>
 <body>
 <div id="app">
 
-<div id="s-dash" class="screen active">
+<!-- DASHBOARD -->
+<div id="s-home" class="scr on">
   <div class="hdr">
-    <div class="hdr-logo">&#10052;</div>
-    <span class="hdr-title">Alaro Clima</span>
-    <button class="hdr-btn" onclick="nav('s-cfg')">&#9881;</button>
+    <div class="hdr-ico">❄</div>
+    <span class="hdr-tit">Alaro Clima</span>
+    <button class="hdr-btn" onclick="go('s-cfg')" title="Ajustes">⚙</button>
   </div>
-  <div style="padding:16px 16px 4px">
-    <div style="font-size:12px;color:var(--tx2)" id="dash-date"></div>
-    <div style="font-size:20px;font-weight:600;margin-top:2px" id="dash-hello">Bienvenido</div>
+  <div style="padding:14px 14px 4px">
+    <div style="font-size:12px;color:var(--t2)" id="hoy"></div>
+    <div style="font-size:19px;font-weight:600;margin-top:2px" id="saludo">Bienvenido</div>
   </div>
   <div class="dash-grid">
-    <div class="dash-hero" onclick="startParte()">
-      <div class="dhi">&#128221;</div>
-      <div><div style="font-size:17px;font-weight:600;color:#fff">Nuevo parte</div><div style="font-size:13px;color:rgba(255,255,255,.72);margin-top:2px">Registrar visita de obra</div></div>
+    <div class="hero" onclick="nuevoParte()">
+      <div class="hero-ic">📝</div>
+      <div><div class="hero-t">Nuevo parte</div><div class="hero-s">Registrar visita de obra</div></div>
     </div>
-    <div class="dc" onclick="nav('s-partes')"><div class="dc-i">&#128203;</div><div class="dc-l">Partes</div><div class="dc-s" id="cnt-partes">0 registrados</div></div>
-    <div class="dc" onclick="nav('s-clientes')"><div class="dc-i">&#127970;</div><div class="dc-l">Clientes</div><div class="dc-s" id="cnt-clientes">0 guardados</div></div>
-    <div class="dc" onclick="nav('s-obras')"><div class="dc-i">&#128205;</div><div class="dc-l">Obras</div><div class="dc-s" id="cnt-obras">0 activas</div></div>
+    <div class="dcard" onclick="go('s-partes')">
+      <div class="dcard-i">📋</div><div class="dcard-l">Partes</div><div class="dcard-s" id="cnt-p">0 registrados</div>
+    </div>
+    <div class="dcard" onclick="go('s-clientes')">
+      <div class="dcard-i">🏢</div><div class="dcard-l">Clientes</div><div class="dcard-s" id="cnt-c">0 guardados</div>
+    </div>
+    <div class="dcard" onclick="go('s-obras')">
+      <div class="dcard-i">📍</div><div class="dcard-l">Obras</div><div class="dcard-s" id="cnt-o">0 activas</div>
+    </div>
   </div>
-  <div class="sec-lbl">Ultimos partes</div>
-  <div id="dash-rec"></div>
+  <div class="lbl">Ultimos partes</div>
+  <div id="home-list"></div>
 </div>
 
-<div id="s-cfg" class="screen">
-  <div class="hdr"><button class="hdr-btn" onclick="nav('s-dash')">&#8592;</button><span class="hdr-title">Datos de empresa</span></div>
-  <div class="sec-lbl">Empresa</div>
-  <div class="cg">
-    <div class="row"><span class="rl">Empresa</span><input id="c-emp" type="text" placeholder="Nombre empresa"></div>
-    <div class="row"><span class="rl">Responsable</span><input id="c-res" type="text" placeholder="Nombre completo"></div>
-    <div class="row"><span class="rl">Direccion</span><input id="c-dir" type="text" placeholder="Poligono, calle..."></div>
-    <div class="row"><span class="rl">CP / Poblacion</span><input id="c-cp" type="text" placeholder="07340 Alaro"></div>
-    <div class="row"><span class="rl">NIF</span><input id="c-nif" type="text" placeholder="00000000X"></div>
-    <div class="row"><span class="rl">Movil</span><input id="c-mov" type="tel" placeholder="677 711 704"></div>
+<!-- CONFIG -->
+<div id="s-cfg" class="scr">
+  <div class="hdr"><button class="hdr-btn" onclick="go('s-home')">←</button><span class="hdr-tit">Datos empresa</span></div>
+  <div class="lbl">Empresa</div>
+  <div class="grp">
+    <div class="fld"><span class="fld-l">Empresa</span><input id="cfg-emp" type="text" placeholder="Nombre empresa"></div>
+    <div class="fld"><span class="fld-l">Responsable</span><input id="cfg-res" type="text" placeholder="Nombre completo"></div>
+    <div class="fld"><span class="fld-l">Direccion</span><input id="cfg-dir" type="text" placeholder="Poligono, calle..."></div>
+    <div class="fld"><span class="fld-l">CP Poblacion</span><input id="cfg-cp" type="text" placeholder="07340 Alaro"></div>
+    <div class="fld"><span class="fld-l">NIF</span><input id="cfg-nif" type="text" placeholder="00000000X"></div>
+    <div class="fld"><span class="fld-l">Movil</span><input id="cfg-mov" type="tel" placeholder="677 711 704"></div>
   </div>
-  <div class="sec-lbl">Registros oficiales</div>
-  <div class="cg">
-    <div class="row"><span class="rl">Reg. Industrial</span><input id="c-ri" type="text" placeholder="04/62531 CAIB"></div>
-    <div class="row"><span class="rl">Reg. Medioamb.</span><input id="c-rm" type="text" placeholder="NIMA 0700010246"></div>
+  <div class="lbl">Registros oficiales</div>
+  <div class="grp">
+    <div class="fld"><span class="fld-l">Reg. Industrial</span><input id="cfg-ri" type="text" placeholder="04/62531 CAIB"></div>
+    <div class="fld"><span class="fld-l">Reg. Medioamb</span><input id="cfg-rm" type="text" placeholder="NIMA 0700010246"></div>
   </div>
-  <div class="sp"></div>
-  <button class="btn-p" onclick="saveCfg()">Guardar</button>
-  <div class="sp"></div>
+  <div class="gap"></div>
+  <button class="btn" onclick="guardarCfg()">Guardar cambios</button>
+  <div class="gap"></div>
 </div>
 
-<div id="s-clientes" class="screen">
-  <div class="hdr"><button class="hdr-btn" onclick="nav('s-dash')">&#8592;</button><span class="hdr-title">Clientes</span><button class="hdr-btn" onclick="openCliForm(null)" style="font-size:26px">+</button></div>
-  <div id="lista-clientes"></div>
+<!-- CLIENTES -->
+<div id="s-clientes" class="scr">
+  <div class="hdr"><button class="hdr-btn" onclick="go('s-home')">←</button><span class="hdr-tit">Clientes</span><button class="hdr-btn" onclick="abrirCli(null)" style="font-size:24px;font-weight:300">+</button></div>
+  <div id="lista-cli"></div>
 </div>
-<div id="s-cli-form" class="screen">
-  <div class="hdr"><button class="hdr-btn" onclick="nav('s-clientes')">&#8592;</button><span class="hdr-title" id="cli-ft">Nuevo cliente</span></div>
-  <div class="sec-lbl">Datos del cliente</div>
-  <div class="cg">
-    <div class="row"><span class="rl">Nombre</span><input id="cl-nom" type="text" placeholder="Nombre o empresa"></div>
-    <div class="row"><span class="rl">Domicilio</span><input id="cl-dir" type="text" placeholder="Calle, numero..."></div>
-    <div class="row"><span class="rl">CP Poblacion</span><input id="cl-cp" type="text" placeholder="07000 Palma"></div>
-    <div class="row"><span class="rl">NIF/CIF</span><input id="cl-nif" type="text" placeholder="00000000X"></div>
-    <div class="row"><span class="rl">Telefono</span><input id="cl-tel" type="tel" placeholder="000 000 000"></div>
-    <div class="row"><span class="rl">Email</span><input id="cl-email" type="text" placeholder="correo@ejemplo.com"></div>
+<div id="s-cli-form" class="scr">
+  <div class="hdr"><button class="hdr-btn" onclick="go('s-clientes')">←</button><span class="hdr-tit" id="cli-tit">Nuevo cliente</span></div>
+  <div class="lbl">Datos del cliente</div>
+  <div class="grp">
+    <div class="fld"><span class="fld-l">Nombre</span><input id="cl-n" type="text" placeholder="Nombre o empresa"></div>
+    <div class="fld"><span class="fld-l">Domicilio</span><input id="cl-d" type="text" placeholder="Calle, numero..."></div>
+    <div class="fld"><span class="fld-l">CP Poblacion</span><input id="cl-cp" type="text" placeholder="07000 Palma"></div>
+    <div class="fld"><span class="fld-l">NIF/CIF</span><input id="cl-nif" type="text" placeholder="00000000X"></div>
+    <div class="fld"><span class="fld-l">Telefono</span><input id="cl-t" type="tel" placeholder="000 000 000"></div>
+    <div class="fld"><span class="fld-l">Email</span><input id="cl-e" type="email" placeholder="correo@ejemplo.com"></div>
   </div>
-  <div class="sp"></div>
-  <button class="btn-p" onclick="saveCli()">Guardar cliente</button>
-  <button class="btn-d" id="btn-del-cli" onclick="delCli()" style="display:none">Eliminar cliente</button>
-  <div class="sp"></div>
+  <div class="gap"></div>
+  <button class="btn" onclick="guardarCli()">Guardar cliente</button>
+  <button class="btnd" id="btn-del-cli" onclick="borrarCli()" style="display:none">Eliminar cliente</button>
+  <div class="gap"></div>
 </div>
 
-<div id="s-obras" class="screen">
-  <div class="hdr"><button class="hdr-btn" onclick="nav('s-dash')">&#8592;</button><span class="hdr-title">Obras</span><button class="hdr-btn" onclick="openObraForm(null)" style="font-size:26px">+</button></div>
-  <div id="lista-obras"></div>
+<!-- OBRAS -->
+<div id="s-obras" class="scr">
+  <div class="hdr"><button class="hdr-btn" onclick="go('s-home')">←</button><span class="hdr-tit">Obras</span><button class="hdr-btn" onclick="abrirObra(null)" style="font-size:24px;font-weight:300">+</button></div>
+  <div id="lista-obra"></div>
 </div>
-<div id="s-obra-form" class="screen">
-  <div class="hdr"><button class="hdr-btn" onclick="nav('s-obras')">&#8592;</button><span class="hdr-title" id="obra-ft">Nueva obra</span></div>
-  <div class="sec-lbl">Datos de la obra</div>
-  <div class="cg">
-    <div class="row"><span class="rl">Nombre</span><input id="ob-nom" type="text" placeholder="Descripcion breve"></div>
-    <div class="row"><span class="rl">Direccion</span><input id="ob-dir" type="text" placeholder="Calle, numero, piso..."></div>
-    <div class="row"><span class="rl">Poblacion</span><input id="ob-pob" type="text" placeholder="Palma, Inca..."></div>
-    <div class="row"><span class="rl">Cliente</span><select id="ob-cli"><option value="">Sin asignar</option></select></div>
+<div id="s-obra-form" class="scr">
+  <div class="hdr"><button class="hdr-btn" onclick="go('s-obras')">←</button><span class="hdr-tit" id="obra-tit">Nueva obra</span></div>
+  <div class="lbl">Datos de la obra</div>
+  <div class="grp">
+    <div class="fld"><span class="fld-l">Nombre</span><input id="ob-n" type="text" placeholder="Descripcion breve"></div>
+    <div class="fld"><span class="fld-l">Direccion</span><input id="ob-d" type="text" placeholder="Calle, numero..."></div>
+    <div class="fld"><span class="fld-l">Poblacion</span><input id="ob-p" type="text" placeholder="Palma, Inca..."></div>
+    <div class="fld"><span class="fld-l">Cliente</span><select id="ob-cli"><option value="">Sin asignar</option></select></div>
   </div>
-  <div class="sp"></div>
-  <button class="btn-p" onclick="saveObra()">Guardar obra</button>
-  <button class="btn-d" id="btn-del-obra" onclick="delObra()" style="display:none">Eliminar obra</button>
-  <div class="sp"></div>
+  <div class="gap"></div>
+  <button class="btn" onclick="guardarObra()">Guardar obra</button>
+  <button class="btnd" id="btn-del-obra" onclick="borrarObra()" style="display:none">Eliminar obra</button>
+  <div class="gap"></div>
 </div>
 
-<div id="s-partes" class="screen">
-  <div class="hdr"><button class="hdr-btn" onclick="nav('s-dash')">&#8592;</button><span class="hdr-title">Partes realizados</span></div>
+<!-- PARTES -->
+<div id="s-partes" class="scr">
+  <div class="hdr"><button class="hdr-btn" onclick="go('s-home')">←</button><span class="hdr-tit">Partes realizados</span></div>
   <div id="lista-partes"></div>
 </div>
-<div id="s-parte-det" class="screen">
-  <div class="hdr"><button class="hdr-btn" onclick="nav('s-partes')">&#8592;</button><span class="hdr-title" id="det-t">Parte</span></div>
-  <div id="det-body"></div>
+<div id="s-parte-ver" class="scr">
+  <div class="hdr"><button class="hdr-btn" onclick="go('s-partes')">←</button><span class="hdr-tit" id="ver-tit">Parte</span></div>
+  <div id="ver-body"></div>
 </div>
 
-<div id="s-p1" class="screen">
-  <div class="hdr"><button class="hdr-btn" onclick="abrirModalCanc()">&#10005;</button><span class="hdr-title">Nuevo parte</span></div>
-  <div class="step-bar"><div class="step cur"></div><div class="step"></div><div class="step"></div><div class="step"></div><div class="step"></div></div>
-  <div class="step-info">Paso 1 de 5 - Cliente y obra</div>
-  <div class="sec-lbl">Cliente</div>
-  <div class="cg">
-    <div class="row"><span class="rl">Cliente</span><select id="p1-cli" onchange="onCliChg()"><option value="">Seleccionar...</option></select></div>
-    <div class="row"><span class="rl">Domicilio</span><input id="p1-dom" type="text" placeholder="Se autocompleta"></div>
-    <div class="row"><span class="rl">Telefono</span><input id="p1-tel" type="tel" placeholder="Se autocompleta"></div>
+<!-- PASO 1 -->
+<div id="s-p1" class="scr">
+  <div class="hdr"><button class="hdr-btn" onclick="cancelar()">✕</button><span class="hdr-tit">Nuevo parte</span></div>
+  <div class="steps"><div class="step cur"></div><div class="step"></div><div class="step"></div><div class="step"></div><div class="step"></div></div>
+  <div class="step-lbl">Paso 1 de 5 · Cliente y obra</div>
+  <div class="lbl">Cliente</div>
+  <div class="grp">
+    <div class="fld"><span class="fld-l">Cliente</span><select id="p1-cli" onchange="elegirCli()"><option value="">Seleccionar...</option></select></div>
+    <div class="fld"><span class="fld-l">Domicilio</span><input id="p1-dom" type="text" placeholder="Autocompleta al elegir"></div>
+    <div class="fld"><span class="fld-l">Telefono</span><input id="p1-tel" type="tel" placeholder="Autocompleta al elegir"></div>
   </div>
-  <div class="sec-lbl">Obra / Proyecto</div>
-  <div class="cg">
-    <div class="row"><span class="rl">Obra</span><select id="p1-obra" onchange="onObraChg()"><option value="">Sin asignar</option></select></div>
-    <div class="row"><span class="rl">Direccion obra</span><input id="p1-odir" type="text" placeholder="Direccion de la obra"></div>
-    <div class="row"><span class="rl">N de orden</span><input id="p1-num" type="text" readonly style="color:var(--tx2)"></div>
-    <div class="row"><span class="rl">Fecha</span><input id="p1-fecha" type="date"></div>
+  <div class="lbl">Obra</div>
+  <div class="grp">
+    <div class="fld"><span class="fld-l">Obra</span><select id="p1-obra" onchange="elegirObra()"><option value="">Sin asignar</option></select></div>
+    <div class="fld"><span class="fld-l">Direccion obra</span><input id="p1-odir" type="text" placeholder="Direccion de la obra"></div>
+    <div class="fld"><span class="fld-l">Num. de orden</span><input id="p1-num" type="text" readonly style="color:var(--t3)"></div>
+    <div class="fld"><span class="fld-l">Fecha</span><input id="p1-fecha" type="date"></div>
   </div>
-  <div class="sec-lbl">Operario</div>
-  <div class="cg"><div class="row"><span class="rl">Operario</span><input id="p1-op" type="text" placeholder="Nombre del operario"></div></div>
-  <div class="sp"></div>
-  <button class="btn-p" onclick="goP2()">Siguiente</button>
-  <div class="sp"></div>
+  <div class="lbl">Operario</div>
+  <div class="grp">
+    <div class="fld"><span class="fld-l">Operario</span><input id="p1-op" type="text" placeholder="Nombre del operario"></div>
+  </div>
+  <div class="gap"></div>
+  <button class="btn" onclick="irP2()">Siguiente →</button>
+  <div class="gap"></div>
 </div>
 
-<div id="s-p2" class="screen">
-  <div class="hdr"><button class="hdr-btn" onclick="nav('s-p1')">&#8592;</button><span class="hdr-title">Tipo de visita</span></div>
-  <div class="step-bar"><div class="step done"></div><div class="step cur"></div><div class="step"></div><div class="step"></div><div class="step"></div></div>
-  <div class="step-info">Paso 2 de 5 - Tipo de intervencion</div>
-  <div class="sec-lbl">Selecciona el tipo</div>
-  <div class="tipo-grid">
-    <button class="tipo-btn" onclick="selTipo(this,'Mantenimiento preventivo')"><div class="ti">&#128295;</div><div class="tl">Mantenimiento preventivo</div></button>
-    <button class="tipo-btn" onclick="selTipo(this,'Mantenimiento correctivo')"><div class="ti">&#128296;</div><div class="tl">Mantenimiento correctivo</div></button>
-    <button class="tipo-btn" onclick="selTipo(this,'Instalacion nueva')"><div class="ti">&#128268;</div><div class="tl">Instalacion nueva</div></button>
-    <button class="tipo-btn" onclick="selTipo(this,'Averia urgencia')"><div class="ti">&#9888;</div><div class="tl">Averia / urgencia</div></button>
-    <button class="tipo-btn" onclick="selTipo(this,'Revision periodica')"><div class="ti">&#9989;</div><div class="tl">Revision periodica</div></button>
-    <button class="tipo-btn" onclick="selTipo(this,'Visita tecnica')"><div class="ti">&#128065;</div><div class="tl">Visita tecnica</div></button>
-    <button class="tipo-btn" onclick="selTipo(this,'Garantia')"><div class="ti">&#128737;</div><div class="tl">Garantia</div></button>
-    <button class="tipo-btn" onclick="selTipo(this,'Presupuesto')"><div class="ti">&#128196;</div><div class="tl">Presupuesto</div></button>
+<!-- PASO 2 -->
+<div id="s-p2" class="scr">
+  <div class="hdr"><button class="hdr-btn" onclick="go('s-p1')">←</button><span class="hdr-tit">Tipo de visita</span></div>
+  <div class="steps"><div class="step done"></div><div class="step cur"></div><div class="step"></div><div class="step"></div><div class="step"></div></div>
+  <div class="step-lbl">Paso 2 de 5 · Tipo de intervencion</div>
+  <div class="lbl">Selecciona el tipo</div>
+  <div class="tipo-g">
+    <button class="tipo-b" onclick="elegirTipo(this,'Mantenimiento preventivo')"><div class="tipo-em">🔧</div><div class="tipo-tx">Mantenimiento preventivo</div></button>
+    <button class="tipo-b" onclick="elegirTipo(this,'Mantenimiento correctivo')"><div class="tipo-em">🛠</div><div class="tipo-tx">Mantenimiento correctivo</div></button>
+    <button class="tipo-b" onclick="elegirTipo(this,'Instalacion nueva')"><div class="tipo-em">🔌</div><div class="tipo-tx">Instalacion nueva</div></button>
+    <button class="tipo-b" onclick="elegirTipo(this,'Averia urgente')"><div class="tipo-em">⚠</div><div class="tipo-tx">Averia urgente</div></button>
+    <button class="tipo-b" onclick="elegirTipo(this,'Revision periodica')"><div class="tipo-em">✅</div><div class="tipo-tx">Revision periodica</div></button>
+    <button class="tipo-b" onclick="elegirTipo(this,'Visita tecnica')"><div class="tipo-em">🔍</div><div class="tipo-tx">Visita tecnica</div></button>
+    <button class="tipo-b" onclick="elegirTipo(this,'Garantia')"><div class="tipo-em">🛡</div><div class="tipo-tx">Garantia</div></button>
+    <button class="tipo-b" onclick="elegirTipo(this,'Presupuesto')"><div class="tipo-em">📄</div><div class="tipo-tx">Presupuesto</div></button>
   </div>
-  <div class="sp"></div>
-  <button class="btn-p" onclick="goP3()">Siguiente</button>
-  <div class="sp"></div>
+  <div class="gap"></div>
+  <button class="btn" onclick="irP3()">Siguiente →</button>
+  <div class="gap"></div>
 </div>
 
-<div id="s-p3" class="screen">
-  <div class="hdr"><button class="hdr-btn" onclick="nav('s-p2')">&#8592;</button><span class="hdr-title">Trabajo y fotos</span></div>
-  <div class="step-bar"><div class="step done"></div><div class="step done"></div><div class="step cur"></div><div class="step"></div><div class="step"></div></div>
-  <div class="step-info">Paso 3 de 5 - Descripcion y fotos</div>
-  <div class="sec-lbl">Descripcion del trabajo / incidencia</div>
-  <div class="cg"><div class="row-ta"><textarea id="p3-desc" rows="5" placeholder="Describe el trabajo realizado, la incidencia o la asistencia..."></textarea></div></div>
-  <div class="sec-lbl">Observaciones / incidencias adicionales</div>
-  <div class="cg"><div class="row-ta"><textarea id="p3-obs" rows="3" placeholder="Otros datos de interes, observaciones, incidencias..."></textarea></div></div>
-  <div class="sec-lbl">Materiales utilizados (opcional)</div>
-  <div class="cg"><div class="row-ta"><textarea id="p3-mat" rows="2" placeholder="Gas refrigerante, piezas, referencias..."></textarea></div></div>
-  <div class="sec-lbl">Fotos de la visita</div>
+<!-- PASO 3 -->
+<div id="s-p3" class="scr">
+  <div class="hdr"><button class="hdr-btn" onclick="go('s-p2')">←</button><span class="hdr-tit">Descripcion y fotos</span></div>
+  <div class="steps"><div class="step done"></div><div class="step done"></div><div class="step cur"></div><div class="step"></div><div class="step"></div></div>
+  <div class="step-lbl">Paso 3 de 5 · Trabajo realizado</div>
+  <div class="lbl">Descripcion del trabajo / incidencia</div>
+  <div class="grp"><div class="fld"><textarea id="p3-desc" rows="5" placeholder="Describe el trabajo realizado, incidencia o asistencia..."></textarea></div></div>
+  <div class="lbl">Observaciones adicionales</div>
+  <div class="grp"><div class="fld"><textarea id="p3-obs" rows="3" placeholder="Otros datos, observaciones, incidencias..."></textarea></div></div>
+  <div class="lbl">Materiales utilizados (opcional)</div>
+  <div class="grp"><div class="fld"><textarea id="p3-mat" rows="2" placeholder="Gas refrigerante, piezas, referencias..."></textarea></div></div>
+  <div class="lbl">Fotos de la visita</div>
   <div class="foto-wrap">
-    <div class="foto-grid" id="foto-grid"></div>
-    <button class="fadd" onclick="document.getElementById('foto-input').click()"><span>&#128247;</span> Anadir fotos / camara</button>
-    <input type="file" id="foto-input" accept="image/*" multiple onchange="onFotos(this)">
-    <div style="font-size:12px;color:var(--tx3);margin-top:6px;text-align:right" id="foto-cnt">Sin fotos</div>
+    <div class="foto-g" id="foto-grid"></div>
+    <button class="foto-add" onclick="document.getElementById('foto-inp').click()">📷 Añadir fotos</button>
+    <input type="file" id="foto-inp" accept="image/*" multiple onchange="añadirFotos(this)">
+    <div class="foto-cnt" id="foto-cnt">0 fotos</div>
   </div>
-  <div class="sp"></div>
-  <button class="btn-p" onclick="goP4()">Siguiente</button>
-  <div class="sp"></div>
+  <div class="gap"></div>
+  <button class="btn" onclick="irP4()">Siguiente →</button>
+  <div class="gap"></div>
 </div>
 
-<div id="s-p4" class="screen">
-  <div class="hdr"><button class="hdr-btn" onclick="nav('s-p3')">&#8592;</button><span class="hdr-title">Firma del cliente</span></div>
-  <div class="step-bar"><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step cur"></div><div class="step"></div></div>
-  <div class="step-info">Paso 4 de 5 - Conformidad del cliente</div>
-  <div class="sec-lbl">Firma</div>
+<!-- PASO 4 -->
+<div id="s-p4" class="scr">
+  <div class="hdr"><button class="hdr-btn" onclick="go('s-p3')">←</button><span class="hdr-tit">Firma del cliente</span></div>
+  <div class="steps"><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step cur"></div><div class="step"></div></div>
+  <div class="step-lbl">Paso 4 de 5 · Conformidad</div>
+  <div class="lbl">Firma</div>
   <div class="firma-wrap">
     <div class="firma-box">
-      <canvas id="firma-canvas"></canvas>
-      <div class="firma-ph" id="firma-ph">El cliente firma aqui</div>
+      <canvas id="firma-c"></canvas>
+      <div class="firma-hint" id="firma-hint">✍ El cliente firma aqui</div>
     </div>
-    <button class="firma-clr" onclick="clearFirma()">Borrar firma</button>
+    <button class="firma-clr" onclick="borrarFirma()">🗑 Borrar firma</button>
   </div>
-  <div class="sec-lbl">Datos del firmante</div>
-  <div class="cg">
-    <div class="row"><span class="rl">Nombre</span><input id="p4-nom" type="text" placeholder="Nombre completo"></div>
-    <div class="row"><span class="rl">DNI/NIF</span><input id="p4-dni" type="text" placeholder="Documento de identidad"></div>
+  <div class="lbl">Datos del firmante</div>
+  <div class="grp">
+    <div class="fld"><span class="fld-l">Nombre</span><input id="p4-nom" type="text" placeholder="Nombre del firmante"></div>
+    <div class="fld"><span class="fld-l">DNI / NIF</span><input id="p4-dni" type="text" placeholder="Documento de identidad"></div>
   </div>
-  <div class="sp"></div>
-  <button class="btn-p" onclick="goP5()">Siguiente</button>
-  <button class="btn-s" onclick="goP5()">Continuar sin firma</button>
-  <div class="sp"></div>
+  <div class="gap"></div>
+  <button class="btn" onclick="irP5()">Siguiente →</button>
+  <button class="btn2" onclick="irP5()">Continuar sin firma</button>
+  <div class="gap"></div>
 </div>
 
-<div id="s-p5" class="screen">
-  <div class="hdr"><button class="hdr-btn" onclick="nav('s-p4')">&#8592;</button><span class="hdr-title">Resumen</span></div>
-  <div class="step-bar"><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step cur"></div></div>
-  <div class="step-info">Paso 5 de 5 - Revisa y genera PDF</div>
-  <div class="sec-lbl">Datos del parte</div>
-  <div class="sum-card" id="sum-datos"></div>
-  <div class="sec-lbl">Fotos adjuntas</div>
-  <div id="sum-fotos" style="padding:0 16px 10px;display:flex;flex-wrap:wrap;gap:8px"></div>
-  <div class="sp"></div>
-  <button class="btn-p" id="btn-pdf" onclick="generarPDF()">Generar y descargar PDF</button>
-  <button class="btn-s" onclick="soloGuardar()">Guardar sin PDF</button>
-  <button class="btn-d" onclick="abrirModalCanc()">Descartar parte</button>
-  <div class="sp"></div>
+<!-- PASO 5 -->
+<div id="s-p5" class="scr">
+  <div class="hdr"><button class="hdr-btn" onclick="go('s-p4')">←</button><span class="hdr-tit">Resumen</span></div>
+  <div class="steps"><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step cur"></div></div>
+  <div class="step-lbl">Paso 5 de 5 · Genera el PDF</div>
+  <div class="lbl">Datos del parte</div>
+  <div class="res-card" id="res-datos"></div>
+  <div class="lbl">Fotos</div>
+  <div id="res-fotos" style="padding:0 14px 12px;display:flex;flex-wrap:wrap;gap:7px"></div>
+  <div class="gap"></div>
+  <button class="btn" id="btn-pdf" onclick="generarPDF()">📄 Generar y descargar PDF</button>
+  <button class="btn2" onclick="soloGuardar()">Guardar sin PDF</button>
+  <button class="btnd" onclick="cancelar()">Descartar parte</button>
+  <div class="gap"></div>
 </div>
 
-</div>
+</div><!-- #app -->
 
-<div class="modal-ov" id="modal-canc">
-  <div class="modal-box">
-    <div class="modal-t">Descartar este parte?</div>
-    <div class="modal-s">Los datos introducidos no se guardaran.</div>
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <div class="modal-t">Descartar el parte?</div>
+    <div class="modal-s">Los datos no se guardaran.</div>
     <div style="display:flex;flex-direction:column;gap:8px">
-      <button class="btn-d" style="width:100%;margin:0;padding:14px;border:.5px solid rgba(163,45,45,.3);border-radius:10px" onclick="descartarParte()">Si, descartar</button>
-      <button class="btn-s" style="width:100%;margin:0" onclick="cerrarModal()">Seguir editando</button>
+      <button class="btnd" style="width:100%;margin:0;padding:13px;border:.5px solid rgba(160,40,40,.3);border-radius:10px" onclick="descartar()">Si, descartar</button>
+      <button class="btn2" style="width:100%;margin:0" onclick="cerrarModal()">Seguir editando</button>
     </div>
   </div>
 </div>
@@ -302,481 +338,385 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
 <div class="toast" id="toast"></div>
 
 <script>
-var DB={
-  g:function(k){try{return JSON.parse(localStorage.getItem('ac_'+k));}catch(e){return null;}},
-  s:function(k,v){localStorage.setItem('ac_'+k,JSON.stringify(v));},
-  clientes:function(){return DB.g('clientes')||[];},
-  obras:function(){return DB.g('obras')||[];},
-  partes:function(){return DB.g('partes')||[];},
-  cfg:function(){return DB.g('cfg')||{emp:'Alaro Clima',res:'Luis Salvador Daviu Fueris',dir:'Poligono IV parcela 567',cp:'07340 Alaro',nif:'43151871F',mov:'677 711 704',ri:'04/62531 CAIB',rm:'NIMA 0700010246 CAIB'};}
+// ── DB ──────────────────────────────────────────────
+var DB = {
+  g: function(k) { try { return JSON.parse(localStorage.getItem('ac2_'+k)); } catch(e) { return null; } },
+  s: function(k, v) { localStorage.setItem('ac2_'+k, JSON.stringify(v)); },
+  clientes: function() { return DB.g('cli') || []; },
+  obras: function() { return DB.g('obras') || []; },
+  partes: function() { return DB.g('partes') || []; },
+  cfg: function() { return DB.g('cfg') || { emp:'Alaro Clima', res:'Luis Salvador Daviu Fueris', dir:'Poligono IV parcela 567', cp:'07340 Alaro', nif:'43151871F', mov:'677 711 704', ri:'04/62531 CAIB', rm:'NIMA 0700010246 CAIB' }; }
 };
-var P={},fotos=[],editCliId=null,editObraId=null,fCtx=null,firmaTiene=false;
 
-window.addEventListener('load',function(){
-  var d=new Date();
-  var dias=['Domingo','Lunes','Martes','Miercoles','Jueves','Viernes','Sabado'];
-  var meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  var el=document.getElementById('dash-date');
-  if(el)el.textContent=dias[d.getDay()]+', '+d.getDate()+' de '+meses[d.getMonth()]+' de '+d.getFullYear();
-  var ho=document.getElementById('dash-hello');
-  var h=d.getHours();
-  if(ho)ho.textContent=(h>=6&&h<13?'Buenos dias':h<20?'Buenas tardes':'Buenas noches')+' Luis!';
+// ── STATE ────────────────────────────────────────────
+var P = {}, fotos = [], editCliId = null, editObraId = null, fCtx = null, firmaSi = false;
+
+// ── INIT ─────────────────────────────────────────────
+window.onload = function() {
+  var d = new Date();
+  var dias = ['Domingo','Lunes','Martes','Miercoles','Jueves','Viernes','Sabado'];
+  var mes = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  var el = document.getElementById('hoy');
+  if (el) el.textContent = dias[d.getDay()] + ', ' + d.getDate() + ' de ' + mes[d.getMonth()] + ' ' + d.getFullYear();
+  var h = d.getHours();
+  var sal = document.getElementById('saludo');
+  if (sal) sal.textContent = (h < 13 ? 'Buenos dias' : h < 20 ? 'Buenas tardes' : 'Buenas noches') + ' 👋';
   cargarCfg();
-  renderDash();
-});
+  renderHome();
+};
 
-function nav(id){
-  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
-  var s=document.getElementById(id);
-  if(s){s.classList.add('active');s.scrollTop=0;}
-  if(id==='s-clientes')renderClientes();
-  if(id==='s-obras')renderObras();
-  if(id==='s-partes')renderPartes();
-  if(id==='s-dash')renderDash();
+// ── NAVEGACION ───────────────────────────────────────
+function go(id) {
+  document.querySelectorAll('.scr').forEach(function(s) { s.classList.remove('on'); });
+  var s = document.getElementById(id);
+  if (s) { s.classList.add('on'); s.scrollTop = 0; }
+  if (id === 's-clientes') renderCli();
+  if (id === 's-obras') renderObras();
+  if (id === 's-partes') renderPartes();
+  if (id === 's-home') renderHome();
 }
+
+// ── TOAST ────────────────────────────────────────────
 var tT;
-function toast(msg){
-  var t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  clearTimeout(tT);tT=setTimeout(function(){t.classList.remove('show');},2600);
-}
-function abrirModalCanc(){document.getElementById('modal-canc').classList.add('open');}
-function cerrarModal(){document.getElementById('modal-canc').classList.remove('open');}
-function descartarParte(){cerrarModal();P={};fotos=[];firmaTiene=false;nav('s-dash');}
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function fd(d){if(!d)return '';var p=d.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
-function ini(n){return (n||'?').split(' ').slice(0,2).map(function(w){return (w[0]||'').toUpperCase();}).join('');}
-
-function cargarCfg(){
-  var c=DB.cfg();
-  var sv=function(i,v){var e=document.getElementById(i);if(e)e.value=v||'';};
-  sv('c-emp',c.emp);sv('c-res',c.res);sv('c-dir',c.dir);sv('c-cp',c.cp);
-  sv('c-nif',c.nif);sv('c-mov',c.mov);sv('c-ri',c.ri);sv('c-rm',c.rm);
-}
-function saveCfg(){
-  var gv=function(i){var e=document.getElementById(i);return e?e.value.trim():'';};
-  DB.s('cfg',{emp:gv('c-emp'),res:gv('c-res'),dir:gv('c-dir'),cp:gv('c-cp'),nif:gv('c-nif'),mov:gv('c-mov'),ri:gv('c-ri'),rm:gv('c-rm')});
-  toast('Datos guardados');nav('s-dash');
+function msg(txt) {
+  var t = document.getElementById('toast');
+  t.textContent = txt; t.classList.add('on');
+  clearTimeout(tT); tT = setTimeout(function() { t.classList.remove('on'); }, 2500);
 }
 
-function renderDash(){
-  var partes=DB.partes(),clientes=DB.clientes(),obras=DB.obras(),el;
-  el=document.getElementById('cnt-partes');if(el)el.textContent=partes.length+' registrado'+(partes.length!==1?'s':'');
-  el=document.getElementById('cnt-clientes');if(el)el.textContent=clientes.length+' guardado'+(clientes.length!==1?'s':'');
-  el=document.getElementById('cnt-obras');if(el)el.textContent=obras.length+' activa'+(obras.length!==1?'s':'');
-  var cont=document.getElementById('dash-rec');if(!cont)return;
-  var rec=partes.slice(-5).reverse();
-  if(!rec.length){cont.innerHTML='<div class="empty"><div class="ei">&#128203;</div><div class="et">Sin partes aun</div><div class="es">Pulsa Nuevo parte para empezar</div></div>';return;}
-  cont.innerHTML=rec.map(function(p){
-    return '<div class="li" onclick="verParte(''+p.id+'')">'
-      +'<div class="av">'+ini(p.cliNom)+'</div>'
-      +'<div class="li-info"><div class="li-t">'+esc(p.cliNom||'Sin cliente')+'</div>'
-      +'<div class="li-m">'+esc(fd(p.fecha))+' - '+esc(p.tipo||'')+'</div></div>'
-      +'<div class="badge">#'+esc(p.num)+'</div></div>';
+// ── MODAL ────────────────────────────────────────────
+function cancelar() { document.getElementById('modal').classList.add('on'); }
+function cerrarModal() { document.getElementById('modal').classList.remove('on'); }
+function descartar() { cerrarModal(); P = {}; fotos = []; firmaSi = false; go('s-home'); }
+
+// ── UTIL ─────────────────────────────────────────────
+function x(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function df(d) { if (!d) return ''; var p = d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+function ini(n) { return (n||'?').split(' ').slice(0,2).map(function(w){ return (w[0]||'').toUpperCase(); }).join(''); }
+function hoy() { var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+// ── CONFIG ───────────────────────────────────────────
+function cargarCfg() {
+  var c = DB.cfg();
+  ['emp','res','dir','cp','nif','mov','ri','rm'].forEach(function(k) {
+    var e = document.getElementById('cfg-'+k); if (e) e.value = c[k]||'';
+  });
+}
+function guardarCfg() {
+  var c = {};
+  ['emp','res','dir','cp','nif','mov','ri','rm'].forEach(function(k) {
+    var e = document.getElementById('cfg-'+k); c[k] = e ? e.value.trim() : '';
+  });
+  DB.s('cfg', c); msg('Datos guardados'); go('s-home');
+}
+
+// ── HOME ─────────────────────────────────────────────
+function renderHome() {
+  var partes = DB.partes(), cli = DB.clientes(), obras = DB.obras();
+  var el;
+  el = document.getElementById('cnt-p'); if (el) el.textContent = partes.length + ' registrado' + (partes.length!==1?'s':'');
+  el = document.getElementById('cnt-c'); if (el) el.textContent = cli.length + ' guardado' + (cli.length!==1?'s':'');
+  el = document.getElementById('cnt-o'); if (el) el.textContent = obras.length + ' activa' + (obras.length!==1?'s':'');
+  var cont = document.getElementById('home-list'); if (!cont) return;
+  var rec = partes.slice(-5).reverse();
+  if (!rec.length) {
+    cont.innerHTML = '<div class="empty"><div class="empty-i">📋</div><div class="empty-t">Sin partes aun</div><div class="empty-s">Pulsa Nuevo parte para registrar la primera visita</div></div>';
+    return;
+  }
+  cont.innerHTML = rec.map(function(p) {
+    return '<div class="item" onclick="verParte(\''+p.id+'\')"><div class="ava">'+ini(p.cliNom)+'</div><div class="item-inf"><div class="item-t">'+x(p.cliNom||'Sin cliente')+'</div><div class="item-s">'+x(df(p.fecha))+' · '+x(p.tipo||'')+'</div></div><div class="tag">#'+x(p.num)+'</div></div>';
   }).join('');
 }
 
-function renderClientes(){
-  var lista=DB.clientes(),cont=document.getElementById('lista-clientes');if(!cont)return;
-  if(!lista.length){cont.innerHTML='<div class="empty"><div class="ei">&#127970;</div><div class="et">Sin clientes</div><div class="es">Pulsa + para anadir el primer cliente</div></div>';return;}
-  cont.innerHTML=lista.map(function(c){
-    return '<div class="li" onclick="openCliForm(''+c.id+'')">'
-      +'<div class="av">'+ini(c.nom)+'</div>'
-      +'<div class="li-info"><div class="li-t">'+esc(c.nom)+'</div><div class="li-m">'+esc(c.cp||'')+(c.tel?' - '+c.tel:'')+'</div></div>'
-      +'<span class="chv">&#8250;</span></div>';
+// ── CLIENTES ─────────────────────────────────────────
+function renderCli() {
+  var lista = DB.clientes(), cont = document.getElementById('lista-cli'); if (!cont) return;
+  if (!lista.length) { cont.innerHTML = '<div class="empty"><div class="empty-i">🏢</div><div class="empty-t">Sin clientes</div><div class="empty-s">Pulsa + para añadir el primer cliente</div></div>'; return; }
+  cont.innerHTML = lista.map(function(c) {
+    return '<div class="item" onclick="abrirCli(\''+c.id+'\')"><div class="ava">'+ini(c.n)+'</div><div class="item-inf"><div class="item-t">'+x(c.n)+'</div><div class="item-s">'+x(c.cp||'')+(c.t?' · '+c.t:'')+'</div></div><span class="chev">›</span></div>';
   }).join('');
 }
-function openCliForm(id){
-  editCliId=id;var isN=!id;
-  document.getElementById('cli-ft').textContent=isN?'Nuevo cliente':'Editar cliente';
-  document.getElementById('btn-del-cli').style.display=isN?'none':'block';
-  var sv=function(i,v){var e=document.getElementById(i);if(e)e.value=v||'';};
-  if(id){var c=DB.clientes().find(function(x){return x.id===id;});if(c){sv('cl-nom',c.nom);sv('cl-dir',c.dir);sv('cl-cp',c.cp);sv('cl-nif',c.nif);sv('cl-tel',c.tel);sv('cl-email',c.email||'');}}
-  else{['cl-nom','cl-dir','cl-cp','cl-nif','cl-tel','cl-email'].forEach(function(i){sv(i,'');});}
-  nav('s-cli-form');
+function abrirCli(id) {
+  editCliId = id;
+  document.getElementById('cli-tit').textContent = id ? 'Editar cliente' : 'Nuevo cliente';
+  document.getElementById('btn-del-cli').style.display = id ? 'block' : 'none';
+  var sv = function(el, v) { var e = document.getElementById(el); if (e) e.value = v||''; };
+  if (id) {
+    var c = DB.clientes().find(function(x) { return x.id===id; });
+    if (c) { sv('cl-n',c.n); sv('cl-d',c.d); sv('cl-cp',c.cp); sv('cl-nif',c.nif); sv('cl-t',c.t); sv('cl-e',c.e||''); }
+  } else { ['cl-n','cl-d','cl-cp','cl-nif','cl-t','cl-e'].forEach(function(i){ sv(i,''); }); }
+  go('s-cli-form');
 }
-function saveCli(){
-  var nom=document.getElementById('cl-nom').value.trim();
-  if(!nom){toast('El nombre es obligatorio');return;}
-  var lista=DB.clientes();
-  var c={id:editCliId||('c'+Date.now()),nom:nom,
-    dir:document.getElementById('cl-dir').value.trim(),
-    cp:document.getElementById('cl-cp').value.trim(),
-    nif:document.getElementById('cl-nif').value.trim(),
-    tel:document.getElementById('cl-tel').value.trim(),
-    email:document.getElementById('cl-email').value.trim()};
-  if(editCliId){var i=lista.findIndex(function(x){return x.id===editCliId;});if(i>=0)lista[i]=c;else lista.push(c);}
-  else lista.push(c);
-  DB.s('clientes',lista);toast('Cliente guardado');nav('s-clientes');
+function guardarCli() {
+  var n = document.getElementById('cl-n').value.trim(); if (!n) { msg('El nombre es obligatorio'); return; }
+  var lista = DB.clientes();
+  var c = { id: editCliId||('c'+Date.now()), n:n, d:document.getElementById('cl-d').value.trim(), cp:document.getElementById('cl-cp').value.trim(), nif:document.getElementById('cl-nif').value.trim(), t:document.getElementById('cl-t').value.trim(), e:document.getElementById('cl-e').value.trim() };
+  if (editCliId) { var i = lista.findIndex(function(z){ return z.id===editCliId; }); if (i>=0) lista[i]=c; else lista.push(c); } else lista.push(c);
+  DB.s('cli', lista); msg('Cliente guardado'); go('s-clientes');
 }
-function delCli(){
-  if(!editCliId)return;
-  DB.s('clientes',DB.clientes().filter(function(c){return c.id!==editCliId;}));
-  toast('Cliente eliminado');nav('s-clientes');
+function borrarCli() {
+  DB.s('cli', DB.clientes().filter(function(c){ return c.id!==editCliId; }));
+  msg('Cliente eliminado'); go('s-clientes');
 }
 
-function renderObras(){
-  var lista=DB.obras(),cont=document.getElementById('lista-obras');if(!cont)return;
-  if(!lista.length){cont.innerHTML='<div class="empty"><div class="ei">&#128205;</div><div class="et">Sin obras</div><div class="es">Pulsa + para anadir la primera obra</div></div>';return;}
-  cont.innerHTML=lista.map(function(o){
-    return '<div class="li" onclick="openObraForm(''+o.id+'')">'
-      +'<div class="av" style="background:#E6F1FB;color:#185FA5">&#128205;</div>'
-      +'<div class="li-info"><div class="li-t">'+esc(o.nom)+'</div><div class="li-m">'+esc(o.dir||o.pob||'')+(o.cliNom?' - '+o.cliNom:'')+'</div></div>'
-      +'<span class="chv">&#8250;</span></div>';
+// ── OBRAS ────────────────────────────────────────────
+function renderObras() {
+  var lista = DB.obras(), cont = document.getElementById('lista-obra'); if (!cont) return;
+  if (!lista.length) { cont.innerHTML = '<div class="empty"><div class="empty-i">📍</div><div class="empty-t">Sin obras</div><div class="empty-s">Pulsa + para añadir la primera obra</div></div>'; return; }
+  cont.innerHTML = lista.map(function(o) {
+    return '<div class="item" onclick="abrirObra(\''+o.id+'\')"><div class="ava" style="background:#e6f1fb;color:#185fa5">📍</div><div class="item-inf"><div class="item-t">'+x(o.n)+'</div><div class="item-s">'+x(o.d||o.p||'')+(o.cliNom?' · '+o.cliNom:'')+'</div></div><span class="chev">›</span></div>';
   }).join('');
 }
-function fillObCliSel(){
-  var sel=document.getElementById('ob-cli');if(!sel)return;
-  sel.innerHTML='<option value="">Sin asignar</option>'+DB.clientes().map(function(c){return '<option value="'+c.id+'">'+esc(c.nom)+'</option>';}).join('');
+function llenarCliSel(selId) {
+  var sel = document.getElementById(selId); if (!sel) return;
+  var actual = sel.value;
+  sel.innerHTML = '<option value="">Sin asignar</option>' + DB.clientes().map(function(c){ return '<option value="'+c.id+'">'+x(c.n)+'</option>'; }).join('');
+  sel.value = actual;
 }
-function openObraForm(id){
-  editObraId=id;fillObCliSel();
-  document.getElementById('obra-ft').textContent=id?'Editar obra':'Nueva obra';
-  document.getElementById('btn-del-obra').style.display=id?'block':'none';
-  var sv=function(i,v){var e=document.getElementById(i);if(e)e.value=v||'';};
-  if(id){var o=DB.obras().find(function(x){return x.id===id;});if(o){sv('ob-nom',o.nom);sv('ob-dir',o.dir);sv('ob-pob',o.pob);var sel=document.getElementById('ob-cli');if(sel)sel.value=o.cliId||'';}}
-  else{['ob-nom','ob-dir','ob-pob'].forEach(function(i){sv(i,'');});var sel=document.getElementById('ob-cli');if(sel)sel.value='';}
-  nav('s-obra-form');
+function abrirObra(id) {
+  editObraId = id; llenarCliSel('ob-cli');
+  document.getElementById('obra-tit').textContent = id ? 'Editar obra' : 'Nueva obra';
+  document.getElementById('btn-del-obra').style.display = id ? 'block' : 'none';
+  var sv = function(el, v) { var e = document.getElementById(el); if (e) e.value = v||''; };
+  if (id) { var o = DB.obras().find(function(z){ return z.id===id; }); if (o) { sv('ob-n',o.n); sv('ob-d',o.d); sv('ob-p',o.p); var s=document.getElementById('ob-cli'); if(s) s.value=o.cliId||''; } }
+  else { ['ob-n','ob-d','ob-p'].forEach(function(i){ sv(i,''); }); var s=document.getElementById('ob-cli'); if(s) s.value=''; }
+  go('s-obra-form');
 }
-function saveObra(){
-  var nom=document.getElementById('ob-nom').value.trim();
-  if(!nom){toast('El nombre es obligatorio');return;}
-  var lista=DB.obras();
-  var cliId=document.getElementById('ob-cli').value;
-  var cliNom='';if(cliId){var c=DB.clientes().find(function(x){return x.id===cliId;});if(c)cliNom=c.nom;}
-  var o={id:editObraId||('o'+Date.now()),nom:nom,
-    dir:document.getElementById('ob-dir').value.trim(),
-    pob:document.getElementById('ob-pob').value.trim(),
-    cliId:cliId,cliNom:cliNom};
-  if(editObraId){var i=lista.findIndex(function(x){return x.id===editObraId;});if(i>=0)lista[i]=o;else lista.push(o);}
-  else lista.push(o);
-  DB.s('obras',lista);toast('Obra guardada');nav('s-obras');
+function guardarObra() {
+  var n = document.getElementById('ob-n').value.trim(); if (!n) { msg('El nombre es obligatorio'); return; }
+  var lista = DB.obras();
+  var cliId = document.getElementById('ob-cli').value;
+  var cliNom = ''; if (cliId) { var c = DB.clientes().find(function(z){ return z.id===cliId; }); if (c) cliNom = c.n; }
+  var o = { id: editObraId||('o'+Date.now()), n:n, d:document.getElementById('ob-d').value.trim(), p:document.getElementById('ob-p').value.trim(), cliId:cliId, cliNom:cliNom };
+  if (editObraId) { var i = lista.findIndex(function(z){ return z.id===editObraId; }); if (i>=0) lista[i]=o; else lista.push(o); } else lista.push(o);
+  DB.s('obras', lista); msg('Obra guardada'); go('s-obras');
 }
-function delObra(){
-  if(!editObraId)return;
-  DB.s('obras',DB.obras().filter(function(o){return o.id!==editObraId;}));
-  toast('Obra eliminada');nav('s-obras');
+function borrarObra() {
+  DB.s('obras', DB.obras().filter(function(o){ return o.id!==editObraId; }));
+  msg('Obra eliminada'); go('s-obras');
 }
 
-function nextNum(){
-  var max=DB.partes().reduce(function(m,p){return Math.max(m,parseInt(p.num)||0);},0);
+// ── NUEVO PARTE ──────────────────────────────────────
+function numSig() {
+  var max = DB.partes().reduce(function(m,p){ return Math.max(m, parseInt(p.num)||0); }, 0);
   return String(max+1).padStart(4,'0');
 }
-function startParte(){
-  P={};fotos=[];firmaTiene=false;clearFirma();
-  var g=document.getElementById('foto-grid');if(g)g.innerHTML='';
-  var c=document.getElementById('foto-cnt');if(c)c.textContent='Sin fotos';
-  ['p3-desc','p3-obs','p3-mat','p4-nom','p4-dni'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
-  document.querySelectorAll('.tipo-btn').forEach(function(b){b.classList.remove('sel');});
-  var sel=document.getElementById('p1-cli');
-  if(sel){sel.innerHTML='<option value="">Seleccionar...</option>'+DB.clientes().map(function(c){return '<option value="'+c.id+'">'+esc(c.nom)+'</option>';}).join('');sel.value='';}
-  fillParteObras('');
-  document.getElementById('p1-dom').value='';
-  document.getElementById('p1-tel').value='';
-  document.getElementById('p1-odir').value='';
-  document.getElementById('p1-num').value='#'+nextNum();
-  var now=new Date();
-  document.getElementById('p1-fecha').value=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+function nuevoParte() {
+  P = {}; fotos = []; firmaSi = false; borrarFirma();
+  var g = document.getElementById('foto-grid'); if (g) g.innerHTML='';
+  var c = document.getElementById('foto-cnt'); if (c) c.textContent='0 fotos';
+  ['p3-desc','p3-obs','p3-mat','p4-nom','p4-dni'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+  document.querySelectorAll('.tipo-b').forEach(function(b){ b.classList.remove('on'); });
+  // llenar clientes
+  llenarCliSel('p1-cli'); document.getElementById('p1-cli').value='';
+  llenarObrasSel('');
+  document.getElementById('p1-dom').value=''; document.getElementById('p1-tel').value=''; document.getElementById('p1-odir').value='';
+  document.getElementById('p1-num').value='#'+numSig();
+  document.getElementById('p1-fecha').value=hoy();
   document.getElementById('p1-op').value=DB.cfg().res||'';
-  nav('s-p1');
+  go('s-p1');
 }
-function fillParteObras(cliId){
-  var obras=DB.obras();
-  var filt=cliId?obras.filter(function(o){return o.cliId===cliId;}):obras;
-  if(cliId&&filt.length===0)filt=obras;
-  var sel=document.getElementById('p1-obra');if(!sel)return;
-  sel.innerHTML='<option value="">Sin asignar</option>'+filt.map(function(o){return '<option value="'+o.id+'">'+esc(o.nom)+'</option>';}).join('');
+function llenarObrasSel(cliId) {
+  var todas = DB.obras(); var fil = cliId ? todas.filter(function(o){ return o.cliId===cliId; }) : todas;
+  if (cliId && !fil.length) fil = todas;
+  var sel = document.getElementById('p1-obra'); if (!sel) return;
+  sel.innerHTML = '<option value="">Sin asignar</option>' + fil.map(function(o){ return '<option value="'+o.id+'">'+x(o.n)+'</option>'; }).join('');
 }
-function onCliChg(){
-  var cliId=document.getElementById('p1-cli').value;
-  fillParteObras(cliId);
-  if(!cliId){document.getElementById('p1-dom').value='';document.getElementById('p1-tel').value='';return;}
-  var c=DB.clientes().find(function(x){return x.id===cliId;});
-  if(c){document.getElementById('p1-dom').value=(c.dir?c.dir+', ':'')+c.cp;document.getElementById('p1-tel').value=c.tel||'';}
+function elegirCli() {
+  var id = document.getElementById('p1-cli').value; llenarObrasSel(id);
+  if (!id) { document.getElementById('p1-dom').value=''; document.getElementById('p1-tel').value=''; return; }
+  var c = DB.clientes().find(function(z){ return z.id===id; });
+  if (c) { document.getElementById('p1-dom').value=(c.d?c.d+', ':'')+c.cp; document.getElementById('p1-tel').value=c.t||''; }
 }
-function onObraChg(){
-  var oId=document.getElementById('p1-obra').value;if(!oId){document.getElementById('p1-odir').value='';return;}
-  var o=DB.obras().find(function(x){return x.id===oId;});
-  if(o)document.getElementById('p1-odir').value=(o.dir?o.dir+(o.pob?', ':''): '')+o.pob;
+function elegirObra() {
+  var id = document.getElementById('p1-obra').value; if (!id) { document.getElementById('p1-odir').value=''; return; }
+  var o = DB.obras().find(function(z){ return z.id===id; });
+  if (o) document.getElementById('p1-odir').value=(o.d?o.d+(o.p?', ':''):'')+o.p;
 }
-function goP2(){
-  var cliId=document.getElementById('p1-cli').value;
-  var c=cliId?DB.clientes().find(function(x){return x.id===cliId;}):null;
-  P.cliId=cliId;P.cliNom=c?c.nom:'Sin cliente';
-  P.cliDir=document.getElementById('p1-dom').value.trim();
-  P.cliTel=document.getElementById('p1-tel').value.trim();
-  P.cliNif=c?c.nif||'':'';P.cliEmail=c?c.email||'':'';
-  var oId=document.getElementById('p1-obra').value;
-  var o=oId?DB.obras().find(function(x){return x.id===oId;}):null;
-  P.obraId=oId;P.obraNom=o?o.nom:'';P.obraDir=document.getElementById('p1-odir').value.trim();
-  P.num=document.getElementById('p1-num').value.replace('#','');
-  P.fecha=document.getElementById('p1-fecha').value;
-  P.op=document.getElementById('p1-op').value.trim();
-  nav('s-p2');
+function irP2() {
+  var cliId = document.getElementById('p1-cli').value;
+  var c = cliId ? DB.clientes().find(function(z){ return z.id===cliId; }) : null;
+  P.cliId=cliId; P.cliNom=c?c.n:'Sin cliente'; P.cliDir=document.getElementById('p1-dom').value.trim(); P.cliTel=document.getElementById('p1-tel').value.trim(); P.cliNif=c?c.nif||'':'';
+  var oId=document.getElementById('p1-obra').value; var o=oId?DB.obras().find(function(z){ return z.id===oId; }):null;
+  P.obraId=oId; P.obraNom=o?o.n:''; P.obraDir=document.getElementById('p1-odir').value.trim();
+  P.num=document.getElementById('p1-num').value.replace('#',''); P.fecha=document.getElementById('p1-fecha').value; P.op=document.getElementById('p1-op').value.trim();
+  go('s-p2');
 }
 
-function selTipo(btn,tipo){document.querySelectorAll('.tipo-btn').forEach(function(b){b.classList.remove('sel');});btn.classList.add('sel');P.tipo=tipo;}
-function goP3(){if(!P.tipo){toast('Selecciona el tipo de visita');return;}nav('s-p3');}
+function elegirTipo(btn, tipo) { document.querySelectorAll('.tipo-b').forEach(function(b){ b.classList.remove('on'); }); btn.classList.add('on'); P.tipo=tipo; }
+function irP3() { if (!P.tipo) { msg('Selecciona el tipo de visita'); return; } go('s-p3'); }
 
-function onFotos(input){
-  var files=Array.from(input.files);if(!files.length)return;
-  var done=0,total=files.length;
-  files.forEach(function(file){
-    var reader=new FileReader();
-    reader.onload=function(e){fotos.push({dataUrl:e.target.result,name:file.name});done++;if(done===total)renderFotos();};
-    reader.readAsDataURL(file);
-  });
-  input.value='';
+// ── FOTOS ────────────────────────────────────────────
+function añadirFotos(inp) {
+  var files = Array.from(inp.files); if (!files.length) return;
+  var done=0, tot=files.length;
+  files.forEach(function(f) {
+    var r=new FileReader(); r.onload=function(e){ fotos.push({data:e.target.result,name:f.name}); done++; if(done===tot) dibujarFotos(); }; r.readAsDataURL(f);
+  }); inp.value='';
 }
-function renderFotos(){
-  var grid=document.getElementById('foto-grid');if(!grid)return;
-  grid.innerHTML=fotos.map(function(f,i){
-    return '<div class="fthumb"><img src="'+f.dataUrl+'" alt="Foto '+(i+1)+'">'
-      +'<button class="fdel" onclick="delFoto('+i+')">x</button></div>';
-  }).join('');
-  var cnt=document.getElementById('foto-cnt');
-  if(cnt)cnt.textContent=fotos.length===0?'Sin fotos':fotos.length+' foto'+(fotos.length!==1?'s':'');
+function dibujarFotos() {
+  var g=document.getElementById('foto-grid'); if(!g) return;
+  g.innerHTML=fotos.map(function(f,i){ return '<div class="fото"><img src="'+f.data+'"><button class="foto-del" onclick="quitarFoto('+i+')">✕</button></div>'; }).join('');
+  var c=document.getElementById('foto-cnt'); if(c) c.textContent=fotos.length+' foto'+(fotos.length!==1?'s':'');
 }
-function delFoto(i){fotos.splice(i,1);renderFotos();}
-function goP4(){
-  P.desc=document.getElementById('p3-desc').value.trim();
-  P.obs=document.getElementById('p3-obs').value.trim();
-  P.mat=document.getElementById('p3-mat').value.trim();
-  P.fotos=fotos.map(function(f){return f.dataUrl;});
-  setTimeout(function(){initFirmaCanvas();},100);
-  nav('s-p4');
+function quitarFoto(i) { fotos.splice(i,1); dibujarFotos(); }
+function irP4() {
+  P.desc=document.getElementById('p3-desc').value.trim(); P.obs=document.getElementById('p3-obs').value.trim(); P.mat=document.getElementById('p3-mat').value.trim();
+  P.fotos=fotos.map(function(f){ return f.data; });
+  setTimeout(initFirma, 80); go('s-p4');
 }
 
-function initFirmaCanvas(){
-  var canvas=document.getElementById('firma-canvas');if(!canvas)return;
-  var W=canvas.parentElement.clientWidth||350;
-  canvas.width=W;canvas.height=160;
-  fCtx=canvas.getContext('2d');
-  fCtx.strokeStyle='#1D9E75';fCtx.lineWidth=2.5;fCtx.lineCap='round';fCtx.lineJoin='round';
-  var drawing=false;
-  function getP(e){
-    var r=canvas.getBoundingClientRect();
-    var sx=canvas.width/r.width,sy=canvas.height/r.height;
-    var src=e.touches?e.touches[0]:e;
-    return {x:(src.clientX-r.left)*sx,y:(src.clientY-r.top)*sy};
-  }
-  canvas.onmousedown=function(e){drawing=true;var p=getP(e);fCtx.beginPath();fCtx.moveTo(p.x,p.y);hidePH();};
-  canvas.onmousemove=function(e){if(!drawing)return;var p=getP(e);fCtx.lineTo(p.x,p.y);fCtx.stroke();firmaTiene=true;};
-  canvas.onmouseup=function(){drawing=false;};
-  canvas.onmouseleave=function(){drawing=false;};
-  canvas.ontouchstart=function(e){e.preventDefault();drawing=true;var p=getP(e);fCtx.beginPath();fCtx.moveTo(p.x,p.y);hidePH();};
-  canvas.ontouchmove=function(e){e.preventDefault();if(!drawing)return;var p=getP(e);fCtx.lineTo(p.x,p.y);fCtx.stroke();firmaTiene=true;};
-  canvas.ontouchend=function(){drawing=false;};
+// ── FIRMA ────────────────────────────────────────────
+function initFirma() {
+  var c=document.getElementById('firma-c'); if(!c) return;
+  c.width=c.parentElement.clientWidth||340; c.height=155;
+  fCtx=c.getContext('2d'); fCtx.strokeStyle='#1D9E75'; fCtx.lineWidth=2.5; fCtx.lineCap='round'; fCtx.lineJoin='round';
+  var draw=false;
+  function pos(e) { var r=c.getBoundingClientRect(),sx=c.width/r.width,sy=c.height/r.height,src=e.touches?e.touches[0]:e; return {x:(src.clientX-r.left)*sx,y:(src.clientY-r.top)*sy}; }
+  c.onmousedown=function(e){draw=true;var p=pos(e);fCtx.beginPath();fCtx.moveTo(p.x,p.y);ocultarHint();};
+  c.onmousemove=function(e){if(!draw)return;var p=pos(e);fCtx.lineTo(p.x,p.y);fCtx.stroke();firmaSi=true;};
+  c.onmouseup=c.onmouseleave=function(){draw=false;};
+  c.ontouchstart=function(e){e.preventDefault();draw=true;var p=pos(e);fCtx.beginPath();fCtx.moveTo(p.x,p.y);ocultarHint();};
+  c.ontouchmove=function(e){e.preventDefault();if(!draw)return;var p=pos(e);fCtx.lineTo(p.x,p.y);fCtx.stroke();firmaSi=true;};
+  c.ontouchend=function(){draw=false;};
 }
-function hidePH(){var el=document.getElementById('firma-ph');if(el)el.style.display='none';}
-function clearFirma(){
-  firmaTiene=false;
-  var c=document.getElementById('firma-canvas');
-  if(fCtx&&c)fCtx.clearRect(0,0,c.width,c.height);
-  var el=document.getElementById('firma-ph');if(el)el.style.display='block';
-}
-function goP5(){
-  var c=document.getElementById('firma-canvas');
-  P.firmaNom=document.getElementById('p4-nom').value.trim();
-  P.firmaDni=document.getElementById('p4-dni').value.trim();
-  P.firmaImg=firmaTiene&&c?c.toDataURL('image/png'):'';
-  P.firmada=firmaTiene;
-  renderResumen();nav('s-p5');
+function ocultarHint() { var h=document.getElementById('firma-hint'); if(h) h.style.display='none'; }
+function borrarFirma() { firmaSi=false; var c=document.getElementById('firma-c'); if(fCtx&&c) fCtx.clearRect(0,0,c.width,c.height); var h=document.getElementById('firma-hint'); if(h) h.style.display='flex'; }
+function irP5() {
+  var c=document.getElementById('firma-c'); P.firmaNom=document.getElementById('p4-nom').value.trim(); P.firmaDni=document.getElementById('p4-dni').value.trim();
+  P.firmaImg=firmaSi&&c?c.toDataURL('image/png'):''; P.firmada=firmaSi;
+  renderResumen(); go('s-p5');
 }
 
-function renderResumen(){
-  var r=document.getElementById('sum-datos');if(!r)return;
-  var rows=[
-    {k:'N de parte',v:'#'+P.num},{k:'Fecha',v:fd(P.fecha)},{k:'Operario',v:P.op},
-    {k:'Cliente',v:P.cliNom},{k:'Domicilio cliente',v:P.cliDir},
-    {k:'Obra',v:P.obraNom||P.obraDir||'-'},{k:'Tipo de visita',v:P.tipo},
-    {k:'Firmado',v:P.firmada?'Si ('+P.firmaNom+')':'No'}
-  ].filter(function(row){return row.v;});
-  r.innerHTML=rows.map(function(row){return '<div class="sr"><span class="sk">'+row.k+'</span><span class="sv">'+esc(row.v)+'</span></div>';}).join('');
-  var rf=document.getElementById('sum-fotos');if(!rf)return;
-  if(P.fotos&&P.fotos.length){
-    rf.innerHTML=P.fotos.map(function(src){return '<img src="'+src+'" style="width:68px;height:68px;object-fit:cover;border-radius:8px;border:.5px solid rgba(0,0,0,.1)">';}).join('');
-  }else{rf.innerHTML='<span style="font-size:13px;color:var(--tx3)">Sin fotos</span>';}
+// ── RESUMEN ──────────────────────────────────────────
+function renderResumen() {
+  var r=document.getElementById('res-datos'); if(!r) return;
+  var filas=[['Num. de parte','#'+P.num],['Fecha',df(P.fecha)],['Operario',P.op],['Cliente',P.cliNom],['Domicilio',P.cliDir],['Obra',P.obraNom||P.obraDir||'-'],['Tipo',P.tipo],['Firmado',P.firmada?'Si ('+P.firmaNom+')':'No']];
+  r.innerHTML=filas.filter(function(f){return f[1];}).map(function(f){ return '<div class="res-row"><span class="res-k">'+f[0]+'</span><span class="res-v">'+x(f[1])+'</span></div>'; }).join('');
+  var rf=document.getElementById('res-fotos'); if(!rf) return;
+  rf.innerHTML=P.fotos&&P.fotos.length?P.fotos.map(function(s){ return '<img src="'+s+'" style="width:66px;height:66px;object-fit:cover;border-radius:8px;border:.5px solid rgba(0,0,0,.1)">'; }).join(''):'<span style="font-size:13px;color:var(--t3)">Sin fotos</span>';
 }
 
-function buildP(){
-  return {id:'p'+Date.now(),num:P.num,fecha:P.fecha,op:P.op,
-    cliId:P.cliId||'',cliNom:P.cliNom||'',cliDir:P.cliDir||'',cliTel:P.cliTel||'',cliNif:P.cliNif||'',cliEmail:P.cliEmail||'',
-    obraId:P.obraId||'',obraNom:P.obraNom||'',obraDir:P.obraDir||'',tipo:P.tipo||'',
-    desc:P.desc||'',obs:P.obs||'',mat:P.mat||'',fotos:P.fotos||[],
-    firmada:P.firmada||false,firmaImg:P.firmaImg||'',firmaNom:P.firmaNom||'',firmaDni:P.firmaDni||'',
-    ts:new Date().toISOString()};
+// ── GUARDAR ──────────────────────────────────────────
+function buildParte() {
+  return { id:'p'+Date.now(), num:P.num, fecha:P.fecha, op:P.op||'', cliId:P.cliId||'', cliNom:P.cliNom||'', cliDir:P.cliDir||'', cliTel:P.cliTel||'', cliNif:P.cliNif||'', obraId:P.obraId||'', obraNom:P.obraNom||'', obraDir:P.obraDir||'', tipo:P.tipo||'', desc:P.desc||'', obs:P.obs||'', mat:P.mat||'', fotos:P.fotos||[], firmada:P.firmada||false, firmaImg:P.firmaImg||'', firmaNom:P.firmaNom||'', firmaDni:P.firmaDni||'', ts:new Date().toISOString() };
 }
-function soloGuardar(){
-  var partes=DB.partes(),p=buildP();partes.push(p);DB.s('partes',partes);
-  toast('Parte #'+p.num+' guardado');P={};fotos=[];nav('s-dash');
+function soloGuardar() {
+  var lista=DB.partes(), p=buildParte(); lista.push(p); DB.s('partes',lista);
+  msg('Parte #'+p.num+' guardado'); P={}; fotos=[]; go('s-home');
 }
 
-function renderPartes(){
-  var lista=DB.partes().slice().reverse(),cont=document.getElementById('lista-partes');if(!cont)return;
-  if(!lista.length){cont.innerHTML='<div class="empty"><div class="ei">&#128203;</div><div class="et">Sin partes</div><div class="es">Los partes creados apareceran aqui</div></div>';return;}
-  cont.innerHTML=lista.map(function(p){
-    return '<div class="li" onclick="verParte(''+p.id+'')">'
-      +'<div class="av">'+ini(p.cliNom)+'</div>'
-      +'<div class="li-info"><div class="li-t">'+esc(p.cliNom||'Sin cliente')+'</div>'
-      +'<div class="li-m">#'+esc(p.num)+' - '+esc(fd(p.fecha))+' - '+esc(p.tipo||'')+'</div></div>'
-      +'<span class="chv">&#8250;</span></div>';
-  }).join('');
+// ── PARTES LIST ───────────────────────────────────────
+function renderPartes() {
+  var lista=DB.partes().slice().reverse(), cont=document.getElementById('lista-partes'); if(!cont) return;
+  if(!lista.length){ cont.innerHTML='<div class="empty"><div class="empty-i">📋</div><div class="empty-t">Sin partes</div><div class="empty-s">Los partes creados apareceran aqui</div></div>'; return; }
+  cont.innerHTML=lista.map(function(p){ return '<div class="item" onclick="verParte(\''+p.id+'\')"><div class="ava">'+ini(p.cliNom)+'</div><div class="item-inf"><div class="item-t">'+x(p.cliNom||'Sin cliente')+'</div><div class="item-s">#'+x(p.num)+' · '+x(df(p.fecha))+' · '+x(p.tipo||'')+'</div></div><span class="chev">›</span></div>'; }).join('');
 }
 
-function verParte(id){
-  var p=DB.partes().find(function(x){return x.id===id;});if(!p)return;
-  document.getElementById('det-t').textContent='Parte #'+p.num;
-  var fh='';
-  if(p.fotos&&p.fotos.length){
-    fh='<div class="sec-lbl">Fotos ('+p.fotos.length+')</div><div style="padding:0 16px 12px;display:flex;flex-wrap:wrap;gap:8px">'
-      +p.fotos.map(function(src){return '<img src="'+src+'" style="width:78px;height:78px;object-fit:cover;border-radius:8px">';}).join('')+'</div>';
-  }
-  var fis='';
-  if(p.firmaImg)fis='<div class="sec-lbl">Firma del cliente</div><div style="padding:0 16px 12px"><img src="'+p.firmaImg+'" style="max-width:100%;border:.5px solid rgba(0,0,0,.1);border-radius:8px;background:#fff;display:block"></div>';
-  document.getElementById('det-body').innerHTML=
-    '<div class="sum-card">'
-    +'<div class="sr"><span class="sk">Fecha</span><span class="sv">'+esc(fd(p.fecha))+'</span></div>'
-    +'<div class="sr"><span class="sk">Operario</span><span class="sv">'+esc(p.op||'')+'</span></div>'
-    +'<div class="sr"><span class="sk">Cliente</span><span class="sv">'+esc(p.cliNom||'')+'</span></div>'
-    +(p.cliDir?'<div class="sr"><span class="sk">Domicilio</span><span class="sv">'+esc(p.cliDir)+'</span></div>':'')
-    +'<div class="sr"><span class="sk">Obra</span><span class="sv">'+esc(p.obraNom||p.obraDir||'-')+'</span></div>'
-    +'<div class="sr"><span class="sk">Tipo</span><span class="sv">'+esc(p.tipo||'')+'</span></div>'
-    +'<div class="sr"><span class="sk">Firmado</span><span class="sv">'+(p.firmada?'Si':'No')+'</span></div>'
-    +'</div>'
-    +'<div class="sec-lbl">Descripcion del trabajo</div>'
-    +'<div style="background:var(--card);border-top:.5px solid var(--b);border-bottom:.5px solid var(--b);padding:14px 16px;font-size:14px;line-height:1.7;white-space:pre-wrap;margin-bottom:2px">'+esc(p.desc||'-')+'</div>'
-    +(p.obs?'<div class="sec-lbl">Observaciones</div><div style="background:var(--card);border-top:.5px solid var(--b);border-bottom:.5px solid var(--b);padding:14px 16px;font-size:14px;line-height:1.7;white-space:pre-wrap;margin-bottom:2px">'+esc(p.obs)+'</div>':'')
-    +(p.mat?'<div class="sec-lbl">Materiales</div><div style="background:var(--card);border-top:.5px solid var(--b);border-bottom:.5px solid var(--b);padding:14px 16px;font-size:14px;line-height:1.7;white-space:pre-wrap;margin-bottom:2px">'+esc(p.mat)+'</div>':'')
-    +fh+fis
-    +'<div class="sp"></div>'
-    +'<button class="btn-p" onclick="pdfDe(''+id+'')">Generar PDF</button>'
-    +'<button class="btn-d" onclick="delParte(''+id+'')">Eliminar parte</button>'
-    +'<div class="sp"></div>';
-  nav('s-parte-det');
+// ── VER PARTE ────────────────────────────────────────
+function verParte(id) {
+  var p=DB.partes().find(function(z){ return z.id===id; }); if(!p) return;
+  document.getElementById('ver-tit').textContent='Parte #'+p.num;
+  var fh='', fi='';
+  if(p.fotos&&p.fotos.length) fh='<div class="lbl">Fotos ('+p.fotos.length+')</div><div style="padding:0 14px 12px;display:flex;flex-wrap:wrap;gap:7px">'+p.fotos.map(function(s){ return '<img src="'+s+'" style="width:75px;height:75px;object-fit:cover;border-radius:8px">'; }).join('')+'</div>';
+  if(p.firmaImg) fi='<div class="lbl">Firma del cliente</div><div style="padding:0 14px 12px"><img src="'+p.firmaImg+'" style="max-width:100%;border:.5px solid rgba(0,0,0,.1);border-radius:8px;background:#fff;display:block"></div>';
+  document.getElementById('ver-body').innerHTML=
+    '<div class="res-card"><div class="res-row"><span class="res-k">Fecha</span><span class="res-v">'+x(df(p.fecha))+'</span></div><div class="res-row"><span class="res-k">Operario</span><span class="res-v">'+x(p.op)+'</span></div><div class="res-row"><span class="res-k">Cliente</span><span class="res-v">'+x(p.cliNom)+'</span></div>'+(p.cliDir?'<div class="res-row"><span class="res-k">Domicilio</span><span class="res-v">'+x(p.cliDir)+'</span></div>':'')+'<div class="res-row"><span class="res-k">Obra</span><span class="res-v">'+x(p.obraNom||p.obraDir||'-')+'</span></div><div class="res-row"><span class="res-k">Tipo</span><span class="res-v">'+x(p.tipo)+'</span></div><div class="res-row"><span class="res-k">Firmado</span><span class="res-v">'+(p.firmada?'Si':'No')+'</span></div></div>'
+    +'<div class="lbl">Descripcion del trabajo</div><div style="background:var(--w);border-top:.5px solid var(--b1);border-bottom:.5px solid var(--b1);padding:13px 14px;font-size:14px;line-height:1.65;white-space:pre-wrap;margin-bottom:2px">'+x(p.desc||'-')+'</div>'
+    +(p.obs?'<div class="lbl">Observaciones</div><div style="background:var(--w);border-top:.5px solid var(--b1);border-bottom:.5px solid var(--b1);padding:13px 14px;font-size:14px;line-height:1.65;white-space:pre-wrap;margin-bottom:2px">'+x(p.obs)+'</div>':'')
+    +(p.mat?'<div class="lbl">Materiales</div><div style="background:var(--w);border-top:.5px solid var(--b1);border-bottom:.5px solid var(--b1);padding:13px 14px;font-size:14px;line-height:1.65;white-space:pre-wrap;margin-bottom:2px">'+x(p.mat)+'</div>':'')
+    +fh+fi
+    +'<div class="gap"></div><button class="btn" onclick="pdfDe(\''+id+'\')">Generar PDF</button><button class="btnd" onclick="borrarParte(\''+id+'\')">Eliminar parte</button><div class="gap"></div>';
+  go('s-parte-ver');
 }
-function delParte(id){DB.s('partes',DB.partes().filter(function(p){return p.id!==id;}));toast('Parte eliminado');nav('s-partes');}
-function pdfDe(id){var p=DB.partes().find(function(x){return x.id===id;});if(p)doPDF(p);}
+function borrarParte(id) { DB.s('partes',DB.partes().filter(function(p){ return p.id!==id; })); msg('Parte eliminado'); go('s-partes'); }
+function pdfDe(id) { var p=DB.partes().find(function(z){ return z.id===id; }); if(p) hacerPDF(p); }
 
-function generarPDF(){
-  var partes=DB.partes();
-  var existe=partes.find(function(x){return x.num===P.num;});
-  var p=existe||buildP();
-  if(!existe){partes.push(p);DB.s('partes',partes);}
-  renderDash();doPDF(p);
+// ── GENERAR PDF ───────────────────────────────────────
+function generarPDF() {
+  var lista=DB.partes(), existe=lista.find(function(z){ return z.num===P.num; }), p=existe||buildParte();
+  if(!existe){ lista.push(p); DB.s('partes',lista); } renderHome(); hacerPDF(p);
 }
 
-function doPDF(p){
-  var btn=document.getElementById('btn-pdf');
-  if(btn){btn.disabled=true;btn.textContent='Generando...';}
+function hacerPDF(p) {
+  var btn=document.getElementById('btn-pdf'); if(btn){btn.disabled=true;btn.textContent='Generando...';}
   var cfg=DB.cfg();
-  var jsPDF=window.jspdf&&window.jspdf.jsPDF;
-  if(!jsPDF){toast('Libreria PDF no cargada. Recarga la pagina.');if(btn){btn.disabled=false;btn.innerHTML='Generar y descargar PDF';}return;}
-  try{
-    var doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-    var W=210,mg=14,cw=W-mg*2,PH=297;
-    var GR=[29,158,117],GG=[200,240,225],TX=[26,26,24],TX2=[100,100,100],BD=[220,220,218];
-    doc.setFillColor(GR[0],GR[1],GR[2]);doc.rect(0,0,W,30,'F');
-    doc.setFont('helvetica','bold');doc.setFontSize(17);doc.setTextColor(255,255,255);
-    doc.text(cfg.emp||'Alaro Clima',mg,13);
-    doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(GG[0],GG[1],GG[2]);
-    doc.text('Instalaciones y mantenimiento de climatizacion - RITE - Electricidad B.T.',mg,19);
-    doc.text((cfg.dir||'')+' - '+(cfg.cp||'')+' - '+(cfg.mov||''),mg,25);
-    doc.setFont('helvetica','bold');doc.setFontSize(13);doc.setTextColor(255,255,255);
-    doc.text('PARTE DE TRABAJO',W-mg,12,{align:'right'});
-    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(GG[0],GG[1],GG[2]);
-    doc.text('N '+p.num,W-mg,19,{align:'right'});
-    doc.text('Fecha: '+fd(p.fecha),W-mg,25,{align:'right'});
-    var y=35;
-    doc.setFillColor(245,245,243);doc.setDrawColor(BD[0],BD[1],BD[2]);doc.setLineWidth(0.3);
-    doc.roundedRect(mg,y,cw,12,2,2,'FD');
-    doc.setFontSize(7.5);doc.setTextColor(TX2[0],TX2[1],TX2[2]);
-    doc.text('Empresa acreditada - Reg. Industrial: '+(cfg.ri||'')+' - Reg. Medioambiente: '+(cfg.rm||''),mg+4,y+5);
-    doc.text('NIF: '+(cfg.nif||'')+' - Tel: '+(cfg.mov||''),mg+4,y+9.5);
-    y+=17;
-    var hw=(cw-4)/2;
-    doc.setFillColor(230,241,251);doc.roundedRect(mg,y,hw,44,2,2,'FD');
-    doc.setFont('helvetica','bold');doc.setFontSize(7.5);doc.setTextColor(TX[0],TX[1],TX[2]);
-    doc.text('CLIENTE',mg+3,y+6);
-    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(TX[0],TX[1],TX[2]);
-    doc.text(p.cliNom||'-',mg+3,y+13);
-    doc.setFontSize(7.5);doc.setTextColor(TX2[0],TX2[1],TX2[2]);
-    if(p.cliDir)doc.text(p.cliDir,mg+3,y+19);
-    if(p.cliNif)doc.text('NIF: '+p.cliNif,mg+3,y+25);
-    if(p.cliTel)doc.text('Tel: '+p.cliTel,mg+3,y+31);
-    var ox=mg+hw+4;
-    doc.setFillColor(245,245,243);doc.roundedRect(ox,y,hw,44,2,2,'FD');
-    doc.setFont('helvetica','bold');doc.setFontSize(7.5);doc.setTextColor(TX[0],TX[1],TX[2]);
-    doc.text('OBRA / PROYECTO',ox+3,y+6);
-    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(TX[0],TX[1],TX[2]);
-    doc.text(p.obraNom||p.obraDir||'-',ox+3,y+13);
-    doc.setFontSize(7.5);doc.setTextColor(TX2[0],TX2[1],TX2[2]);
-    if(p.obraDir&&p.obraNom)doc.text(p.obraDir,ox+3,y+19);
-    doc.text('Tipo:',ox+3,y+27);
-    doc.setFont('helvetica','bold');doc.setTextColor(GR[0],GR[1],GR[2]);
-    doc.text(p.tipo||'-',ox+3,y+33);
-    doc.setFont('helvetica','normal');doc.setTextColor(TX2[0],TX2[1],TX2[2]);
-    doc.text('Operario: '+(p.op||cfg.res||''),ox+3,y+39);
-    y+=49;
-    doc.setDrawColor(GR[0],GR[1],GR[2]);doc.setLineWidth(0.5);doc.line(mg,y,mg+cw,y);y+=6;
-    doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(GR[0],GR[1],GR[2]);
-    doc.text('DESCRIPCION DEL TRABAJO / INCIDENCIA / ASISTENCIA',mg,y);y+=5;
-    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(TX[0],TX[1],TX[2]);
-    var dL=doc.splitTextToSize(p.desc||'-',cw-6);
-    var dH=Math.max(dL.length*5.5+8,24);
-    doc.setFillColor(252,252,250);doc.setDrawColor(BD[0],BD[1],BD[2]);doc.setLineWidth(0.3);
-    doc.roundedRect(mg,y,cw,dH,2,2,'FD');doc.text(dL,mg+3,y+6);y+=dH+5;
-    if(p.obs){
-      doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(GR[0],GR[1],GR[2]);
-      doc.text('OBSERVACIONES / INCIDENCIAS',mg,y);y+=5;
-      var oL=doc.splitTextToSize(p.obs,cw-6);var oH=Math.max(oL.length*5.5+8,18);
-      doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(TX[0],TX[1],TX[2]);
-      doc.setFillColor(252,252,250);doc.setDrawColor(BD[0],BD[1],BD[2]);
-      doc.roundedRect(mg,y,cw,oH,2,2,'FD');doc.text(oL,mg+3,y+6);y+=oH+5;
-    }
-    if(p.mat){
-      doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(GR[0],GR[1],GR[2]);
-      doc.text('MATERIALES UTILIZADOS',mg,y);y+=5;
-      var mL=doc.splitTextToSize(p.mat,cw-6);var mH=Math.max(mL.length*5.5+8,14);
-      doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(TX[0],TX[1],TX[2]);
-      doc.setFillColor(252,252,250);doc.setDrawColor(BD[0],BD[1],BD[2]);
-      doc.roundedRect(mg,y,cw,mH,2,2,'FD');doc.text(mL,mg+3,y+6);y+=mH+5;
-    }
-    if(p.fotos&&p.fotos.length){
-      var ppr=3,fW=(cw-(ppr-1)*4)/ppr,fH=fW*0.72,rowsN=Math.ceil(p.fotos.length/ppr);
-      if(y+14+rowsN*(fH+4)>270){doc.addPage();y=mg;}
-      doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(GR[0],GR[1],GR[2]);
-      doc.text('FOTOGRAFIAS DE LA VISITA ('+p.fotos.length+')',mg,y);y+=6;
-      p.fotos.forEach(function(src,i){
-        var row=Math.floor(i/ppr),col=i%ppr;
-        var fx=mg+col*(fW+4),fy=y+row*(fH+4);
-        if(fy+fH>272){doc.addPage();y=mg;fy=y;}
-        try{doc.addImage(src,src.indexOf('data:image/png')===0?'PNG':'JPEG',fx,fy,fW,fH);doc.setDrawColor(BD[0],BD[1],BD[2]);doc.setLineWidth(0.2);doc.rect(fx,fy,fW,fH);}catch(e){}
-      });
-      y+=rowsN*(fH+4)+6;
-    }
-    if(y+46>272){doc.addPage();y=mg;}
-    doc.setDrawColor(BD[0],BD[1],BD[2]);doc.setLineWidth(0.3);doc.line(mg,y,mg+cw,y);y+=5;
-    var fw2=(cw-6)/2;
-    doc.setFillColor(252,252,250);doc.roundedRect(mg,y,fw2,36,2,2,'FD');
-    doc.setFont('helvetica','bold');doc.setFontSize(7.5);doc.setTextColor(TX2[0],TX2[1],TX2[2]);
-    doc.text('Conforme / Firma del cliente:',mg+3,y+6);
-    if(p.firmaImg){try{doc.addImage(p.firmaImg,'PNG',mg+4,y+8,fw2-8,20);}catch(e){}}
-    doc.setFont('helvetica','normal');doc.setFontSize(7);
-    if(p.firmaNom)doc.text('Nombre: '+p.firmaNom,mg+3,y+32);
-    var tx2x=mg+fw2+6;
-    doc.setFillColor(252,252,250);doc.roundedRect(tx2x,y,fw2,36,2,2,'FD');
-    doc.setFont('helvetica','bold');doc.setFontSize(7.5);doc.setTextColor(TX2[0],TX2[1],TX2[2]);
-    doc.text('Firma del tecnico / Operario:',tx2x+3,y+6);
-    doc.setFont('helvetica','normal');doc.setFontSize(7);doc.text(p.op||cfg.res||'',tx2x+3,y+32);
-    doc.setFillColor(GR[0],GR[1],GR[2]);doc.rect(0,PH-12,W,12,'F');
-    doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(GG[0],GG[1],GG[2]);
-    doc.text((cfg.emp||'')+' - NIF: '+(cfg.nif||'')+' - '+(cfg.ri||'')+' - '+(cfg.rm||''),W/2,PH-5.5,{align:'center'});
-    var fname='Parte_'+p.num+'_'+(p.cliNom||'cliente').replace(/\s+/g,'_').substring(0,20)+'_'+fd(p.fecha).replace(/\//g,'')+'.pdf';
-    doc.save(fname);
-    toast('PDF descargado: '+fname);
-  }catch(err){toast('Error: '+err.message);console.error(err);}
+
+  // Usamos un iframe oculto con la pagina del parte y mandamos a imprimir
+  // Esto funciona en todos los navegadores sin libreria externa
+  var fotosSec='';
+  if(p.fotos&&p.fotos.length){
+    fotosSec='<div class="sec">FOTOGRAFIAS DE LA VISITA ('+p.fotos.length+')</div><div class="fotos-wrap">'
+      +p.fotos.map(function(s){ return '<img src="'+s+'">'; }).join('')+'</div>';
+  }
+  var firmaSec='';
+  if(p.firmaImg){
+    firmaSec='<img src="'+p.firmaImg+'" class="firma-img">';
+  }
+
+  var html='<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">'
+    +'<title>Parte '+p.num+'</title>'
+    +'<style>'
+    +'*{box-sizing:border-box;margin:0;padding:0}'
+    +'body{font-family:Arial,sans-serif;font-size:11px;color:#111;background:#fff}'
+    +'.page{width:210mm;min-height:297mm;padding:12mm 14mm;display:flex;flex-direction:column}'
+    +'.cab{background:#1D9E75;color:#fff;padding:10px 14px;border-radius:6px;display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}'
+    +'.cab-l{} .cab-emp{font-size:16px;font-weight:700;margin-bottom:3px}'
+    +'.cab-sub{font-size:8px;opacity:.8;line-height:1.5}'
+    +'.cab-r{text-align:right} .cab-tit{font-size:14px;font-weight:700;margin-bottom:3px}'
+    +'.cab-num{font-size:10px;opacity:.85}'
+    +'.regs{background:#f5f5f3;border:1px solid #e0e0dd;border-radius:4px;padding:5px 8px;font-size:8px;color:#555;margin-bottom:8px}'
+    +'.cols{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}'
+    +'.col{border:1px solid #e0e0dd;border-radius:4px;padding:8px}'
+    +'.col-tit{font-size:8px;font-weight:700;color:#555;text-transform:uppercase;margin-bottom:5px;letter-spacing:.05em}'
+    +'.col-n{font-size:12px;font-weight:600;margin-bottom:3px}'
+    +'.col-d{font-size:9px;color:#555;line-height:1.5}'
+    +'.tipo-badge{display:inline-block;background:#1D9E75;color:#fff;font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;margin-top:3px}'
+    +'.sec{font-size:8px;font-weight:700;color:#1D9E75;text-transform:uppercase;letter-spacing:.06em;margin:8px 0 4px}'
+    +'.bloque{border:1px solid #e8e8e6;border-radius:4px;padding:8px;font-size:10px;line-height:1.6;white-space:pre-wrap;margin-bottom:6px;min-height:32px;background:#fcfcfb}'
+    +'.fotos-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}'
+    +'.fotos-wrap img{width:58mm;height:43mm;object-fit:cover;border-radius:4px;border:1px solid #e0e0dd}'
+    +'.firmas{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto;padding-top:8px;border-top:1px solid #e0e0dd}'
+    +'.firma-box{border:1px solid #e0e0dd;border-radius:4px;padding:6px;min-height:60px}'
+    +'.firma-lbl{font-size:8px;color:#777;margin-bottom:4px}'
+    +'.firma-img{max-width:100%;max-height:50px;display:block}'
+    +'.firma-nom{font-size:8px;color:#333;margin-top:4px;border-top:1px solid #e0e0dd;padding-top:3px}'
+    +'.pie{background:#1D9E75;color:rgba(255,255,255,.8);font-size:7px;text-align:center;padding:5px;border-radius:4px;margin-top:8px}'
+    +'@media print{body{margin:0}.page{padding:10mm 12mm}}'
+    +'</style></head><body>'
+    +'<div class="page">'
+    +'<div class="cab"><div class="cab-l"><div class="cab-emp">'+(cfg.emp||'Alaro Clima')+'</div><div class="cab-sub">Instalaciones y mantenimiento de climatizacion · RITE · Electricidad B.T.<br>'+(cfg.dir||'')+' · '+(cfg.cp||'')+' · '+(cfg.mov||'')+'</div></div><div class="cab-r"><div class="cab-tit">PARTE DE TRABAJO</div><div class="cab-num">Num. '+p.num+'<br>Fecha: '+df(p.fecha)+'</div></div></div>'
+    +'<div class="regs">Empresa acreditada · Reg. Industrial: '+(cfg.ri||'')+' · Reg. Medioambiente: '+(cfg.rm||'')+' · NIF: '+(cfg.nif||'')+'</div>'
+    +'<div class="cols">'
+    +'<div class="col"><div class="col-tit">Cliente</div><div class="col-n">'+(p.cliNom||'-')+'</div><div class="col-d">'+(p.cliDir||'')+(p.cliNif?'<br>NIF: '+p.cliNif:'')+(p.cliTel?'<br>Tel: '+p.cliTel:'')+'</div></div>'
+    +'<div class="col"><div class="col-tit">Obra / Proyecto</div><div class="col-n">'+(p.obraNom||p.obraDir||'-')+'</div><div class="col-d">'+(p.obraDir&&p.obraNom?p.obraDir+'<br>':'')+'Operario: '+(p.op||cfg.res||'')+'<br><span class="tipo-badge">'+(p.tipo||'')+'</span></div></div>'
+    +'</div>'
+    +'<div class="sec">Descripcion del trabajo / incidencia / asistencia</div>'
+    +'<div class="bloque">'+(p.desc||'-')+'</div>'
+    +(p.obs?'<div class="sec">Observaciones / incidencias</div><div class="bloque">'+p.obs+'</div>':'')
+    +(p.mat?'<div class="sec">Materiales utilizados</div><div class="bloque">'+p.mat+'</div>':'')
+    +fotosSec
+    +'<div class="firmas">'
+    +'<div class="firma-box"><div class="firma-lbl">Conforme / Firma del cliente:</div>'+firmaSec+'<div class="firma-nom">'+(p.firmaNom?'Nombre: '+p.firmaNom:'')+(p.firmaDni?' · DNI: '+p.firmaDni:'')+'</div></div>'
+    +'<div class="firma-box"><div class="firma-lbl">Firma del tecnico / Operario:</div><div class="firma-nom" style="margin-top:30px">'+(p.op||cfg.res||'')+'</div></div>'
+    +'</div>'
+    +'<div class="pie">'+(cfg.emp||'')+' · NIF: '+(cfg.nif||'')+' · '+(cfg.ri||'')+' · '+(cfg.rm||'')+'</div>'
+    +'</div>'
+    +'</body></html>';
+
+  // Abrir ventana de impresion
+  var win = window.open('','_blank','width=900,height=700');
+  if (!win) { msg('Permite las ventanas emergentes para generar el PDF'); if(btn){btn.disabled=false;btn.innerHTML='Generar y descargar PDF';} return; }
+  win.document.write(html);
+  win.document.close();
+  win.onload = function() {
+    setTimeout(function() {
+      win.focus();
+      win.print();
+    }, 300);
+  };
   if(btn){btn.disabled=false;btn.innerHTML='Generar y descargar PDF';}
+  msg('Usa "Guardar como PDF" en el dialogo de impresion');
 }
 </script>
 </body>
