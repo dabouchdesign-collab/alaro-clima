@@ -4,236 +4,276 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <title>Alaro Clima</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{--g:#1D9E75;--gl:#e8f8f2;--gd:#0e6b50;--bg:#f2f2f0;--w:#fff;--b1:rgba(0,0,0,.08);--b2:rgba(0,0,0,.14);--t1:#181816;--t2:#64645f;--t3:#9e9e9a;--red:#a02828;--r:10px;--rl:14px}
-html,body{height:100%;background:var(--bg);color:var(--t1);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;overscroll-behavior:none}
-#app{max-width:480px;margin:0 auto;min-height:100vh;position:relative}
-/* NAV */
-.hdr{background:var(--w);border-bottom:.5px solid var(--b1);height:52px;display:flex;align-items:center;padding:0 14px;gap:8px;position:sticky;top:0;z-index:40}
-.hdr-ico{width:32px;height:32px;background:var(--g);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px;flex-shrink:0}
-.hdr-tit{font-size:16px;font-weight:600;flex:1}
-.hdr-btn{width:36px;height:36px;border:none;background:none;cursor:pointer;font-size:20px;color:var(--t2);display:flex;align-items:center;justify-content:center;border-radius:8px}
-.hdr-btn:active{background:var(--bg)}
-/* SCREENS */
-.scr{display:none;flex-direction:column;min-height:calc(100vh - 52px);overflow-y:auto;-webkit-overflow-scrolling:touch}
+:root{
+  --g:#22c55e;--bg:#111;--s1:#1a1a1a;--s2:#222;
+  --b1:rgba(255,255,255,.07);--b2:rgba(255,255,255,.12);--b3:rgba(255,255,255,.2);
+  --t1:#f0f0f0;--t2:#777;--t3:#444;--red:#ef4444;
+  --r:8px;--rl:10px
+}
+html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'Inter',sans-serif;font-size:15px;overscroll-behavior:none}
+#app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+
+/* ── TOP BAR (Archviz style) ── */
+.topbar{background:var(--bg);border-bottom:1px solid var(--b1);padding:0 18px;position:sticky;top:0;z-index:50;flex-shrink:0}
+.topbar-row1{height:44px;display:flex;align-items:center;gap:12px}
+.tb-brand{font-size:15px;font-weight:600;letter-spacing:-.01em;color:var(--t1);flex:1}
+.tb-date{font-size:11px;color:var(--t3);letter-spacing:.02em}
+.tb-sync{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.tb-dot{width:6px;height:6px;border-radius:50%;background:var(--t3);flex-shrink:0;transition:background .3s}
+.tb-dot.ok{background:var(--g)}
+.tb-dot.err{background:var(--red)}
+.tb-cfg{width:28px;height:28px;border:none;background:none;cursor:pointer;color:var(--t3);display:flex;align-items:center;justify-content:center;border-radius:5px;padding:0}
+.tb-cfg:active{color:var(--t1)}
+.tb-cfg svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.topbar-row2{display:flex;border-top:1px solid var(--b1)}
+.nav-tab{flex:1;padding:11px 4px;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border:none;background:none;color:var(--t3);cursor:pointer;font-family:'Inter',sans-serif;border-bottom:1.5px solid transparent;transition:all .12s;white-space:nowrap}
+.nav-tab.on{color:var(--t1);border-bottom-color:var(--t1)}
+.nav-tab:active{opacity:.7}
+
+/* ── SUBHEADER (pantallas secundarias) ── */
+.subhdr{background:var(--bg);border-bottom:1px solid var(--b1);height:48px;display:flex;align-items:center;padding:0 14px;gap:10px;position:sticky;top:0;z-index:40;flex-shrink:0}
+.back-btn{width:32px;height:32px;border:none;background:none;cursor:pointer;color:var(--t2);display:flex;align-items:center;justify-content:center;border-radius:5px;font-size:18px;font-family:'Inter',sans-serif;flex-shrink:0}
+.back-btn:active{color:var(--t1)}
+.subhdr-tit{font-size:13px;font-weight:500;letter-spacing:.02em;flex:1;color:var(--t1)}
+.subhdr-act{width:32px;height:32px;border:none;background:none;cursor:pointer;color:var(--t2);font-size:22px;font-weight:300;display:flex;align-items:center;justify-content:center;border-radius:5px;font-family:'Inter',sans-serif}
+.subhdr-act:active{color:var(--t1)}
+
+/* ── SCREENS ── */
+.scr{display:none;flex-direction:column;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .scr.on{display:flex}
-/* GROUPS */
-.grp{background:var(--w);border-top:.5px solid var(--b1);border-bottom:.5px solid var(--b1);margin-bottom:2px}
-.lbl{padding:14px 14px 4px;font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.06em}
-.fld{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:.5px solid var(--b1);min-height:46px}
+
+/* ── FORM GROUPS ── */
+.grp{background:var(--s1);border-top:1px solid var(--b1);border-bottom:1px solid var(--b1);margin-bottom:1px}
+.lbl{padding:18px 16px 5px;font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.1em}
+.fld{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--b1);min-height:48px}
 .fld:last-child{border-bottom:none}
-.fld-l{font-size:13px;color:var(--t2);min-width:90px;flex-shrink:0}
-.fld input,.fld select,.fld textarea{flex:1;border:none;background:none;font-size:15px;color:var(--t1);text-align:right;outline:none;font-family:inherit;min-width:0}
-.fld textarea{text-align:left;resize:none;line-height:1.5;padding:2px 0}
-/* LIST ITEMS */
-.item{background:var(--w);border-bottom:.5px solid var(--b1);padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;min-height:60px}
-.item:first-of-type{border-top:.5px solid var(--b1)}
-.item:active{background:#efefed}
-.ava{width:36px;height:36px;border-radius:50%;background:var(--gl);color:var(--gd);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0}
+.fld-l{font-size:13px;color:var(--t2);min-width:100px;flex-shrink:0}
+.fld input,.fld select,.fld textarea{flex:1;border:none;background:none;font-size:15px;color:var(--t1);text-align:right;outline:none;font-family:'Inter',sans-serif;min-width:0}
+.fld input::placeholder,.fld textarea::placeholder{color:var(--t3)}
+.fld select option{background:#1a1a1a;color:var(--t1)}
+.fld textarea{text-align:left;resize:none;line-height:1.6;padding:2px 0}
+
+/* ── LIST ITEMS ── */
+.item{background:transparent;border-bottom:1px solid var(--b1);padding:14px 16px;display:flex;align-items:center;gap:13px;cursor:pointer;min-height:60px;transition:background .07s}
+.item:first-of-type{border-top:1px solid var(--b1)}
+.item:active{background:var(--s1)}
+.ava{width:32px;height:32px;border:1px solid var(--b2);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;letter-spacing:.05em;color:var(--t3);flex-shrink:0;text-transform:uppercase}
 .item-inf{flex:1;min-width:0}
-.item-t{font-size:14px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.item-s{font-size:12px;color:var(--t2);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.chev{color:var(--t3);font-size:16px;flex-shrink:0}
-.tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:12px;background:#e5f2e0;color:#2e6b1a;flex-shrink:0}
-.tag-pend{background:#fff3e0;color:#bf6900}
-.tag-real{background:#e5f2e0;color:#2e6b1a}
-/* TABS PARTES */
-.tabs{display:flex;gap:0;padding:0 14px 10px}
-.tab-btn{flex:1;padding:9px 4px;font-size:13px;font-weight:500;border:none;background:var(--w);color:var(--t2);cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;transition:all .12s}
-.tab-btn.on{color:var(--g);border-bottom-color:var(--g);font-weight:600}
-.tab-btn:active{opacity:.7}
-/* ESTADO SELECTOR */
-.est-g{display:flex;gap:8px;padding:0 14px 14px}
-.est-b{flex:1;border:.5px solid var(--b2);background:var(--w);border-radius:var(--r);padding:12px 8px;cursor:pointer;text-align:center;font-family:inherit;transition:background .08s}
-.est-b.on{border-width:1.5px}
-.est-b.on-real{background:#e5f2e0;border-color:#2e6b1a}
-.est-b.on-pend{background:#fff3e0;border-color:#bf6900}
-.est-em{font-size:18px;margin-bottom:4px}
-.est-tx{font-size:12px;font-weight:500;color:var(--t1)}
-/* DASHBOARD */
-.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px}
-.hero{grid-column:1/-1;background:var(--g);border-radius:var(--rl);padding:16px 18px;cursor:pointer;display:flex;align-items:center;gap:14px}
-.hero:active{opacity:.88}
-.hero-ic{width:44px;height:44px;background:rgba(255,255,255,.18);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
-.hero-t{font-size:17px;font-weight:600;color:#fff}
-.hero-s{font-size:13px;color:rgba(255,255,255,.72);margin-top:1px}
-.dcard{background:var(--w);border:.5px solid var(--b1);border-radius:var(--rl);padding:14px;cursor:pointer}
-.dcard:active{opacity:.8}
-.dcard-i{font-size:22px;margin-bottom:6px}
-.dcard-l{font-size:13px;font-weight:600}
-.dcard-s{font-size:11px;color:var(--t2);margin-top:2px}
-/* STEPS */
-.steps{display:flex;gap:4px;padding:10px 14px 2px}
-.step{flex:1;height:3px;border-radius:2px;background:var(--b2)}
-.step.done{background:var(--g)}.step.cur{background:#5dcaa5}
-.step-lbl{padding:2px 14px 10px;font-size:12px;color:var(--t2)}
-/* TIPO GRID */
-.tipo-g{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 14px 14px}
-.tipo-b{border:.5px solid var(--b2);background:var(--w);border-radius:var(--r);padding:13px 8px;cursor:pointer;text-align:center;font-family:inherit;transition:background .08s}
-.tipo-b.on{background:var(--gl);border-color:var(--g);border-width:1.5px}
-.tipo-em{font-size:20px;margin-bottom:5px}
-.tipo-tx{font-size:12px;font-weight:500;color:var(--t1);line-height:1.3}
-/* FOTOS */
-.foto-wrap{padding:0 14px 14px}
-.foto-g{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
-.fото{position:relative;aspect-ratio:1;border-radius:var(--r);overflow:hidden;border:.5px solid var(--b1)}
+.item-t{font-size:13px;font-weight:500;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item-s{font-size:11px;color:var(--t2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chev{color:var(--t3);font-size:13px;flex-shrink:0}
+.tag{font-size:9px;font-weight:700;padding:3px 7px;border-radius:3px;letter-spacing:.07em;text-transform:uppercase;flex-shrink:0;border:1px solid}
+.tag-pend{color:#f59e0b;border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.07)}
+.tag-real{color:var(--g);border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.07)}
+
+/* ── INNER TABS ── */
+.tabs{display:flex;border-bottom:1px solid var(--b1)}
+.tab-btn{flex:1;padding:11px 4px;font-size:10px;font-weight:600;border:none;background:none;color:var(--t3);cursor:pointer;font-family:'Inter',sans-serif;border-bottom:1.5px solid transparent;transition:all .12s;letter-spacing:.07em;text-transform:uppercase}
+.tab-btn.on{color:var(--t1);border-bottom-color:var(--g)}
+
+/* ── BUSCADOR ── */
+.search-wrap{padding:12px 16px;border-bottom:1px solid var(--b1)}
+.search-inp{width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:10px 14px;font-size:13px;color:var(--t1);font-family:'Inter',sans-serif;outline:none}
+.search-inp::placeholder{color:var(--t3)}
+.search-inp:focus{border-color:var(--b3)}
+
+/* ── DASHBOARD HOME ── */
+.home-hero{margin:16px;background:var(--s1);border:1px solid var(--b2);border-radius:var(--rl);padding:18px;cursor:pointer;display:flex;align-items:center;gap:16px;transition:border-color .1s}
+.home-hero:active{border-color:var(--g)}
+.hero-ic{width:38px;height:38px;border:1px solid var(--b3);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hero-ic svg{width:17px;height:17px;stroke:var(--g);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.hero-t{font-size:14px;font-weight:600;color:var(--t1)}
+.hero-s{font-size:11px;color:var(--t2);margin-top:3px}
+
+/* ── STATS ROW ── */
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 16px 16px}
+.stat{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);padding:14px;cursor:pointer;transition:border-color .1s}
+.stat:active{border-color:var(--b3)}
+.stat-n{font-size:22px;font-weight:300;color:var(--t1);line-height:1}
+.stat-l{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-top:5px}
+
+/* ── RESUMEN PARTES (home) ── */
+.resumen-hdr{display:flex;align-items:center;justify-content:space-between;padding:0 16px;margin-top:4px}
+.resumen-hdr-tit{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.1em;padding:14px 0 6px}
+.resumen-toggle{font-size:11px;color:var(--t2);background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;padding:4px 0}
+.filtros{padding:10px 16px 4px;display:none;gap:8px;flex-direction:column}
+.filtros.on{display:flex}
+.filtros-row{display:flex;gap:8px}
+.fil-inp{flex:1;background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:9px 12px;font-size:12px;color:var(--t1);font-family:'Inter',sans-serif;outline:none}
+.fil-inp::placeholder{color:var(--t3)}
+.fil-inp:focus{border-color:var(--b3)}
+
+/* ── ESTADO SELECTOR ── */
+.est-g{display:flex;gap:8px;padding:0 16px 16px}
+.est-b{flex:1;border:1px solid var(--b1);background:var(--s1);border-radius:var(--r);padding:13px 8px;cursor:pointer;text-align:center;font-family:'Inter',sans-serif;transition:border-color .1s}
+.est-b.on-real{border-color:var(--g);background:rgba(34,197,94,.05)}
+.est-b.on-pend{border-color:#f59e0b;background:rgba(245,158,11,.05)}
+.est-tx{font-size:10px;font-weight:700;color:var(--t1);text-transform:uppercase;letter-spacing:.07em}
+
+/* ── STEPS ── */
+.steps{display:flex;gap:4px;padding:14px 16px 4px}
+.step{flex:1;height:2px;border-radius:1px;background:var(--b2)}
+.step.done{background:var(--g)}.step.cur{background:rgba(34,197,94,.5)}
+.step-lbl{padding:4px 16px 12px;font-size:11px;color:var(--t3);letter-spacing:.04em}
+
+/* ── TIPO GRID ── */
+.tipo-g{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 16px 16px}
+.tipo-b{border:1px solid var(--b1);background:var(--s1);border-radius:var(--r);padding:16px 10px;cursor:pointer;text-align:center;font-family:'Inter',sans-serif;transition:border-color .1s}
+.tipo-b.on{border-color:var(--g);background:rgba(34,197,94,.05)}
+.tipo-ic{display:flex;align-items:center;justify-content:center;margin-bottom:8px}
+.tipo-ic svg{width:18px;height:18px;stroke:var(--t3);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;transition:stroke .1s}
+.tipo-b.on .tipo-ic svg{stroke:var(--g)}
+.tipo-tx{font-size:12px;color:var(--t2);line-height:1.4}
+.tipo-b.on .tipo-tx{color:var(--t1)}
+
+/* ── FOTOS ── */
+.foto-wrap{padding:0 16px 16px}
+.foto-g{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+.fото{position:relative;aspect-ratio:1;border-radius:var(--r);overflow:hidden;border:1px solid var(--b1)}
 .fото img{width:100%;height:100%;object-fit:cover;display:block}
-.foto-del{position:absolute;top:3px;right:3px;width:20px;height:20px;background:rgba(0,0,0,.55);border:none;border-radius:50%;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
-.foto-add{border:1.5px dashed var(--b2);background:none;border-radius:var(--r);padding:12px;display:flex;align-items:center;gap:10px;width:100%;font-family:inherit;font-size:14px;color:var(--t2);cursor:pointer}
-.foto-add:active{background:rgba(0,0,0,.03)}
-.foto-cnt{font-size:12px;color:var(--t3);text-align:right;margin-top:5px}
+.foto-del{position:absolute;top:4px;right:4px;width:20px;height:20px;background:rgba(0,0,0,.7);border:none;border-radius:4px;color:#fff;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.foto-add{border:1px solid var(--b2);background:none;border-radius:var(--r);padding:14px;display:flex;align-items:center;gap:10px;width:100%;font-family:'Inter',sans-serif;font-size:13px;color:var(--t2);cursor:pointer;transition:border-color .1s}
+.foto-add:active{border-color:var(--b3)}
+.foto-cnt{font-size:11px;color:var(--t3);text-align:right;margin-top:6px;letter-spacing:.04em}
 #foto-inp{display:none}
-/* FIRMA */
-.firma-wrap{padding:0 14px 6px}
-.firma-box{border:.5px solid var(--b2);border-radius:var(--r);background:var(--w);position:relative;overflow:hidden}
+
+/* ── FIRMA ── */
+.firma-wrap{padding:0 16px 8px}
+.firma-box{border:1px solid var(--b1);border-radius:var(--r);background:var(--s1);position:relative;overflow:hidden}
 #firma-c{display:block;width:100%;height:155px;cursor:crosshair;touch-action:none}
-.firma-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--t3);pointer-events:none;text-align:center;line-height:1.5}
-.firma-clr{font-size:12px;color:var(--t2);background:none;border:none;cursor:pointer;padding:5px 0;font-family:inherit}
-/* BOTONES */
-.btn{background:var(--g);color:#fff;border:none;border-radius:var(--r);padding:13px 18px;font-size:15px;font-weight:600;cursor:pointer;width:calc(100% - 28px);margin:0 14px 10px;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px}
-.btn:active{opacity:.85}.btn:disabled{opacity:.45;cursor:default}
-.btn2{background:var(--w);color:var(--t1);border:.5px solid var(--b2);border-radius:var(--r);padding:12px 18px;font-size:14px;cursor:pointer;width:calc(100% - 28px);margin:0 14px 8px;font-family:inherit}
-.btn2:active{background:#efefed}
-.btnd{background:none;color:var(--red);border:none;padding:11px 18px;font-size:14px;cursor:pointer;width:calc(100% - 28px);margin:0 14px 6px;font-family:inherit}
-.gap{height:18px}
-/* RESUMEN */
-.res-card{background:var(--w);border-top:.5px solid var(--b1);border-bottom:.5px solid var(--b1);margin-bottom:6px}
-.res-row{display:flex;justify-content:space-between;align-items:baseline;padding:9px 14px;border-bottom:.5px solid var(--b1);font-size:14px}
+.firma-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--t3);pointer-events:none;text-align:center}
+.firma-clr{font-size:12px;color:var(--t2);background:none;border:none;cursor:pointer;padding:6px 0;font-family:'Inter',sans-serif}
+
+/* ── BOTONES ── */
+.btn{background:var(--g);color:#000;border:none;border-radius:var(--r);padding:14px 18px;font-size:13px;font-weight:700;cursor:pointer;width:calc(100% - 32px);margin:0 16px 10px;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.02em;text-transform:uppercase}
+.btn:active{opacity:.85}.btn:disabled{opacity:.3;cursor:default}
+.btn2{background:transparent;color:var(--t1);border:1px solid var(--b2);border-radius:var(--r);padding:13px 18px;font-size:13px;cursor:pointer;width:calc(100% - 32px);margin:0 16px 8px;font-family:'Inter',sans-serif;transition:border-color .1s}
+.btn2:active{border-color:var(--b3)}
+.btnd{background:none;color:var(--red);border:none;padding:12px 18px;font-size:12px;cursor:pointer;width:calc(100% - 32px);margin:0 16px 6px;font-family:'Inter',sans-serif;opacity:.6;text-transform:uppercase;letter-spacing:.04em}
+.btnd:active{opacity:1}
+.gap{height:20px}
+
+/* ── RESUMEN ── */
+.res-card{background:var(--s1);border-top:1px solid var(--b1);border-bottom:1px solid var(--b1);margin-bottom:4px}
+.res-row{display:flex;justify-content:space-between;align-items:baseline;padding:10px 16px;border-bottom:1px solid var(--b1);font-size:13px}
 .res-row:last-child{border-bottom:none}
-.res-k{color:var(--t2)}.res-v{font-weight:500;text-align:right;max-width:60%;line-height:1.4}
-/* EMPTY */
-.empty{text-align:center;padding:52px 20px}
-.empty-i{font-size:38px;margin-bottom:10px}
-.empty-t{font-size:14px;font-weight:500;color:var(--t2);margin-bottom:4px}
-.empty-s{font-size:13px;color:var(--t3);line-height:1.6}
-/* TOAST */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(8px);background:#1a1a18;color:#fff;padding:9px 16px;border-radius:22px;font-size:13px;opacity:0;transition:all .22s;pointer-events:none;z-index:99;white-space:nowrap;max-width:calc(100% - 28px);text-align:center}
+.res-k{color:var(--t2)}
+.res-v{font-weight:500;color:var(--t1);text-align:right;max-width:60%;line-height:1.4}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:60px 20px}
+.empty-t{font-size:13px;font-weight:500;color:var(--t2);margin-bottom:5px}
+.empty-s{font-size:12px;color:var(--t3);line-height:1.6}
+
+/* ── EMPRESA HUB (grid) ── */
+.emp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:16px}
+.emp-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);padding:16px;cursor:pointer;transition:border-color .1s}
+.emp-card:active{border-color:var(--b3)}
+.emp-card-l{font-size:12px;font-weight:600;color:var(--t1);text-transform:uppercase;letter-spacing:.06em}
+.emp-card-s{font-size:11px;color:var(--t3);margin-top:4px;line-height:1.4}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--t1);color:#111;padding:9px 18px;border-radius:20px;font-size:12px;font-weight:600;letter-spacing:.03em;opacity:0;transition:all .2s;pointer-events:none;z-index:99;white-space:nowrap;max-width:calc(100% - 32px);text-align:center}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
-/* MODAL */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:80;display:none;align-items:flex-end}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:80;display:none;align-items:flex-end}
 .modal-bg.on{display:flex}
-.modal{background:var(--w);border-radius:18px 18px 0 0;padding:22px 18px 20px;width:100%;max-width:480px;margin:0 auto}
-.modal-t{font-size:16px;font-weight:600;margin-bottom:6px}
-.modal-s{font-size:14px;color:var(--t2);margin-bottom:18px;line-height:1.5}
+.modal{background:var(--s1);border:1px solid var(--b2);border-radius:14px 14px 0 0;padding:24px 18px 32px;width:100%;max-width:480px;margin:0 auto}
+.modal-t{font-size:14px;font-weight:600;margin-bottom:6px;color:var(--t1)}
+.modal-s{font-size:13px;color:var(--t2);margin-bottom:20px;line-height:1.5}
 </style>
 </head>
 <body>
 <div id="app">
 
-<!-- DASHBOARD -->
-<div id="s-home" class="scr on">
-  <div class="hdr">
-    <div class="hdr-ico">❄</div>
-    <span class="hdr-tit">Alaro Clima</span>
-    <span id="sync-badge" title="Sincronizando..." style="font-size:14px;cursor:default">🔄</span>
-    <button class="hdr-btn" onclick="go('s-cfg')" title="Ajustes">⚙</button>
+<!-- ══ TOP BAR ══ -->
+<div class="topbar" id="topbar">
+  <div class="topbar-row1">
+    <span class="tb-brand">Alaro Clima</span>
+    <span class="tb-date" id="hoy"></span>
+    <div class="tb-sync">
+      <div class="tb-dot" id="sync-dot"></div>
+      <span id="sync-txt">—</span>
+    </div>
+    <button class="tb-cfg" onclick="goSub('s-cfg','s-partes')" title="Ajustes">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
   </div>
-  <div style="padding:14px 14px 4px">
-    <div style="font-size:12px;color:var(--t2)" id="hoy"></div>
-    <div style="font-size:19px;font-weight:600;margin-top:2px" id="saludo">Bienvenido</div>
+  <div class="topbar-row2">
+    <button class="nav-tab on" id="nav-partes" onclick="navTo('partes')">Partes</button>
+    <button class="nav-tab" id="nav-clientes" onclick="navTo('clientes')">Clientes / Obras</button>
+    <button class="nav-tab" id="nav-empresa" onclick="navTo('empresa')">Empresa</button>
   </div>
-  <div class="dash-grid">
-    <div class="hero" onclick="nuevoParte()">
-      <div class="hero-ic">📝</div>
-      <div><div class="hero-t">Nuevo parte</div><div class="hero-s">Registrar visita de obra</div></div>
+</div>
+
+<!-- ══ PÁGINA 1: PARTES ══ -->
+<div id="s-partes" class="scr on">
+  <!-- Hero nuevo parte -->
+  <div class="home-hero" onclick="nuevoParte()">
+    <div class="hero-ic">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
     </div>
-    <div class="dcard" onclick="go('s-partes')">
-      <div class="dcard-i">📋</div><div class="dcard-l">Partes</div><div class="dcard-s" id="cnt-p">0 registrados</div>
+    <div><div class="hero-t">Nuevo parte</div><div class="hero-s">Registrar visita de obra</div></div>
+  </div>
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat" onclick="goSub('s-carpeta-partes','s-partes')">
+      <div class="stat-n" id="cnt-p">0</div>
+      <div class="stat-l">Partes totales</div>
     </div>
-    <div class="dcard" onclick="go('s-clientes')">
-      <div class="dcard-i">🏢</div><div class="dcard-l">Clientes</div><div class="dcard-s" id="cnt-c">0 guardados</div>
-    </div>
-    <div class="dcard" onclick="go('s-obras')">
-      <div class="dcard-i">📍</div><div class="dcard-l">Obras</div><div class="dcard-s" id="cnt-o">0 activas</div>
+    <div class="stat" onclick="goSub('s-carpeta-partes','s-partes')">
+      <div class="stat-n" id="cnt-pend">0</div>
+      <div class="stat-l">Pendientes</div>
     </div>
   </div>
-  <div class="lbl">Ultimos partes</div>
+  <!-- Resumen reciente con filtros -->
+  <div class="resumen-hdr">
+    <span class="resumen-hdr-tit">Partes recientes</span>
+    <button class="resumen-toggle" onclick="toggleFiltros()" id="btn-filtros">Filtrar ↓</button>
+  </div>
+  <div class="filtros" id="filtros-panel">
+    <div class="filtros-row">
+      <input class="fil-inp" id="fil-cli" type="text" placeholder="Buscar por cliente..." oninput="renderHome()">
+      <input class="fil-inp" id="fil-fecha" type="date" onchange="renderHome()" style="max-width:148px">
+    </div>
+  </div>
   <div id="home-list"></div>
 </div>
 
-<!-- CONFIG -->
-<div id="s-cfg" class="scr">
-  <div class="hdr"><button class="hdr-btn" onclick="go('s-home')">←</button><span class="hdr-tit">Datos empresa</span></div>
-  <div class="lbl">Empresa</div>
-  <div class="grp">
-    <div class="fld"><span class="fld-l">Empresa</span><input id="cfg-emp" type="text" placeholder="Nombre empresa"></div>
-    <div class="fld"><span class="fld-l">Responsable</span><input id="cfg-res" type="text" placeholder="Nombre completo"></div>
-    <div class="fld"><span class="fld-l">Direccion</span><input id="cfg-dir" type="text" placeholder="Poligono, calle..."></div>
-    <div class="fld"><span class="fld-l">CP Poblacion</span><input id="cfg-cp" type="text" placeholder="07340 Alaro"></div>
-    <div class="fld"><span class="fld-l">NIF</span><input id="cfg-nif" type="text" placeholder="00000000X"></div>
-    <div class="fld"><span class="fld-l">Movil</span><input id="cfg-mov" type="tel" placeholder="677 711 704"></div>
+<!-- ══ CARPETA PARTES (subpage) ══ -->
+<div id="s-carpeta-partes" class="scr">
+  <div class="subhdr">
+    <button class="back-btn" id="back-carpeta-partes">←</button>
+    <span class="subhdr-tit">Todos los partes</span>
   </div>
-  <div class="lbl">Registros oficiales</div>
-  <div class="grp">
-    <div class="fld"><span class="fld-l">Reg. Industrial</span><input id="cfg-ri" type="text" placeholder="04/62531 CAIB"></div>
-    <div class="fld"><span class="fld-l">Reg. Medioamb</span><input id="cfg-rm" type="text" placeholder="NIMA 0700010246"></div>
-  </div>
-  <div class="gap"></div>
-  <button class="btn" onclick="guardarCfg()">Guardar cambios</button>
-  <div class="gap"></div>
-</div>
-
-<!-- CLIENTES -->
-<div id="s-clientes" class="scr">
-  <div class="hdr"><button class="hdr-btn" onclick="go('s-home')">←</button><span class="hdr-tit">Clientes</span><button class="hdr-btn" onclick="abrirCli(null)" style="font-size:24px;font-weight:300">+</button></div>
-  <div id="lista-cli"></div>
-</div>
-<div id="s-cli-form" class="scr">
-  <div class="hdr"><button class="hdr-btn" onclick="go('s-clientes')">←</button><span class="hdr-tit" id="cli-tit">Nuevo cliente</span></div>
-  <div class="lbl">Datos del cliente</div>
-  <div class="grp">
-    <div class="fld"><span class="fld-l">Nombre</span><input id="cl-n" type="text" placeholder="Nombre o empresa"></div>
-    <div class="fld"><span class="fld-l">Domicilio</span><input id="cl-d" type="text" placeholder="Calle, numero..."></div>
-    <div class="fld"><span class="fld-l">CP Poblacion</span><input id="cl-cp" type="text" placeholder="07000 Palma"></div>
-    <div class="fld"><span class="fld-l">NIF/CIF</span><input id="cl-nif" type="text" placeholder="00000000X"></div>
-    <div class="fld"><span class="fld-l">Telefono</span><input id="cl-t" type="tel" placeholder="000 000 000"></div>
-    <div class="fld"><span class="fld-l">Email</span><input id="cl-e" type="email" placeholder="correo@ejemplo.com"></div>
-  </div>
-  <div class="gap"></div>
-  <button class="btn" onclick="guardarCli()">Guardar cliente</button>
-  <button class="btnd" id="btn-del-cli" onclick="borrarCli()" style="display:none">Eliminar cliente</button>
-  <div class="gap"></div>
-</div>
-
-<!-- OBRAS -->
-<div id="s-obras" class="scr">
-  <div class="hdr"><button class="hdr-btn" onclick="go('s-home')">←</button><span class="hdr-tit">Obras</span><button class="hdr-btn" onclick="abrirObra(null)" style="font-size:24px;font-weight:300">+</button></div>
-  <div id="lista-obra"></div>
-</div>
-<div id="s-obra-form" class="scr">
-  <div class="hdr"><button class="hdr-btn" onclick="go('s-obras')">←</button><span class="hdr-tit" id="obra-tit">Nueva obra</span></div>
-  <div class="lbl">Datos de la obra</div>
-  <div class="grp">
-    <div class="fld"><span class="fld-l">Nombre</span><input id="ob-n" type="text" placeholder="Descripcion breve"></div>
-    <div class="fld"><span class="fld-l">Direccion</span><input id="ob-d" type="text" placeholder="Calle, numero..."></div>
-    <div class="fld"><span class="fld-l">Poblacion</span><input id="ob-p" type="text" placeholder="Palma, Inca..."></div>
-    <div class="fld"><span class="fld-l">Cliente</span><select id="ob-cli"><option value="">Sin asignar</option></select></div>
-  </div>
-  <div class="gap"></div>
-  <button class="btn" onclick="guardarObra()">Guardar obra</button>
-  <button class="btnd" id="btn-del-obra" onclick="borrarObra()" style="display:none">Eliminar obra</button>
-  <div class="gap"></div>
-</div>
-
-<!-- PARTES -->
-<div id="s-partes" class="scr">
-  <div class="hdr"><button class="hdr-btn" onclick="go('s-home')">←</button><span class="hdr-tit">Partes</span></div>
   <div class="tabs">
     <button class="tab-btn on" id="tab-real" onclick="setTabPartes('realizado')">Realizados</button>
     <button class="tab-btn" id="tab-pend" onclick="setTabPartes('pendiente')">Pendientes</button>
   </div>
+  <div class="search-wrap">
+    <input class="search-inp" id="partes-q" type="text" placeholder="Buscar por cliente u obra..." oninput="renderPartes()">
+  </div>
   <div id="lista-partes"></div>
 </div>
 <div id="s-parte-ver" class="scr">
-  <div class="hdr"><button class="hdr-btn" onclick="go('s-partes')">←</button><span class="hdr-tit" id="ver-tit">Parte</span></div>
+  <div class="subhdr">
+    <button class="back-btn" onclick="goSub('s-carpeta-partes','s-partes')">←</button>
+    <span class="subhdr-tit" id="ver-tit">Parte</span>
+  </div>
   <div id="ver-body"></div>
 </div>
 
-<!-- PASO 1 -->
+<!-- ══ PASOS NUEVO PARTE ══ -->
 <div id="s-p1" class="scr">
-  <div class="hdr"><button class="hdr-btn" onclick="cancelar()">✕</button><span class="hdr-tit">Nuevo parte</span></div>
+  <div class="subhdr"><button class="back-btn" onclick="cancelar()">✕</button><span class="subhdr-tit">Nuevo parte</span></div>
   <div class="steps"><div class="step cur"></div><div class="step"></div><div class="step"></div><div class="step"></div><div class="step"></div></div>
   <div class="step-lbl">Paso 1 de 5 · Cliente y obra</div>
   <div class="lbl">Cliente</div>
@@ -245,7 +285,7 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:-apple-sy
   <div class="lbl">Obra</div>
   <div class="grp">
     <div class="fld"><span class="fld-l">Obra</span><select id="p1-obra" onchange="elegirObra()"><option value="">Sin asignar</option></select></div>
-    <div class="fld"><span class="fld-l">Direccion obra</span><input id="p1-odir" type="text" placeholder="Direccion de la obra"></div>
+    <div class="fld"><span class="fld-l">Dirección obra</span><input id="p1-odir" type="text" placeholder="Dirección de la obra"></div>
     <div class="fld"><span class="fld-l">Num. de orden</span><input id="p1-num" type="text" readonly style="color:var(--t3)"></div>
     <div class="fld"><span class="fld-l">Fecha</span><input id="p1-fecha" type="date"></div>
   </div>
@@ -257,34 +297,54 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:-apple-sy
   <button class="btn" onclick="irP2()">Siguiente →</button>
   <div class="gap"></div>
 </div>
-
-<!-- PASO 2 -->
 <div id="s-p2" class="scr">
-  <div class="hdr"><button class="hdr-btn" onclick="go('s-p1')">←</button><span class="hdr-tit">Tipo de visita</span></div>
+  <div class="subhdr"><button class="back-btn" onclick="goSub('s-p1','s-partes')">←</button><span class="subhdr-tit">Tipo de visita</span></div>
   <div class="steps"><div class="step done"></div><div class="step cur"></div><div class="step"></div><div class="step"></div><div class="step"></div></div>
-  <div class="step-lbl">Paso 2 de 5 · Tipo de intervencion</div>
+  <div class="step-lbl">Paso 2 de 5 · Tipo de intervención</div>
   <div class="lbl">Selecciona el tipo</div>
   <div class="tipo-g">
-    <button class="tipo-b" onclick="elegirTipo(this,'Mantenimiento preventivo')"><div class="tipo-em">🔧</div><div class="tipo-tx">Mantenimiento preventivo</div></button>
-    <button class="tipo-b" onclick="elegirTipo(this,'Mantenimiento correctivo')"><div class="tipo-em">🛠</div><div class="tipo-tx">Mantenimiento correctivo</div></button>
-    <button class="tipo-b" onclick="elegirTipo(this,'Instalacion nueva')"><div class="tipo-em">🔌</div><div class="tipo-tx">Instalacion nueva</div></button>
-    <button class="tipo-b" onclick="elegirTipo(this,'Averia urgente')"><div class="tipo-em">⚠</div><div class="tipo-tx">Averia urgente</div></button>
-    <button class="tipo-b" onclick="elegirTipo(this,'Revision periodica')"><div class="tipo-em">✅</div><div class="tipo-tx">Revision periodica</div></button>
-    <button class="tipo-b" onclick="elegirTipo(this,'Visita tecnica')"><div class="tipo-em">🔍</div><div class="tipo-tx">Visita tecnica</div></button>
-    <button class="tipo-b" onclick="elegirTipo(this,'Garantia')"><div class="tipo-em">🛡</div><div class="tipo-tx">Garantia</div></button>
-    <button class="tipo-b" onclick="elegirTipo(this,'Presupuesto')"><div class="tipo-em">📄</div><div class="tipo-tx">Presupuesto</div></button>
+    <button class="tipo-b" onclick="elegirTipo(this,'Mantenimiento preventivo')">
+      <div class="tipo-ic"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
+      <div class="tipo-tx">Mantenimiento preventivo</div>
+    </button>
+    <button class="tipo-b" onclick="elegirTipo(this,'Mantenimiento correctivo')">
+      <div class="tipo-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></div>
+      <div class="tipo-tx">Mantenimiento correctivo</div>
+    </button>
+    <button class="tipo-b" onclick="elegirTipo(this,'Instalación nueva')">
+      <div class="tipo-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+      <div class="tipo-tx">Instalación nueva</div>
+    </button>
+    <button class="tipo-b" onclick="elegirTipo(this,'Avería urgente')">
+      <div class="tipo-ic"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+      <div class="tipo-tx">Avería urgente</div>
+    </button>
+    <button class="tipo-b" onclick="elegirTipo(this,'Revisión periódica')">
+      <div class="tipo-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+      <div class="tipo-tx">Revisión periódica</div>
+    </button>
+    <button class="tipo-b" onclick="elegirTipo(this,'Visita técnica')">
+      <div class="tipo-ic"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+      <div class="tipo-tx">Visita técnica</div>
+    </button>
+    <button class="tipo-b" onclick="elegirTipo(this,'Garantía')">
+      <div class="tipo-ic"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      <div class="tipo-tx">Garantía</div>
+    </button>
+    <button class="tipo-b" onclick="elegirTipo(this,'Presupuesto')">
+      <div class="tipo-ic"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+      <div class="tipo-tx">Presupuesto</div>
+    </button>
   </div>
   <div class="gap"></div>
   <button class="btn" onclick="irP3()">Siguiente →</button>
   <div class="gap"></div>
 </div>
-
-<!-- PASO 3 -->
 <div id="s-p3" class="scr">
-  <div class="hdr"><button class="hdr-btn" onclick="go('s-p2')">←</button><span class="hdr-tit">Descripcion y fotos</span></div>
+  <div class="subhdr"><button class="back-btn" onclick="goSub('s-p2','s-partes')">←</button><span class="subhdr-tit">Descripción y fotos</span></div>
   <div class="steps"><div class="step done"></div><div class="step done"></div><div class="step cur"></div><div class="step"></div><div class="step"></div></div>
   <div class="step-lbl">Paso 3 de 5 · Trabajo realizado</div>
-  <div class="lbl">Descripcion del trabajo / incidencia</div>
+  <div class="lbl">Descripción del trabajo</div>
   <div class="grp"><div class="fld"><textarea id="p3-desc" rows="5" placeholder="Describe el trabajo realizado, incidencia o asistencia..."></textarea></div></div>
   <div class="lbl">Observaciones adicionales</div>
   <div class="grp"><div class="fld"><textarea id="p3-obs" rows="3" placeholder="Otros datos, observaciones, incidencias..."></textarea></div></div>
@@ -293,7 +353,7 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:-apple-sy
   <div class="lbl">Fotos de la visita</div>
   <div class="foto-wrap">
     <div class="foto-g" id="foto-grid"></div>
-    <button class="foto-add" onclick="document.getElementById('foto-inp').click()">📷 Añadir fotos</button>
+    <button class="foto-add" onclick="document.getElementById('foto-inp').click()">+ Añadir fotos</button>
     <input type="file" id="foto-inp" accept="image/*" multiple onchange="añadirFotos(this)">
     <div class="foto-cnt" id="foto-cnt">0 fotos</div>
   </div>
@@ -301,19 +361,17 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:-apple-sy
   <button class="btn" onclick="irP4()">Siguiente →</button>
   <div class="gap"></div>
 </div>
-
-<!-- PASO 4 -->
 <div id="s-p4" class="scr">
-  <div class="hdr"><button class="hdr-btn" onclick="go('s-p3')">←</button><span class="hdr-tit">Firma del cliente</span></div>
+  <div class="subhdr"><button class="back-btn" onclick="goSub('s-p3','s-partes')">←</button><span class="subhdr-tit">Firma del cliente</span></div>
   <div class="steps"><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step cur"></div><div class="step"></div></div>
   <div class="step-lbl">Paso 4 de 5 · Conformidad</div>
   <div class="lbl">Firma</div>
   <div class="firma-wrap">
     <div class="firma-box">
       <canvas id="firma-c"></canvas>
-      <div class="firma-hint" id="firma-hint">✍ El cliente firma aqui</div>
+      <div class="firma-hint" id="firma-hint">El cliente firma aquí</div>
     </div>
-    <button class="firma-clr" onclick="borrarFirma()">🗑 Borrar firma</button>
+    <button class="firma-clr" onclick="borrarFirma()">Borrar firma</button>
   </div>
   <div class="lbl">Datos del firmante</div>
   <div class="grp">
@@ -325,25 +383,251 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:-apple-sy
   <button class="btn2" onclick="irP5()">Continuar sin firma</button>
   <div class="gap"></div>
 </div>
-
-<!-- PASO 5 -->
 <div id="s-p5" class="scr">
-  <div class="hdr"><button class="hdr-btn" onclick="go('s-p4')">←</button><span class="hdr-tit">Resumen</span></div>
+  <div class="subhdr"><button class="back-btn" onclick="goSub('s-p4','s-partes')">←</button><span class="subhdr-tit">Resumen</span></div>
   <div class="steps"><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step cur"></div></div>
   <div class="step-lbl">Paso 5 de 5 · Genera el PDF</div>
   <div class="lbl">Datos del parte</div>
   <div class="res-card" id="res-datos"></div>
   <div class="lbl">Fotos</div>
-  <div id="res-fotos" style="padding:0 14px 12px;display:flex;flex-wrap:wrap;gap:7px"></div>
+  <div id="res-fotos" style="padding:0 16px 12px;display:flex;flex-wrap:wrap;gap:7px"></div>
   <div class="lbl">Estado del parte</div>
   <div class="est-g">
-    <button class="est-b on on-real" id="est-real" onclick="elegirEstado('realizado')"><div class="est-em">✅</div><div class="est-tx">Realizado</div></button>
-    <button class="est-b" id="est-pend" onclick="elegirEstado('pendiente')"><div class="est-em">⏳</div><div class="est-tx">Pendiente</div></button>
+    <button class="est-b on-real" id="est-real" onclick="elegirEstado('realizado')"><div class="est-tx">Realizado</div></button>
+    <button class="est-b" id="est-pend" onclick="elegirEstado('pendiente')"><div class="est-tx">Pendiente</div></button>
   </div>
   <div class="gap"></div>
-  <button class="btn" id="btn-pdf" onclick="generarPDF()">📄 Generar y descargar PDF</button>
+  <button class="btn" id="btn-pdf" onclick="generarPDF()">Generar y descargar PDF</button>
   <button class="btn2" onclick="soloGuardar()">Guardar sin PDF</button>
   <button class="btnd" onclick="cancelar()">Descartar parte</button>
+  <div class="gap"></div>
+</div>
+
+<!-- ══ PÁGINA 2: CLIENTES / OBRAS ══ -->
+<div id="s-clientes-obras" class="scr">
+  <div class="tabs" style="margin-top:0">
+    <button class="tab-btn on" id="tab-clis" onclick="setTabCO('cli')">Clientes</button>
+    <button class="tab-btn" id="tab-obras" onclick="setTabCO('obra')">Obras</button>
+    <button class="tab-btn" id="tab-buscar" onclick="setTabCO('buscar')">Buscar</button>
+  </div>
+  <!-- Clientes -->
+  <div id="panel-cli">
+    <div style="display:flex;justify-content:flex-end;padding:10px 16px 0">
+      <button class="subhdr-act" onclick="abrirCli(null)" style="color:var(--t2);font-size:22px;font-weight:300;border:none;background:none;cursor:pointer">+</button>
+    </div>
+    <div id="lista-cli"></div>
+  </div>
+  <!-- Obras -->
+  <div id="panel-obra" style="display:none">
+    <div style="display:flex;justify-content:flex-end;padding:10px 16px 0">
+      <button class="subhdr-act" onclick="abrirObra(null)" style="color:var(--t2);font-size:22px;font-weight:300;border:none;background:none;cursor:pointer">+</button>
+    </div>
+    <div id="lista-obra"></div>
+  </div>
+  <!-- Buscador -->
+  <div id="panel-buscar" style="display:none">
+    <div class="search-wrap">
+      <input class="search-inp" id="buscar-inp" type="text" placeholder="Buscar clientes y obras..." oninput="renderBuscar()">
+    </div>
+    <div id="lista-buscar"></div>
+  </div>
+</div>
+
+<!-- Formularios clientes/obras (subpages) -->
+<div id="s-cli-form" class="scr">
+  <div class="subhdr"><button class="back-btn" onclick="goSub('s-clientes-obras','s-clientes-obras')">←</button><span class="subhdr-tit" id="cli-tit">Nuevo cliente</span></div>
+  <div class="lbl">Datos del cliente</div>
+  <div class="grp">
+    <div class="fld"><span class="fld-l">Nombre</span><input id="cl-n" type="text" placeholder="Nombre o empresa"></div>
+    <div class="fld"><span class="fld-l">Domicilio</span><input id="cl-d" type="text" placeholder="Calle, número..."></div>
+    <div class="fld"><span class="fld-l">CP Población</span><input id="cl-cp" type="text" placeholder="07000 Palma"></div>
+    <div class="fld"><span class="fld-l">NIF/CIF</span><input id="cl-nif" type="text" placeholder="00000000X"></div>
+    <div class="fld"><span class="fld-l">Teléfono</span><input id="cl-t" type="tel" placeholder="000 000 000"></div>
+    <div class="fld"><span class="fld-l">Email</span><input id="cl-e" type="email" placeholder="correo@ejemplo.com"></div>
+  </div>
+  <div class="gap"></div>
+  <button class="btn" onclick="guardarCli()">Guardar cliente</button>
+  <button class="btnd" id="btn-del-cli" onclick="borrarCli()" style="display:none">Eliminar cliente</button>
+  <div class="gap"></div>
+</div>
+<div id="s-obra-form" class="scr">
+  <div class="subhdr"><button class="back-btn" onclick="goSub('s-clientes-obras','s-clientes-obras')">←</button><span class="subhdr-tit" id="obra-tit">Nueva obra</span></div>
+  <div class="lbl">Datos de la obra</div>
+  <div class="grp">
+    <div class="fld"><span class="fld-l">Nombre</span><input id="ob-n" type="text" placeholder="Descripción breve"></div>
+    <div class="fld"><span class="fld-l">Dirección</span><input id="ob-d" type="text" placeholder="Calle, número..."></div>
+    <div class="fld"><span class="fld-l">Población</span><input id="ob-p" type="text" placeholder="Palma, Inca..."></div>
+    <div class="fld"><span class="fld-l">Cliente</span><select id="ob-cli"><option value="">Sin asignar</option></select></div>
+  </div>
+  <div class="gap"></div>
+  <button class="btn" onclick="guardarObra()">Guardar obra</button>
+  <button class="btnd" id="btn-del-obra" onclick="borrarObra()" style="display:none">Eliminar obra</button>
+  <div class="gap"></div>
+</div>
+
+<!-- ══ PÁGINA 3: EMPRESA ══ -->
+<div id="s-empresa" class="scr">
+  <div class="emp-grid">
+    <div class="emp-card" onclick="goSub('s-contabilidad','s-empresa')" style="grid-column:1/-1">
+      <div class="emp-card-l">Contabilidad</div>
+      <div class="emp-card-s">Facturas · Presupuestos · Albaranes</div>
+    </div>
+    <div class="emp-card" onclick="goSub('s-proveedores','s-empresa')">
+      <div class="emp-card-l">Proveedores</div>
+      <div class="emp-card-s">Marcas y contactos</div>
+    </div>
+    <div class="emp-card" onclick="goSub('s-cfg','s-empresa')">
+      <div class="emp-card-l">Datos empresa</div>
+      <div class="emp-card-s">Configuración</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CONFIG ══ -->
+<div id="s-cfg" class="scr">
+  <div class="subhdr"><button class="back-btn" id="back-cfg">←</button><span class="subhdr-tit">Datos empresa</span></div>
+  <div class="lbl">Empresa</div>
+  <div class="grp">
+    <div class="fld"><span class="fld-l">Empresa</span><input id="cfg-emp" type="text" placeholder="Nombre empresa"></div>
+    <div class="fld"><span class="fld-l">Responsable</span><input id="cfg-res" type="text" placeholder="Nombre completo"></div>
+    <div class="fld"><span class="fld-l">Dirección</span><input id="cfg-dir" type="text" placeholder="Polígono, calle..."></div>
+    <div class="fld"><span class="fld-l">CP Población</span><input id="cfg-cp" type="text" placeholder="07340 Alaró"></div>
+    <div class="fld"><span class="fld-l">NIF</span><input id="cfg-nif" type="text" placeholder="00000000X"></div>
+    <div class="fld"><span class="fld-l">Móvil</span><input id="cfg-mov" type="tel" placeholder="677 711 704"></div>
+  </div>
+  <div class="lbl">Registros oficiales</div>
+  <div class="grp">
+    <div class="fld"><span class="fld-l">Reg. Industrial</span><input id="cfg-ri" type="text" placeholder="04/62531 CAIB"></div>
+    <div class="fld"><span class="fld-l">Reg. Medioamb</span><input id="cfg-rm" type="text" placeholder="NIMA 0700010246"></div>
+  </div>
+  <div class="gap"></div>
+  <button class="btn" onclick="guardarCfg()">Guardar cambios</button>
+  <div class="gap"></div>
+</div>
+
+<!-- ══ CONTABILIDAD ══ -->
+<div id="s-contabilidad" class="scr">
+  <div class="subhdr"><button class="back-btn" onclick="goSub('s-empresa','s-empresa')">←</button><span class="subhdr-tit">Contabilidad</span><button class="subhdr-act" onclick="abrirDocCont(null)">+</button></div>
+  <div class="tabs">
+    <button class="tab-btn on" id="tab-fact" onclick="setTabCont('factura')">Facturas</button>
+    <button class="tab-btn" id="tab-pres" onclick="setTabCont('presupuesto')">Presupuestos</button>
+    <button class="tab-btn" id="tab-alba" onclick="setTabCont('albaran')">Albaranes</button>
+  </div>
+  <div id="lista-cont"></div>
+</div>
+<div id="s-cont-form" class="scr">
+  <div class="subhdr"><button class="back-btn" onclick="goSub('s-contabilidad','s-empresa')">←</button><span class="subhdr-tit" id="cont-tit">Nuevo documento</span></div>
+  <div class="lbl">Tipo</div>
+  <div class="grp">
+    <div class="fld"><span class="fld-l">Tipo</span><select id="ct-tipo"><option value="factura">Factura</option><option value="presupuesto">Presupuesto</option><option value="albaran">Albarán</option></select></div>
+    <div class="fld"><span class="fld-l">Número</span><input id="ct-num" type="text" placeholder="2024-001"></div>
+    <div class="fld"><span class="fld-l">Fecha</span><input id="ct-fecha" type="date"></div>
+  </div>
+  <div class="lbl">Cliente y obra</div>
+  <div class="grp">
+    <div class="fld"><span class="fld-l">Cliente</span><select id="ct-cli" onchange="llenarObraSelCont()"><option value="">Sin asignar</option></select></div>
+    <div class="fld"><span class="fld-l">Obra</span><select id="ct-obra"><option value="">Sin asignar</option></select></div>
+  </div>
+  <div class="lbl">Importe</div>
+  <div class="grp">
+    <div class="fld"><span class="fld-l">Base imponible</span><input id="ct-base" type="number" step="0.01" placeholder="0.00"><span style="color:var(--t2);font-size:13px;margin-left:4px">€</span></div>
+    <div class="fld"><span class="fld-l">IVA (%)</span><input id="ct-iva" type="number" step="1" placeholder="21"><span style="color:var(--t2);font-size:13px;margin-left:4px">%</span></div>
+  </div>
+  <div class="lbl">Concepto</div>
+  <div class="grp"><div class="fld"><textarea id="ct-desc" rows="3" placeholder="Descripción del servicio o producto..."></textarea></div></div>
+  <div class="lbl">Estado</div>
+  <div class="grp"><div class="fld"><span class="fld-l">Estado</span><select id="ct-estado"><option value="pendiente">Pendiente</option><option value="pagado">Pagado</option><option value="cancelado">Cancelado</option></select></div></div>
+  <div class="gap"></div>
+  <button class="btn" onclick="guardarDocCont()">Guardar documento</button>
+  <button class="btn2" id="btn-pdf-cont" onclick="generarPDFFactura()" style="display:none">Generar PDF</button>
+  <button class="btnd" id="btn-del-cont" onclick="borrarDocCont()" style="display:none">Eliminar documento</button>
+  <div class="gap"></div>
+</div>
+
+<!-- ══ PROVEEDORES ══ -->
+<div id="s-proveedores" class="scr">
+  <div class="subhdr"><button class="back-btn" onclick="goSub('s-empresa','s-empresa')">←</button><span class="subhdr-tit">Proveedores</span><button class="subhdr-act" onclick="abrirProvCust(null)">+</button></div>
+  <div class="tabs">
+    <button class="tab-btn on" id="tab-prov-cont" onclick="setTabProv('contactos')">Contactos</button>
+    <button class="tab-btn" id="tab-prov-fichas" onclick="setTabProv('fichas')">Fichas técnicas</button>
+  </div>
+  <!-- Panel contactos -->
+  <div id="panel-prov-contactos">
+    <div class="lbl">Marcas</div>
+    <div id="marcas-list">
+      <div class="item" onclick="goSub('s-prov-form','s-proveedores');cargarMarcaFija('aermec')">
+        <div class="ava">AE</div>
+        <div class="item-inf"><div class="item-t">Aermec</div><div class="item-s">Climatización · aermec.com</div></div>
+        <span class="chev">›</span>
+      </div>
+      <div class="item" onclick="goSub('s-prov-form','s-proveedores');cargarMarcaFija('mitsubishi')">
+        <div class="ava">ME</div>
+        <div class="item-inf"><div class="item-t">Mitsubishi Electric</div><div class="item-s">Aire acondicionado · mitsubishielectric.es</div></div>
+        <span class="chev">›</span>
+      </div>
+      <div class="item" onclick="goSub('s-prov-form','s-proveedores');cargarMarcaFija('carrier')">
+        <div class="ava">CA</div>
+        <div class="item-inf"><div class="item-t">Carrier</div><div class="item-s">HVAC · carrier.com/es</div></div>
+        <span class="chev">›</span>
+      </div>
+    </div>
+    <div class="lbl">Personalizados</div>
+    <div id="lista-prov"></div>
+  </div>
+  <!-- Panel fichas técnicas -->
+  <div id="panel-prov-fichas" style="display:none">
+    <div style="display:flex;justify-content:flex-end;padding:10px 16px 0">
+      <button class="subhdr-act" onclick="abrirFicha(null)" style="color:var(--t2);font-size:22px;font-weight:300;border:none;background:none;cursor:pointer">+</button>
+    </div>
+    <div id="lista-fichas"></div>
+  </div>
+</div>
+<div id="s-prov-form" class="scr">
+  <div class="subhdr"><button class="back-btn" onclick="goSub('s-proveedores','s-empresa')">←</button><span class="subhdr-tit" id="prov-tit">Nuevo proveedor</span></div>
+  <div class="lbl">Datos del proveedor</div>
+  <div class="grp">
+    <div class="fld"><span class="fld-l">Marca / Nombre</span><input id="pv-n" type="text" placeholder="Nombre del proveedor"></div>
+    <div class="fld"><span class="fld-l">Especialidad</span><input id="pv-esp" type="text" placeholder="Climatización, electricidad..."></div>
+    <div class="fld"><span class="fld-l">Web</span><input id="pv-web" type="url" placeholder="https://..."></div>
+    <div class="fld"><span class="fld-l">Teléfono</span><input id="pv-tel" type="tel" placeholder="000 000 000"></div>
+    <div class="fld"><span class="fld-l">Email</span><input id="pv-email" type="email" placeholder="contacto@proveedor.com"></div>
+    <div class="fld"><span class="fld-l">Contacto</span><input id="pv-cont" type="text" placeholder="Nombre del contacto"></div>
+  </div>
+  <div class="lbl">Notas</div>
+  <div class="grp"><div class="fld"><textarea id="pv-notas" rows="3" placeholder="Condiciones, descuentos, observaciones..."></textarea></div></div>
+  <div class="gap"></div>
+  <button class="btn" onclick="guardarProv()">Guardar proveedor</button>
+  <button class="btnd" id="btn-del-prov" onclick="borrarProv()" style="display:none">Eliminar proveedor</button>
+  <div class="gap"></div>
+</div>
+
+<!-- ══ FICHAS TÉCNICAS ══ -->
+<div id="s-ficha-form" class="scr">
+  <div class="subhdr"><button class="back-btn" onclick="goSub('s-proveedores','s-empresa')">←</button><span class="subhdr-tit" id="ficha-tit">Nueva ficha técnica</span></div>
+  <div class="lbl">Documento</div>
+  <div class="grp">
+    <div class="fld"><span class="fld-l">Nombre</span><input id="ft-nom" type="text" placeholder="Ej: Aermec NRL 020 — Manual"></div>
+    <div class="fld"><span class="fld-l">Marca</span><input id="ft-marca" type="text" placeholder="Aermec, Mitsubishi..."></div>
+    <div class="fld"><span class="fld-l">Modelo</span><input id="ft-modelo" type="text" placeholder="Referencia del equipo"></div>
+    <div class="fld"><span class="fld-l">Tipo</span>
+      <select id="ft-tipo">
+        <option value="manual">Manual técnico</option>
+        <option value="ficha">Ficha técnica</option>
+        <option value="catalogo">Catálogo</option>
+        <option value="certificado">Certificado</option>
+        <option value="otro">Otro</option>
+      </select>
+    </div>
+  </div>
+  <div class="lbl">Enlace externo (opcional)</div>
+  <div class="grp">
+    <div class="fld"><span class="fld-l">URL</span><input id="ft-url" type="url" placeholder="https://..."></div>
+  </div>
+  <div class="lbl">Notas</div>
+  <div class="grp"><div class="fld"><textarea id="ft-notas" rows="3" placeholder="Observaciones, número de serie, instalación..."></textarea></div></div>
+  <div class="gap"></div>
+  <button class="btn" onclick="guardarFicha()">Guardar ficha</button>
+  <button class="btnd" id="btn-del-ficha" onclick="borrarFicha()" style="display:none">Eliminar ficha</button>
   <div class="gap"></div>
 </div>
 
@@ -351,10 +635,10 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:-apple-sy
 
 <div class="modal-bg" id="modal">
   <div class="modal">
-    <div class="modal-t">Descartar el parte?</div>
-    <div class="modal-s">Los datos no se guardaran.</div>
+    <div class="modal-t">¿Descartar el parte?</div>
+    <div class="modal-s">Los datos no se guardarán.</div>
     <div style="display:flex;flex-direction:column;gap:8px">
-      <button class="btnd" style="width:100%;margin:0;padding:13px;border:.5px solid rgba(160,40,40,.3);border-radius:10px" onclick="descartar()">Si, descartar</button>
+      <button class="btnd" style="width:100%;margin:0;padding:13px;border:1px solid rgba(239,68,68,.2);border-radius:8px" onclick="descartar()">Sí, descartar</button>
       <button class="btn2" style="width:100%;margin:0" onclick="cerrarModal()">Seguir editando</button>
     </div>
   </div>
@@ -362,12 +646,11 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:-apple-sy
 
 <div class="toast" id="toast"></div>
 
-<!-- Firebase compat SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script>
-// ── FIREBASE ─────────────────────────────────────────────
+// ── FIREBASE ──────────────────────────────────────────
 var FBcfg = {
   apiKey: "AIzaSyAud7H7z-oJ5DokAfO8D_fkE710TStNAM4",
   authDomain: "alaro-clima.firebaseapp.com",
@@ -381,8 +664,7 @@ var db = firebase.firestore();
 var auth = firebase.auth();
 db.enablePersistence().catch(function(e){ console.warn('Persistence:', e.code); });
 
-var DOC_ID = 'datos';
-var COL = 'alaro';
+var DOC_ID = 'datos', COL = 'alaro';
 var _cache = { cli:[], obras:[], partes:[], cfg:null, _loaded:false };
 var CFG_DEFAULT = {
   emp:'Alaro Clima', res:'Luis Salvador Daviu Fueris',
@@ -392,10 +674,13 @@ var CFG_DEFAULT = {
 };
 
 function syncBadge(estado) {
-  var b = document.getElementById('sync-badge'); if (!b) return;
-  if (estado==='ok')    { b.textContent='🟢'; b.title='Sincronizado'; }
-  if (estado==='sync')  { b.textContent='🔄'; b.title='Sincronizando...'; }
-  if (estado==='error') { b.textContent='🔴'; b.title='Sin conexion'; }
+  var dot = document.getElementById('sync-dot');
+  var txt = document.getElementById('sync-txt');
+  if(!dot) return;
+  dot.className = 'tb-dot';
+  if(estado==='ok')   { dot.classList.add('ok');  txt.textContent='En línea'; }
+  if(estado==='sync') { txt.textContent='Sync...'; }
+  if(estado==='error'){ dot.classList.add('err');  txt.textContent='Offline'; }
 }
 
 function aplicarSnapshot(data) {
@@ -403,7 +688,11 @@ function aplicarSnapshot(data) {
   _cache.cli=data.cli||[]; _cache.obras=data.obras||[]; _cache.partes=data.partes||[];
   _cache.cfg=data.cfg||CFG_DEFAULT; _cache._loaded=true; syncBadge('ok');
   var activa=document.querySelector('.scr.on');
-  if(activa){var id=activa.id;if(id==='s-home')renderHome();if(id==='s-clientes')renderCli();if(id==='s-obras')renderObras();if(id==='s-partes')renderPartes();}
+  if(activa){
+    var id=activa.id;
+    if(id==='s-partes') renderHome();
+    if(id==='s-clientes-obras') { renderCli(); renderObras(); }
+  }
 }
 
 function guardarFirestore() {
@@ -412,7 +701,7 @@ function guardarFirestore() {
     cli:_cache.cli, obras:_cache.obras, partes:_cache.partes,
     cfg:_cache.cfg||CFG_DEFAULT, ts:new Date().toISOString()
   }).then(function(){ syncBadge('ok'); })
-   .catch(function(e){ syncBadge('error'); console.error('Firestore write:', e); });
+   .catch(function(e){ syncBadge('error'); console.error('FS:', e); });
 }
 
 var DB = {
@@ -436,30 +725,31 @@ function iniciarListener(){
 function pollFirestore(){
   db.collection(COL).doc(DOC_ID).get()
     .then(function(snap){ aplicarSnapshot(snap.exists?snap.data():null); })
-    .catch(function(e){ syncBadge('error'); });
+    .catch(function(){ syncBadge('error'); });
 }
 auth.signInAnonymously()
   .then(function(){ iniciarListener(); setInterval(pollFirestore,10000); })
-  .catch(function(e){ syncBadge('error'); _cache._loaded=true; });
+  .catch(function(){ syncBadge('error'); _cache._loaded=true; });
 
-// ── STATE ────────────────────────────────────────────
-var P = {}, fotos = [], editCliId = null, editObraId = null, fCtx = null, firmaSi = false;
+// ── STATE ─────────────────────────────────────────────
+var P={}, fotos=[], editCliId=null, editObraId=null, fCtx=null, firmaSi=false;
+var editContId=null, editProvId=null, editFichaId=null;
+var _tabPartes='realizado', tabCont='factura', tabCO='cli', tabProv='contactos';
+// historial de pantallas para back dinámico
+var _backStack = {};
 
-// ── INIT ─────────────────────────────────────────────
+// ── INIT ──────────────────────────────────────────────
 window.onload = function() {
   var d = new Date();
-  var dias = ['Domingo','Lunes','Martes','Miercoles','Jueves','Viernes','Sabado'];
-  var mes = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  var dias = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  var mes  = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
   var el = document.getElementById('hoy');
-  if (el) el.textContent = dias[d.getDay()] + ', ' + d.getDate() + ' de ' + mes[d.getMonth()] + ' ' + d.getFullYear();
-  var h = d.getHours();
-  var sal = document.getElementById('saludo');
-  if (sal) sal.textContent = (h < 13 ? 'Buenos dias' : h < 20 ? 'Buenas tardes' : 'Buenas noches') + ' 👋';
-  // Esperar a que Firebase cargue los datos (max 4s, luego renderiza igual)
-  var intentos = 0;
-  var esperar = setInterval(function() {
+  if(el) el.textContent = dias[d.getDay()]+' '+d.getDate()+'/'+d.getFullYear();
+
+  var intentos=0;
+  var esperar=setInterval(function(){
     intentos++;
-    if (_cache._loaded || intentos > 40) {
+    if(_cache._loaded || intentos>40){
       clearInterval(esperar);
       cargarCfg();
       renderHome();
@@ -467,216 +757,259 @@ window.onload = function() {
   }, 100);
 };
 
-// ── NAVEGACION ───────────────────────────────────────
-function go(id) {
-  document.querySelectorAll('.scr').forEach(function(s) { s.classList.remove('on'); });
-  var s = document.getElementById(id);
-  if (s) { s.classList.add('on'); s.scrollTop = 0; }
-  if (id === 's-clientes') renderCli();
-  if (id === 's-obras') renderObras();
-  if (id === 's-partes') renderPartes();
-  if (id === 's-home') renderHome();
+// ── NAVEGACIÓN PRINCIPAL ──────────────────────────────
+var _currentNav = 'partes';
+function navTo(tab) {
+  _currentNav = tab;
+  ['partes','clientes','empresa'].forEach(function(t){
+    document.getElementById('nav-'+t).classList.toggle('on', t===tab);
+  });
+  var map = { partes:'s-partes', clientes:'s-clientes-obras', empresa:'s-empresa' };
+  showScr(map[tab]);
+  if(tab==='partes') renderHome();
+  if(tab==='clientes') { renderCli(); renderObras(); }
 }
 
-// ── TOAST ────────────────────────────────────────────
+// navTo con alias para el tab de clientes
+document.getElementById('nav-clientes') && (document.getElementById('nav-clientes').onclick = function(){ navTo('clientes'); });
+document.getElementById('nav-empresa')  && (document.getElementById('nav-empresa').onclick  = function(){ navTo('empresa'); });
+
+// Mostrar pantalla sin cambiar topbar
+function showScr(id) {
+  document.querySelectorAll('.scr').forEach(function(s){ s.classList.remove('on'); });
+  var s=document.getElementById(id);
+  if(s){ s.classList.add('on'); s.scrollTop=0; }
+}
+
+// Ir a subpantalla con registro de back
+function goSub(id, backId) {
+  _backStack[id] = backId;
+  // configurar botones back dinámicos
+  var btn = document.getElementById('back-'+id.replace('s-',''));
+  if(btn) btn.onclick = function(){ goBack(id); };
+  showScr(id);
+  if(id==='s-clientes-obras') { renderCli(); renderObras(); }
+  if(id==='s-contabilidad') renderCont();
+  if(id==='s-proveedores') renderProv();
+  if(id==='s-empresa') {} // nada extra
+}
+
+function goBack(fromId) {
+  var dest = _backStack[fromId];
+  if(!dest) { navTo(_currentNav); return; }
+  // si el destino es una de las páginas raíz, usar navTo
+  var raiz = {'s-partes':'partes','s-clientes-obras':'clientes','s-empresa':'empresa'};
+  if(raiz[dest]) { navTo(raiz[dest]); }
+  else { showScr(dest); }
+}
+
+// ── TOAST ─────────────────────────────────────────────
 var tT;
 function msg(txt) {
-  var t = document.getElementById('toast');
-  t.textContent = txt; t.classList.add('on');
-  clearTimeout(tT); tT = setTimeout(function() { t.classList.remove('on'); }, 2500);
+  var t=document.getElementById('toast');
+  t.textContent=txt; t.classList.add('on');
+  clearTimeout(tT); tT=setTimeout(function(){ t.classList.remove('on'); },2500);
 }
 
-// ── MODAL ────────────────────────────────────────────
-function cancelar() { document.getElementById('modal').classList.add('on'); }
-function cerrarModal() { document.getElementById('modal').classList.remove('on'); }
-function descartar() { cerrarModal(); P = {}; fotos = []; firmaSi = false; go('s-home'); }
+// ── MODAL ─────────────────────────────────────────────
+function cancelar(){ document.getElementById('modal').classList.add('on'); }
+function cerrarModal(){ document.getElementById('modal').classList.remove('on'); }
+function descartar(){ cerrarModal(); P={}; fotos=[]; firmaSi=false; navTo('partes'); }
 
-// ── UTIL ─────────────────────────────────────────────
-function x(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function df(d) { if (!d) return ''; var p = d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
-function ini(n) { return (n||'?').split(' ').slice(0,2).map(function(w){ return (w[0]||'').toUpperCase(); }).join(''); }
-function hoy() { var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+// ── UTIL ──────────────────────────────────────────────
+function x(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function df(d){ if(!d) return ''; var p=d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+function ini(n){ return (n||'?').split(' ').slice(0,2).map(function(w){ return (w[0]||'').toUpperCase(); }).join(''); }
+function hoy(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 
-// ── CONFIG ───────────────────────────────────────────
+// ── CONFIG ────────────────────────────────────────────
 function cargarCfg() {
-  var c = DB.cfg();
-  ['emp','res','dir','cp','nif','mov','ri','rm'].forEach(function(k) {
-    var e = document.getElementById('cfg-'+k); if (e) e.value = c[k]||'';
+  var c=DB.cfg();
+  ['emp','res','dir','cp','nif','mov','ri','rm'].forEach(function(k){
+    var e=document.getElementById('cfg-'+k); if(e) e.value=c[k]||'';
   });
 }
 function guardarCfg() {
-  var c = {};
-  ['emp','res','dir','cp','nif','mov','ri','rm'].forEach(function(k) {
-    var e = document.getElementById('cfg-'+k); c[k] = e ? e.value.trim() : '';
+  var c={};
+  ['emp','res','dir','cp','nif','mov','ri','rm'].forEach(function(k){
+    var e=document.getElementById('cfg-'+k); c[k]=e?e.value.trim():'';
   });
-  DB.s('cfg', c); msg('Datos guardados'); go('s-home');
+  // preservar datos extra
+  var prev=DB.cfg(); c._cont=prev._cont||[]; c._prov=prev._prov||[]; c._fichas=prev._fichas||[];
+  DB.s('cfg',c); msg('Datos guardados'); navTo('empresa');
 }
 
-// ── HOME ─────────────────────────────────────────────
+// ── HOME / PARTES ─────────────────────────────────────
+var _filtrosVisible = false;
+function toggleFiltros() {
+  _filtrosVisible = !_filtrosVisible;
+  document.getElementById('filtros-panel').classList.toggle('on', _filtrosVisible);
+  document.getElementById('btn-filtros').textContent = _filtrosVisible ? 'Cerrar ↑' : 'Filtrar ↓';
+  if(!_filtrosVisible){
+    document.getElementById('fil-cli').value='';
+    document.getElementById('fil-fecha').value='';
+  }
+  renderHome();
+}
+
 function renderHome() {
-  var partes = DB.partes(), cli = DB.clientes(), obras = DB.obras();
-  var el;
-  el = document.getElementById('cnt-p'); if (el) el.textContent = partes.length + ' registrado' + (partes.length!==1?'s':'');
-  el = document.getElementById('cnt-c'); if (el) el.textContent = cli.length + ' guardado' + (cli.length!==1?'s':'');
-  el = document.getElementById('cnt-o'); if (el) el.textContent = obras.length + ' activa' + (obras.length!==1?'s':'');
-  var cont = document.getElementById('home-list'); if (!cont) return;
-  var rec = partes.slice(-5).reverse();
-  if (!rec.length) {
-    cont.innerHTML = '<div class="empty"><div class="empty-i">📋</div><div class="empty-t">Sin partes aun</div><div class="empty-s">Pulsa Nuevo parte para registrar la primera visita</div></div>';
+  var partes = DB.partes();
+  var pendientes = partes.filter(function(p){ return (p.estado||'realizado')==='pendiente'; });
+  var cntP = document.getElementById('cnt-p'); if(cntP) cntP.textContent=partes.length;
+  var cntPend = document.getElementById('cnt-pend'); if(cntPend) cntPend.textContent=pendientes.length;
+
+  var cont = document.getElementById('home-list'); if(!cont) return;
+  var filCli = (document.getElementById('fil-cli')||{}).value||'';
+  var filFecha = (document.getElementById('fil-fecha')||{}).value||'';
+
+  var lista = partes.slice().reverse();
+  if(filCli) lista = lista.filter(function(p){ return (p.cliNom||'').toLowerCase().includes(filCli.toLowerCase()); });
+  if(filFecha) lista = lista.filter(function(p){ return p.fecha===filFecha; });
+  if(!lista.length) {
+    cont.innerHTML='<div class="empty"><div class="empty-t">'+(filCli||filFecha?'Sin resultados':'Sin partes aún')+'</div><div class="empty-s">'+(filCli||filFecha?'Prueba con otros filtros':'Pulsa "Nuevo parte" para empezar')+'</div></div>';
     return;
   }
-  cont.innerHTML = rec.map(function(p) {
-    var estCls = (p.estado||'realizado')==='pendiente' ? 'tag tag-pend' : 'tag tag-real';
-    var estIco = (p.estado||'realizado')==='pendiente' ? '⏳ ' : '✅ ';
+  cont.innerHTML = lista.map(function(p){
+    var estCls=(p.estado||'realizado')==='pendiente'?'tag tag-pend':'tag tag-real';
     return '<div class="item" onclick="verParte(\''+p.id+'\')"><div class="ava">'+ini(p.cliNom)+'</div><div class="item-inf"><div class="item-t">'+x(p.cliNom||'Sin cliente')+'</div><div class="item-s">'+x(df(p.fecha))+' · '+x(p.tipo||'')+'</div></div><div class="'+estCls+'">#'+x(p.num)+'</div></div>';
   }).join('');
 }
 
-// ── CLIENTES ─────────────────────────────────────────
-function renderCli() {
-  var lista = DB.clientes(), cont = document.getElementById('lista-cli'); if (!cont) return;
-  if (!lista.length) { cont.innerHTML = '<div class="empty"><div class="empty-i">🏢</div><div class="empty-t">Sin clientes</div><div class="empty-s">Pulsa + para añadir el primer cliente</div></div>'; return; }
-  cont.innerHTML = lista.map(function(c) {
-    return '<div class="item" onclick="abrirCli(\''+c.id+'\')"><div class="ava">'+ini(c.n)+'</div><div class="item-inf"><div class="item-t">'+x(c.n)+'</div><div class="item-s">'+x(c.cp||'')+(c.t?' · '+c.t:'')+'</div></div><span class="chev">›</span></div>';
+// ── CARPETA PARTES ────────────────────────────────────
+function setTabPartes(tab) {
+  _tabPartes=tab;
+  document.getElementById('tab-real').classList.toggle('on', tab==='realizado');
+  document.getElementById('tab-pend').classList.toggle('on', tab==='pendiente');
+  var q=document.getElementById('partes-q'); if(q) q.value='';
+  renderPartes();
+}
+function renderPartes() {
+  var todas=DB.partes(), cont=document.getElementById('lista-partes'); if(!cont) return;
+  var q=((document.getElementById('partes-q')||{}).value||'').toLowerCase().trim();
+  var lista=todas.filter(function(p){ return (p.estado||'realizado')===_tabPartes; });
+  if(q){
+    lista=lista.filter(function(p){
+      return (p.cliNom||'').toLowerCase().includes(q)
+          || (p.obraNom||'').toLowerCase().includes(q)
+          || (p.obraDir||'').toLowerCase().includes(q);
+    });
+  }
+  lista=lista.slice().reverse();
+  if(!todas.length){ cont.innerHTML='<div class="empty"><div class="empty-t">Sin partes</div><div class="empty-s">Los partes creados aparecerán aquí</div></div>'; return; }
+  if(!lista.length){
+    var vacio=q?'Sin resultados para "'+x(q)+'"':('Sin partes '+(_tabPartes==='realizado'?'realizados':'pendientes'));
+    cont.innerHTML='<div class="empty"><div class="empty-t">'+vacio+'</div>'+(q?'<div class="empty-s">Prueba con otro nombre de cliente u obra</div>':'')+'</div>';
+    return;
+  }
+  cont.innerHTML=lista.map(function(p){
+    var est=(p.estado||'realizado')==='pendiente'?'<span class="tag tag-pend">PEND</span>':'<span class="tag tag-real">OK</span>';
+    var sub='#'+x(p.num)+' · '+x(df(p.fecha))+(p.obraNom?' · '+x(p.obraNom):'');
+    return '<div class="item" onclick="verParte(\''+p.id+'\')"><div class="ava">'+ini(p.cliNom)+'</div><div class="item-inf"><div class="item-t">'+x(p.cliNom||'Sin cliente')+'</div><div class="item-s">'+sub+'</div></div>'+est+'<span class="chev">›</span></div>';
   }).join('');
 }
-function abrirCli(id) {
-  editCliId = id;
-  document.getElementById('cli-tit').textContent = id ? 'Editar cliente' : 'Nuevo cliente';
-  document.getElementById('btn-del-cli').style.display = id ? 'block' : 'none';
-  var sv = function(el, v) { var e = document.getElementById(el); if (e) e.value = v||''; };
-  if (id) {
-    var c = DB.clientes().find(function(x) { return x.id===id; });
-    if (c) { sv('cl-n',c.n); sv('cl-d',c.d); sv('cl-cp',c.cp); sv('cl-nif',c.nif); sv('cl-t',c.t); sv('cl-e',c.e||''); }
-  } else { ['cl-n','cl-d','cl-cp','cl-nif','cl-t','cl-e'].forEach(function(i){ sv(i,''); }); }
-  go('s-cli-form');
+
+// ── VER PARTE ─────────────────────────────────────────
+function verParte(id) {
+  var p=DB.partes().find(function(z){ return z.id===id; }); if(!p) return;
+  document.getElementById('ver-tit').textContent='Parte #'+p.num;
+  var fh='',fi='';
+  if(p.fotos&&p.fotos.length) fh='<div class="lbl">Fotos ('+p.fotos.length+')</div><div style="padding:0 16px 12px;display:flex;flex-wrap:wrap;gap:7px">'+p.fotos.map(function(s){ return '<img src="'+s+'" style="width:75px;height:75px;object-fit:cover;border-radius:6px;border:1px solid var(--b1)">'; }).join('')+'</div>';
+  if(p.firmaImg) fi='<div class="lbl">Firma del cliente</div><div style="padding:0 16px 12px"><img src="'+p.firmaImg+'" style="max-width:100%;border:1px solid var(--b1);border-radius:8px;background:#fff;display:block"></div>';
+  document.getElementById('ver-body').innerHTML=
+    '<div class="res-card"><div class="res-row"><span class="res-k">Fecha</span><span class="res-v">'+x(df(p.fecha))+'</span></div><div class="res-row"><span class="res-k">Operario</span><span class="res-v">'+x(p.op)+'</span></div><div class="res-row"><span class="res-k">Cliente</span><span class="res-v">'+x(p.cliNom)+'</span></div>'+(p.cliDir?'<div class="res-row"><span class="res-k">Domicilio</span><span class="res-v">'+x(p.cliDir)+'</span></div>':'')+'<div class="res-row"><span class="res-k">Obra</span><span class="res-v">'+x(p.obraNom||p.obraDir||'—')+'</span></div><div class="res-row"><span class="res-k">Tipo</span><span class="res-v">'+x(p.tipo)+'</span></div></div>'
+    +'<div class="lbl">Descripción</div><div style="background:var(--s1);border-top:1px solid var(--b1);border-bottom:1px solid var(--b1);padding:13px 16px;font-size:13px;line-height:1.7;white-space:pre-wrap;margin-bottom:2px">'+x(p.desc||'—')+'</div>'
+    +(p.obs?'<div class="lbl">Observaciones</div><div style="background:var(--s1);border-top:1px solid var(--b1);border-bottom:1px solid var(--b1);padding:13px 16px;font-size:13px;line-height:1.7;white-space:pre-wrap;margin-bottom:2px">'+x(p.obs)+'</div>':'')
+    +(p.mat?'<div class="lbl">Materiales</div><div style="background:var(--s1);border-top:1px solid var(--b1);border-bottom:1px solid var(--b1);padding:13px 16px;font-size:13px;line-height:1.7;white-space:pre-wrap;margin-bottom:2px">'+x(p.mat)+'</div>':'')
+    +fh+fi
+    +'<div class="gap"></div>'
+    +'<button class="btn2" onclick="toggleEstado(\''+id+'\')">'+((p.estado||'realizado')==='realizado'?'Marcar como pendiente':'Marcar como realizado')+'</button>'
+    +'<button class="btn" onclick="pdfDe(\''+id+'\')">Generar PDF</button>'
+    +'<button class="btnd" onclick="borrarParte(\''+id+'\')">Eliminar parte</button><div class="gap"></div>';
+  goSub('s-parte-ver','s-carpeta-partes');
 }
-function guardarCli() {
-  var n = document.getElementById('cl-n').value.trim(); if (!n) { msg('El nombre es obligatorio'); return; }
-  var lista = DB.clientes();
-  var c = { id: editCliId||('c'+Date.now()), n:n, d:document.getElementById('cl-d').value.trim(), cp:document.getElementById('cl-cp').value.trim(), nif:document.getElementById('cl-nif').value.trim(), t:document.getElementById('cl-t').value.trim(), e:document.getElementById('cl-e').value.trim() };
-  if (editCliId) { var i = lista.findIndex(function(z){ return z.id===editCliId; }); if (i>=0) lista[i]=c; else lista.push(c); } else lista.push(c);
-  DB.s('cli', lista); msg('Cliente guardado'); go('s-clientes');
-}
-function borrarCli() {
-  DB.s('cli', DB.clientes().filter(function(c){ return c.id!==editCliId; }));
-  msg('Cliente eliminado'); go('s-clientes');
+function borrarParte(id){ DB.s('partes',DB.partes().filter(function(p){ return p.id!==id; })); msg('Parte eliminado'); goSub('s-carpeta-partes','s-partes'); }
+function pdfDe(id){ var p=DB.partes().find(function(z){ return z.id===id; }); if(p) hacerPDF(p); }
+function toggleEstado(id){
+  var lista=DB.partes(); var i=lista.findIndex(function(p){ return p.id===id; });
+  if(i<0) return;
+  lista[i].estado=(lista[i].estado||'realizado')==='realizado'?'pendiente':'realizado';
+  DB.s('partes',lista); msg('Estado actualizado'); verParte(id);
 }
 
-// ── OBRAS ────────────────────────────────────────────
-function renderObras() {
-  var lista = DB.obras(), cont = document.getElementById('lista-obra'); if (!cont) return;
-  if (!lista.length) { cont.innerHTML = '<div class="empty"><div class="empty-i">📍</div><div class="empty-t">Sin obras</div><div class="empty-s">Pulsa + para añadir la primera obra</div></div>'; return; }
-  cont.innerHTML = lista.map(function(o) {
-    return '<div class="item" onclick="abrirObra(\''+o.id+'\')"><div class="ava" style="background:#e6f1fb;color:#185fa5">📍</div><div class="item-inf"><div class="item-t">'+x(o.n)+'</div><div class="item-s">'+x(o.d||o.p||'')+(o.cliNom?' · '+o.cliNom:'')+'</div></div><span class="chev">›</span></div>';
-  }).join('');
-}
-function llenarCliSel(selId) {
-  var sel = document.getElementById(selId); if (!sel) return;
-  var actual = sel.value;
-  sel.innerHTML = '<option value="">Sin asignar</option>' + DB.clientes().map(function(c){ return '<option value="'+c.id+'">'+x(c.n)+'</option>'; }).join('');
-  sel.value = actual;
-}
-function abrirObra(id) {
-  editObraId = id; llenarCliSel('ob-cli');
-  document.getElementById('obra-tit').textContent = id ? 'Editar obra' : 'Nueva obra';
-  document.getElementById('btn-del-obra').style.display = id ? 'block' : 'none';
-  var sv = function(el, v) { var e = document.getElementById(el); if (e) e.value = v||''; };
-  if (id) { var o = DB.obras().find(function(z){ return z.id===id; }); if (o) { sv('ob-n',o.n); sv('ob-d',o.d); sv('ob-p',o.p); var s=document.getElementById('ob-cli'); if(s) s.value=o.cliId||''; } }
-  else { ['ob-n','ob-d','ob-p'].forEach(function(i){ sv(i,''); }); var s=document.getElementById('ob-cli'); if(s) s.value=''; }
-  go('s-obra-form');
-}
-function guardarObra() {
-  var n = document.getElementById('ob-n').value.trim(); if (!n) { msg('El nombre es obligatorio'); return; }
-  var lista = DB.obras();
-  var cliId = document.getElementById('ob-cli').value;
-  var cliNom = ''; if (cliId) { var c = DB.clientes().find(function(z){ return z.id===cliId; }); if (c) cliNom = c.n; }
-  var o = { id: editObraId||('o'+Date.now()), n:n, d:document.getElementById('ob-d').value.trim(), p:document.getElementById('ob-p').value.trim(), cliId:cliId, cliNom:cliNom };
-  if (editObraId) { var i = lista.findIndex(function(z){ return z.id===editObraId; }); if (i>=0) lista[i]=o; else lista.push(o); } else lista.push(o);
-  DB.s('obras', lista); msg('Obra guardada'); go('s-obras');
-}
-function borrarObra() {
-  DB.s('obras', DB.obras().filter(function(o){ return o.id!==editObraId; }));
-  msg('Obra eliminada'); go('s-obras');
-}
-
-// ── NUEVO PARTE ──────────────────────────────────────
-function numSig() {
-  var max = DB.partes().reduce(function(m,p){ return Math.max(m, parseInt(p.num)||0); }, 0);
-  return String(max+1).padStart(4,'0');
-}
+// ── NUEVO PARTE ───────────────────────────────────────
+function numSig(){ return String(DB.partes().reduce(function(m,p){ return Math.max(m,parseInt(p.num)||0); },0)+1).padStart(4,'0'); }
 function nuevoParte() {
-  P = {estado:'realizado'}; fotos = []; firmaSi = false; borrarFirma();
-  var g = document.getElementById('foto-grid'); if (g) g.innerHTML='';
-  var c = document.getElementById('foto-cnt'); if (c) c.textContent='0 fotos';
+  P={estado:'realizado'}; fotos=[]; firmaSi=false; borrarFirma();
+  var g=document.getElementById('foto-grid'); if(g) g.innerHTML='';
+  var c=document.getElementById('foto-cnt'); if(c) c.textContent='0 fotos';
   ['p3-desc','p3-obs','p3-mat','p4-nom','p4-dni'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
   document.querySelectorAll('.tipo-b').forEach(function(b){ b.classList.remove('on'); });
-  // llenar clientes
   llenarCliSel('p1-cli'); document.getElementById('p1-cli').value='';
   llenarObrasSel('');
   document.getElementById('p1-dom').value=''; document.getElementById('p1-tel').value=''; document.getElementById('p1-odir').value='';
   document.getElementById('p1-num').value='#'+numSig();
   document.getElementById('p1-fecha').value=hoy();
   document.getElementById('p1-op').value=DB.cfg().res||'';
-  go('s-p1');
+  var er=document.getElementById('est-real'), ep=document.getElementById('est-pend');
+  if(er){ er.classList.add('on-real'); ep.classList.remove('on-pend'); }
+  goSub('s-p1','s-partes');
 }
-function llenarObrasSel(cliId) {
-  var todas = DB.obras(); var fil = cliId ? todas.filter(function(o){ return o.cliId===cliId; }) : todas;
-  if (cliId && !fil.length) fil = todas;
-  var sel = document.getElementById('p1-obra'); if (!sel) return;
-  sel.innerHTML = '<option value="">Sin asignar</option>' + fil.map(function(o){ return '<option value="'+o.id+'">'+x(o.n)+'</option>'; }).join('');
+function llenarObrasSel(cliId){
+  var todas=DB.obras(); var fil=cliId?todas.filter(function(o){ return o.cliId===cliId; }):todas;
+  if(cliId&&!fil.length) fil=todas;
+  var sel=document.getElementById('p1-obra'); if(!sel) return;
+  sel.innerHTML='<option value="">Sin asignar</option>'+fil.map(function(o){ return '<option value="'+o.id+'">'+x(o.n)+'</option>'; }).join('');
 }
-function elegirCli() {
-  var id = document.getElementById('p1-cli').value; llenarObrasSel(id);
-  if (!id) { document.getElementById('p1-dom').value=''; document.getElementById('p1-tel').value=''; return; }
-  var c = DB.clientes().find(function(z){ return z.id===id; });
-  if (c) { document.getElementById('p1-dom').value=(c.d?c.d+', ':'')+c.cp; document.getElementById('p1-tel').value=c.t||''; }
+function elegirCli(){
+  var id=document.getElementById('p1-cli').value; llenarObrasSel(id);
+  if(!id){ document.getElementById('p1-dom').value=''; document.getElementById('p1-tel').value=''; return; }
+  var c=DB.clientes().find(function(z){ return z.id===id; });
+  if(c){ document.getElementById('p1-dom').value=(c.d?c.d+', ':'')+c.cp; document.getElementById('p1-tel').value=c.t||''; }
 }
-function elegirObra() {
-  var id = document.getElementById('p1-obra').value; if (!id) { document.getElementById('p1-odir').value=''; return; }
-  var o = DB.obras().find(function(z){ return z.id===id; });
-  if (o) document.getElementById('p1-odir').value=(o.d?o.d+(o.p?', ':''):'')+o.p;
+function elegirObra(){
+  var id=document.getElementById('p1-obra').value; if(!id){ document.getElementById('p1-odir').value=''; return; }
+  var o=DB.obras().find(function(z){ return z.id===id; });
+  if(o) document.getElementById('p1-odir').value=(o.d?o.d+(o.p?', ':''):'')+o.p;
 }
-function irP2() {
-  var cliId = document.getElementById('p1-cli').value;
-  var c = cliId ? DB.clientes().find(function(z){ return z.id===cliId; }) : null;
+function irP2(){
+  var cliId=document.getElementById('p1-cli').value;
+  var c=cliId?DB.clientes().find(function(z){ return z.id===cliId; }):null;
   P.cliId=cliId; P.cliNom=c?c.n:'Sin cliente'; P.cliDir=document.getElementById('p1-dom').value.trim(); P.cliTel=document.getElementById('p1-tel').value.trim(); P.cliNif=c?c.nif||'':'';
   var oId=document.getElementById('p1-obra').value; var o=oId?DB.obras().find(function(z){ return z.id===oId; }):null;
   P.obraId=oId; P.obraNom=o?o.n:''; P.obraDir=document.getElementById('p1-odir').value.trim();
   P.num=document.getElementById('p1-num').value.replace('#',''); P.fecha=document.getElementById('p1-fecha').value; P.op=document.getElementById('p1-op').value.trim();
-  go('s-p2');
+  goSub('s-p2','s-p1');
 }
+function elegirTipo(btn,tipo){ document.querySelectorAll('.tipo-b').forEach(function(b){ b.classList.remove('on'); }); btn.classList.add('on'); P.tipo=tipo; }
+function irP3(){ if(!P.tipo){ msg('Selecciona el tipo de visita'); return; } goSub('s-p3','s-p2'); }
 
-function elegirTipo(btn, tipo) { document.querySelectorAll('.tipo-b').forEach(function(b){ b.classList.remove('on'); }); btn.classList.add('on'); P.tipo=tipo; }
-function irP3() { if (!P.tipo) { msg('Selecciona el tipo de visita'); return; } go('s-p3'); }
-
-// ── FOTOS ────────────────────────────────────────────
-function añadirFotos(inp) {
-  var files = Array.from(inp.files); if (!files.length) return;
-  var done=0, tot=files.length;
-  files.forEach(function(f) {
+// ── FOTOS ─────────────────────────────────────────────
+function añadirFotos(inp){
+  var files=Array.from(inp.files); if(!files.length) return;
+  var done=0,tot=files.length;
+  files.forEach(function(f){
     var r=new FileReader(); r.onload=function(e){ fotos.push({data:e.target.result,name:f.name}); done++; if(done===tot) dibujarFotos(); }; r.readAsDataURL(f);
   }); inp.value='';
 }
-function dibujarFotos() {
+function dibujarFotos(){
   var g=document.getElementById('foto-grid'); if(!g) return;
   g.innerHTML=fotos.map(function(f,i){ return '<div class="fото"><img src="'+f.data+'"><button class="foto-del" onclick="quitarFoto('+i+')">✕</button></div>'; }).join('');
   var c=document.getElementById('foto-cnt'); if(c) c.textContent=fotos.length+' foto'+(fotos.length!==1?'s':'');
 }
-function quitarFoto(i) { fotos.splice(i,1); dibujarFotos(); }
-function irP4() {
+function quitarFoto(i){ fotos.splice(i,1); dibujarFotos(); }
+function irP4(){
   P.desc=document.getElementById('p3-desc').value.trim(); P.obs=document.getElementById('p3-obs').value.trim(); P.mat=document.getElementById('p3-mat').value.trim();
   P.fotos=fotos.map(function(f){ return f.data; });
-  setTimeout(initFirma, 80); go('s-p4');
+  setTimeout(initFirma,80); goSub('s-p4','s-p3');
 }
 
-// ── FIRMA ────────────────────────────────────────────
-function initFirma() {
+// ── FIRMA ─────────────────────────────────────────────
+function initFirma(){
   var c=document.getElementById('firma-c'); if(!c) return;
   c.width=c.parentElement.clientWidth||340; c.height=155;
-  fCtx=c.getContext('2d'); fCtx.strokeStyle='#1D9E75'; fCtx.lineWidth=2.5; fCtx.lineCap='round'; fCtx.lineJoin='round';
+  fCtx=c.getContext('2d'); fCtx.strokeStyle='#22c55e'; fCtx.lineWidth=2; fCtx.lineCap='round'; fCtx.lineJoin='round';
   var draw=false;
-  function pos(e) { var r=c.getBoundingClientRect(),sx=c.width/r.width,sy=c.height/r.height,src=e.touches?e.touches[0]:e; return {x:(src.clientX-r.left)*sx,y:(src.clientY-r.top)*sy}; }
+  function pos(e){ var r=c.getBoundingClientRect(),sx=c.width/r.width,sy=c.height/r.height,src=e.touches?e.touches[0]:e; return {x:(src.clientX-r.left)*sx,y:(src.clientY-r.top)*sy}; }
   c.onmousedown=function(e){draw=true;var p=pos(e);fCtx.beginPath();fCtx.moveTo(p.x,p.y);ocultarHint();};
   c.onmousemove=function(e){if(!draw)return;var p=pos(e);fCtx.lineTo(p.x,p.y);fCtx.stroke();firmaSi=true;};
   c.onmouseup=c.onmouseleave=function(){draw=false;};
@@ -684,185 +1017,349 @@ function initFirma() {
   c.ontouchmove=function(e){e.preventDefault();if(!draw)return;var p=pos(e);fCtx.lineTo(p.x,p.y);fCtx.stroke();firmaSi=true;};
   c.ontouchend=function(){draw=false;};
 }
-function ocultarHint() { var h=document.getElementById('firma-hint'); if(h) h.style.display='none'; }
-function borrarFirma() { firmaSi=false; var c=document.getElementById('firma-c'); if(fCtx&&c) fCtx.clearRect(0,0,c.width,c.height); var h=document.getElementById('firma-hint'); if(h) h.style.display='flex'; }
-function irP5() {
+function ocultarHint(){ var h=document.getElementById('firma-hint'); if(h) h.style.display='none'; }
+function borrarFirma(){ firmaSi=false; var c=document.getElementById('firma-c'); if(fCtx&&c) fCtx.clearRect(0,0,c.width,c.height); var h=document.getElementById('firma-hint'); if(h) h.style.display='flex'; }
+function irP5(){
   var c=document.getElementById('firma-c'); P.firmaNom=document.getElementById('p4-nom').value.trim(); P.firmaDni=document.getElementById('p4-dni').value.trim();
   P.firmaImg=firmaSi&&c?c.toDataURL('image/png'):''; P.firmada=firmaSi;
-  renderResumen(); go('s-p5');
+  renderResumen(); goSub('s-p5','s-p4');
 }
 
-// ── RESUMEN ──────────────────────────────────────────
-function renderResumen() {
-  var r=document.getElementById('res-datos'); if(!r) return;
-  var filas=[['Num. de parte','#'+P.num],['Fecha',df(P.fecha)],['Operario',P.op],['Cliente',P.cliNom],['Domicilio',P.cliDir],['Obra',P.obraNom||P.obraDir||'-'],['Tipo',P.tipo],['Firmado',P.firmada?'Si ('+P.firmaNom+')':'No'],['Estado',(P.estado||'realizado')==='realizado'?'✅ Realizado':'⏳ Pendiente']];
-  r.innerHTML=filas.filter(function(f){return f[1];}).map(function(f){ return '<div class="res-row"><span class="res-k">'+f[0]+'</span><span class="res-v">'+x(f[1])+'</span></div>'; }).join('');
-  var rf=document.getElementById('res-fotos'); if(!rf) return;
-  rf.innerHTML=P.fotos&&P.fotos.length?P.fotos.map(function(s){ return '<img src="'+s+'" style="width:66px;height:66px;object-fit:cover;border-radius:8px;border:.5px solid rgba(0,0,0,.1)">'; }).join(''):'<span style="font-size:13px;color:var(--t3)">Sin fotos</span>';
+// ── RESUMEN ───────────────────────────────────────────
+function renderResumen(){
+  var d=document.getElementById('res-datos'); if(!d) return;
+  d.innerHTML='<div class="res-row"><span class="res-k">Num.</span><span class="res-v">#'+x(P.num)+'</span></div>'
+    +'<div class="res-row"><span class="res-k">Fecha</span><span class="res-v">'+x(df(P.fecha))+'</span></div>'
+    +'<div class="res-row"><span class="res-k">Cliente</span><span class="res-v">'+x(P.cliNom||'—')+'</span></div>'
+    +'<div class="res-row"><span class="res-k">Obra</span><span class="res-v">'+x(P.obraNom||P.obraDir||'—')+'</span></div>'
+    +'<div class="res-row"><span class="res-k">Tipo</span><span class="res-v">'+x(P.tipo||'—')+'</span></div>'
+    +'<div class="res-row"><span class="res-k">Firma</span><span class="res-v">'+(P.firmada?'Sí':'No')+'</span></div>';
+  var rf=document.getElementById('res-fotos'); if(rf) rf.innerHTML=P.fotos&&P.fotos.length?P.fotos.map(function(s){ return '<img src="'+s+'" style="width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid var(--b1)">'; }).join(''):'<span style="font-size:12px;color:var(--t3)">Sin fotos</span>';
 }
+function elegirEstado(e){
+  P.estado=e;
+  var er=document.getElementById('est-real'),ep=document.getElementById('est-pend');
+  if(er){ er.classList.toggle('on-real',e==='realizado'); ep.classList.toggle('on-pend',e==='pendiente'); }
+}
+function buildParte(){ return Object.assign({id:'p'+Date.now()},P); }
+function soloGuardar(){ var lista=DB.partes(),existe=lista.find(function(z){ return z.num===P.num; }),p=existe||buildParte(); if(!existe){ lista.push(p); DB.s('partes',lista); } msg('Parte guardado'); navTo('partes'); }
+function generarPDF(){ var lista=DB.partes(),existe=lista.find(function(z){ return z.num===P.num; }),p=existe||buildParte(); if(!existe){ lista.push(p); DB.s('partes',lista); } renderHome(); hacerPDF(p); }
 
-// ── GUARDAR ──────────────────────────────────────────
-function buildParte() {
-  return { id:'p'+Date.now(), num:P.num, fecha:P.fecha, op:P.op||'', cliId:P.cliId||'', cliNom:P.cliNom||'', cliDir:P.cliDir||'', cliTel:P.cliTel||'', cliNif:P.cliNif||'', obraId:P.obraId||'', obraNom:P.obraNom||'', obraDir:P.obraDir||'', tipo:P.tipo||'', desc:P.desc||'', obs:P.obs||'', mat:P.mat||'', fotos:P.fotos||[], firmada:P.firmada||false, firmaImg:P.firmaImg||'', firmaNom:P.firmaNom||'', firmaDni:P.firmaDni||'', estado:P.estado||'realizado', ts:new Date().toISOString() };
-}
-function soloGuardar() {
-  var lista=DB.partes(), p=buildParte(); lista.push(p); DB.s('partes',lista);
-  msg('Parte #'+p.num+' guardado'); P={}; fotos=[]; go('s-home');
-}
-
-// ── PARTES LIST ───────────────────────────────────────
-var _tabPartes = 'realizado';
-function setTabPartes(tab) {
-  _tabPartes = tab;
-  document.getElementById('tab-real').classList.toggle('on', tab==='realizado');
-  document.getElementById('tab-pend').classList.toggle('on', tab==='pendiente');
-  renderPartes();
-}
-function elegirEstado(est) {
-  P.estado = est;
-  document.getElementById('est-real').className = 'est-b' + (est==='realizado' ? ' on on-real' : '');
-  document.getElementById('est-pend').className = 'est-b' + (est==='pendiente' ? ' on on-pend' : '');
-}
-function toggleEstado(id) {
-  var lista = DB.partes();
-  var p = lista.find(function(z){ return z.id===id; });
-  if (!p) return;
-  p.estado = (p.estado==='pendiente') ? 'realizado' : 'pendiente';
-  DB.s('partes', lista);
-  msg(p.estado==='realizado' ? 'Marcado como realizado' : 'Marcado como pendiente');
-  verParte(id);
-}
-function renderPartes() {
-  var todas=DB.partes().slice().reverse(), cont=document.getElementById('lista-partes'); if(!cont) return;
-  var lista=todas.filter(function(p){ return (p.estado||'realizado')===_tabPartes; });
-  var total=todas.length;
-  if(!total){ cont.innerHTML='<div class="empty"><div class="empty-i">📋</div><div class="empty-t">Sin partes</div><div class="empty-s">Los partes creados apareceran aqui</div></div>'; return; }
-  if(!lista.length){ cont.innerHTML='<div class="empty"><div class="empty-i">'+(_tabPartes==='realizado'?'✅':'⏳')+'</div><div class="empty-t">Sin partes '+(_tabPartes==='realizado'?'realizados':'pendientes')+'</div><div class="empty-s">Los partes con este estado apareceran aqui</div></div>'; return; }
-  cont.innerHTML=lista.map(function(p){
-    var estTag = (p.estado||'realizado')==='pendiente' ? '<div class="tag tag-pend">⏳</div>' : '<div class="tag tag-real">✅</div>';
-    return '<div class="item" onclick="verParte(\''+p.id+'\')"><div class="ava">'+ini(p.cliNom)+'</div><div class="item-inf"><div class="item-t">'+x(p.cliNom||'Sin cliente')+'</div><div class="item-s">#'+x(p.num)+' · '+x(df(p.fecha))+' · '+x(p.tipo||'')+'</div></div>'+estTag+'<span class="chev">›</span></div>';
-  }).join('');
-}
-
-// ── VER PARTE ────────────────────────────────────────
-function verParte(id) {
-  var p=DB.partes().find(function(z){ return z.id===id; }); if(!p) return;
-  document.getElementById('ver-tit').textContent='Parte #'+p.num;
-  var fh='', fi='';
-  if(p.fotos&&p.fotos.length) fh='<div class="lbl">Fotos ('+p.fotos.length+')</div><div style="padding:0 14px 12px;display:flex;flex-wrap:wrap;gap:7px">'+p.fotos.map(function(s){ return '<img src="'+s+'" style="width:75px;height:75px;object-fit:cover;border-radius:8px">'; }).join('')+'</div>';
-  if(p.firmaImg) fi='<div class="lbl">Firma del cliente</div><div style="padding:0 14px 12px"><img src="'+p.firmaImg+'" style="max-width:100%;border:.5px solid rgba(0,0,0,.1);border-radius:8px;background:#fff;display:block"></div>';
-  document.getElementById('ver-body').innerHTML=
-    '<div class="res-card"><div class="res-row"><span class="res-k">Fecha</span><span class="res-v">'+x(df(p.fecha))+'</span></div><div class="res-row"><span class="res-k">Operario</span><span class="res-v">'+x(p.op)+'</span></div><div class="res-row"><span class="res-k">Cliente</span><span class="res-v">'+x(p.cliNom)+'</span></div>'+(p.cliDir?'<div class="res-row"><span class="res-k">Domicilio</span><span class="res-v">'+x(p.cliDir)+'</span></div>':'')+'<div class="res-row"><span class="res-k">Obra</span><span class="res-v">'+x(p.obraNom||p.obraDir||'-')+'</span></div><div class="res-row"><span class="res-k">Tipo</span><span class="res-v">'+x(p.tipo)+'</span></div><div class="res-row"><span class="res-k">Firmado</span><span class="res-v">'+(p.firmada?'Si':'No')+'</span></div></div>'
-    +'<div class="lbl">Descripcion del trabajo</div><div style="background:var(--w);border-top:.5px solid var(--b1);border-bottom:.5px solid var(--b1);padding:13px 14px;font-size:14px;line-height:1.65;white-space:pre-wrap;margin-bottom:2px">'+x(p.desc||'-')+'</div>'
-    +(p.obs?'<div class="lbl">Observaciones</div><div style="background:var(--w);border-top:.5px solid var(--b1);border-bottom:.5px solid var(--b1);padding:13px 14px;font-size:14px;line-height:1.65;white-space:pre-wrap;margin-bottom:2px">'+x(p.obs)+'</div>':'')
-    +(p.mat?'<div class="lbl">Materiales</div><div style="background:var(--w);border-top:.5px solid var(--b1);border-bottom:.5px solid var(--b1);padding:13px 14px;font-size:14px;line-height:1.65;white-space:pre-wrap;margin-bottom:2px">'+x(p.mat)+'</div>':'')
-    +fh+fi
-    +'<div class="gap"></div>'
-    +'<button class="btn2" onclick="toggleEstado(\''+id+'\')">'+((p.estado||'realizado')==='realizado'?'⏳ Marcar como pendiente':'✅ Marcar como realizado')+'</button>'
-    +'<button class="btn" onclick="pdfDe(\''+id+'\')">Generar PDF</button><button class="btnd" onclick="borrarParte(\''+id+'\')">Eliminar parte</button><div class="gap"></div>';
-  go('s-parte-ver');
-}
-function borrarParte(id) { DB.s('partes',DB.partes().filter(function(p){ return p.id!==id; })); msg('Parte eliminado'); go('s-partes'); }
-function pdfDe(id) { var p=DB.partes().find(function(z){ return z.id===id; }); if(p) hacerPDF(p); }
-
-// ── GENERAR PDF ───────────────────────────────────────
-function generarPDF() {
-  var lista=DB.partes(), existe=lista.find(function(z){ return z.num===P.num; }), p=existe||buildParte();
-  if(!existe){ lista.push(p); DB.s('partes',lista); } renderHome(); hacerPDF(p);
-}
-
-function hacerPDF(p) {
+function hacerPDF(p){
   var btn=document.getElementById('btn-pdf'); if(btn){btn.disabled=true;btn.textContent='Generando...';}
   var cfg=DB.cfg();
-
-  // Usamos un iframe oculto con la pagina del parte y mandamos a imprimir
-  // Esto funciona en todos los navegadores sin libreria externa
-  var fotosSec='';
-  if(p.fotos&&p.fotos.length){
-    fotosSec='<div class="sec">FOTOGRAFIAS DE LA VISITA ('+p.fotos.length+')</div><div class="fotos-wrap">'
-      +p.fotos.map(function(s){ return '<img src="'+s+'">'; }).join('')+'</div>';
-  }
-  var firmaSec='';
-  if(p.firmaImg){
-    firmaSec='<img src="'+p.firmaImg+'" class="firma-img">';
-  }
-
-  var html='<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">'
-    +'<title>Parte '+p.num+'</title>'
-    +'<style>'
-    +'*{box-sizing:border-box;margin:0;padding:0}'
-    +'body{font-family:Arial,sans-serif;font-size:11px;color:#111;background:#fff}'
-    +'.page{width:210mm;min-height:297mm;padding:12mm 14mm;display:flex;flex-direction:column}'
-    +'.cab{background:#1D9E75;color:#fff;padding:10px 14px;border-radius:6px;display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}'
-    +'.cab-l{} .cab-emp{font-size:16px;font-weight:700;margin-bottom:3px}'
-    +'.cab-sub{font-size:8px;opacity:.8;line-height:1.5}'
-    +'.cab-r{text-align:right} .cab-tit{font-size:14px;font-weight:700;margin-bottom:3px}'
-    +'.cab-num{font-size:10px;opacity:.85}'
-    +'.regs{background:#f5f5f3;border:1px solid #e0e0dd;border-radius:4px;padding:5px 8px;font-size:8px;color:#555;margin-bottom:8px}'
-    +'.cols{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}'
-    +'.col{border:1px solid #e0e0dd;border-radius:4px;padding:8px}'
-    +'.col-tit{font-size:8px;font-weight:700;color:#555;text-transform:uppercase;margin-bottom:5px;letter-spacing:.05em}'
-    +'.col-n{font-size:12px;font-weight:600;margin-bottom:3px}'
-    +'.col-d{font-size:9px;color:#555;line-height:1.5}'
-    +'.tipo-badge{display:inline-block;background:#1D9E75;color:#fff;font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;margin-top:3px}'
-    +'.sec{font-size:8px;font-weight:700;color:#1D9E75;text-transform:uppercase;letter-spacing:.06em;margin:8px 0 4px}'
-    +'.bloque{border:1px solid #e8e8e6;border-radius:4px;padding:8px;font-size:10px;line-height:1.6;white-space:pre-wrap;margin-bottom:6px;min-height:32px;background:#fcfcfb}'
-    +'.fotos-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}'
-    +'.fotos-wrap img{width:58mm;height:43mm;object-fit:cover;border-radius:4px;border:1px solid #e0e0dd}'
-    +'.firmas{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto;padding-top:8px;border-top:1px solid #e0e0dd}'
-    +'.firma-box{border:1px solid #e0e0dd;border-radius:4px;padding:6px;min-height:60px}'
-    +'.firma-lbl{font-size:8px;color:#777;margin-bottom:4px}'
-    +'.firma-img{max-width:100%;max-height:50px;display:block}'
-    +'.firma-nom{font-size:8px;color:#333;margin-top:4px;border-top:1px solid #e0e0dd;padding-top:3px}'
-    +'.pie{background:#1D9E75;color:rgba(255,255,255,.8);font-size:7px;text-align:center;padding:5px;border-radius:4px;margin-top:8px}'
-    +'@media print{body{margin:0}.page{padding:10mm 12mm}}'
-    +'</style></head><body>'
-    +'<div class="page">'
-    +'<div class="cab"><div class="cab-l"><div class="cab-emp">'+(cfg.emp||'Alaro Clima')+'</div><div class="cab-sub">Instalaciones y mantenimiento de climatizacion · RITE · Electricidad B.T.<br>'+(cfg.dir||'')+' · '+(cfg.cp||'')+' · '+(cfg.mov||'')+'</div></div><div class="cab-r"><div class="cab-tit">PARTE DE TRABAJO</div><div class="cab-num">Num. '+p.num+'<br>Fecha: '+df(p.fecha)+'</div></div></div>'
-    +'<div class="regs">Empresa acreditada · Reg. Industrial: '+(cfg.ri||'')+' · Reg. Medioambiente: '+(cfg.rm||'')+' · NIF: '+(cfg.nif||'')+'</div>'
-    +'<div class="cols">'
-    +'<div class="col"><div class="col-tit">Cliente</div><div class="col-n">'+(p.cliNom||'-')+'</div><div class="col-d">'+(p.cliDir||'')+(p.cliNif?'<br>NIF: '+p.cliNif:'')+(p.cliTel?'<br>Tel: '+p.cliTel:'')+'</div></div>'
-    +'<div class="col"><div class="col-tit">Obra / Proyecto</div><div class="col-n">'+(p.obraNom||p.obraDir||'-')+'</div><div class="col-d">'+(p.obraDir&&p.obraNom?p.obraDir+'<br>':'')+'Operario: '+(p.op||cfg.res||'')+'<br><span class="tipo-badge">'+(p.tipo||'')+'</span></div></div>'
-    +'</div>'
-    +'<div class="sec">Descripcion del trabajo / incidencia / asistencia</div>'
-    +'<div class="bloque">'+(p.desc||'-')+'</div>'
-    +(p.obs?'<div class="sec">Observaciones / incidencias</div><div class="bloque">'+p.obs+'</div>':'')
-    +(p.mat?'<div class="sec">Materiales utilizados</div><div class="bloque">'+p.mat+'</div>':'')
-    +fotosSec
-    +'<div class="firmas">'
-    +'<div class="firma-box"><div class="firma-lbl">Conforme / Firma del cliente:</div>'+firmaSec+'<div class="firma-nom">'+(p.firmaNom?'Nombre: '+p.firmaNom:'')+(p.firmaDni?' · DNI: '+p.firmaDni:'')+'</div></div>'
-    +'<div class="firma-box"><div class="firma-lbl">Firma del tecnico / Operario:</div><div class="firma-nom" style="margin-top:30px">'+(p.op||cfg.res||'')+'</div></div>'
-    +'</div>'
-    +'<div class="pie">'+(cfg.emp||'')+' · NIF: '+(cfg.nif||'')+' · '+(cfg.ri||'')+' · '+(cfg.rm||'')+'</div>'
-    +'</div>'
-    +'</body></html>';
-
-  // Abrir ventana de impresion
-  var win = window.open('','_blank','width=900,height=700');
-  if (!win) { msg('Permite las ventanas emergentes para generar el PDF'); if(btn){btn.disabled=false;btn.innerHTML='Generar y descargar PDF';} return; }
-  win.document.write(html);
-  win.document.close();
-  win.onload = function() {
-    setTimeout(function() {
-      win.focus();
-      win.print();
-    }, 300);
-  };
+  var fotosSec=''; if(p.fotos&&p.fotos.length){ fotosSec='<div class="sec">FOTOGRAFÍAS ('+p.fotos.length+')</div><div class="fotos-wrap">'+p.fotos.map(function(s){ return '<img src="'+s+'">'; }).join('')+'</div>'; }
+  var firmaSec=''; if(p.firmaImg) firmaSec='<img src="'+p.firmaImg+'" class="firma-img">';
+  var html='<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Parte '+p.num+'</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:11px;color:#111;background:#fff}.page{width:210mm;min-height:297mm;padding:12mm 14mm;display:flex;flex-direction:column}.cab{background:#111;color:#fff;padding:10px 14px;border-radius:4px;display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}.cab-emp{font-size:16px;font-weight:700;margin-bottom:3px}.cab-sub{font-size:8px;opacity:.7;line-height:1.5}.cab-r{text-align:right}.cab-tit{font-size:13px;font-weight:700;margin-bottom:3px;letter-spacing:.05em;text-transform:uppercase}.cab-num{font-size:10px;opacity:.8}.regs{background:#f5f5f3;border:1px solid #e0e0dd;border-radius:4px;padding:5px 8px;font-size:8px;color:#555;margin-bottom:8px}.cols{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}.col{border:1px solid #e0e0dd;border-radius:4px;padding:8px}.col-tit{font-size:8px;font-weight:700;color:#555;text-transform:uppercase;margin-bottom:5px;letter-spacing:.05em}.col-n{font-size:12px;font-weight:600;margin-bottom:3px}.col-d{font-size:9px;color:#555;line-height:1.5}.tipo-badge{display:inline-block;background:#22c55e;color:#000;font-size:8px;font-weight:700;padding:2px 7px;border-radius:3px;margin-top:3px;text-transform:uppercase;letter-spacing:.05em}.sec{font-size:8px;font-weight:700;color:#22c55e;text-transform:uppercase;letter-spacing:.07em;margin:8px 0 4px}.bloque{border:1px solid #e8e8e6;border-radius:4px;padding:8px;font-size:10px;line-height:1.6;white-space:pre-wrap;margin-bottom:6px;min-height:32px;background:#fcfcfb}.fotos-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.fotos-wrap img{width:58mm;height:43mm;object-fit:cover;border-radius:4px;border:1px solid #e0e0dd}.firmas{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto;padding-top:8px;border-top:1px solid #e0e0dd}.firma-box{border:1px solid #e0e0dd;border-radius:4px;padding:6px;min-height:60px}.firma-lbl{font-size:8px;color:#777;margin-bottom:4px}.firma-img{max-width:100%;max-height:50px;display:block}.firma-nom{font-size:8px;color:#333;margin-top:4px;border-top:1px solid #e0e0dd;padding-top:3px}.pie{background:#111;color:rgba(255,255,255,.7);font-size:7px;text-align:center;padding:5px;border-radius:4px;margin-top:8px;letter-spacing:.04em}@media print{body{margin:0}.page{padding:10mm 12mm}}</style></head><body><div class="page"><div class="cab"><div><div class="cab-emp">'+(cfg.emp||'Alaro Clima')+'</div><div class="cab-sub">Instalaciones y mantenimiento de climatización · RITE · Electricidad B.T.<br>'+(cfg.dir||'')+' · '+(cfg.cp||'')+' · '+(cfg.mov||'')+'</div></div><div class="cab-r"><div class="cab-tit">Parte de trabajo</div><div class="cab-num">Núm. '+p.num+'<br>Fecha: '+df(p.fecha)+'</div></div></div><div class="regs">Empresa acreditada · Reg. Industrial: '+(cfg.ri||'')+' · Reg. Medioambiente: '+(cfg.rm||'')+' · NIF: '+(cfg.nif||'')+'</div><div class="cols"><div class="col"><div class="col-tit">Cliente</div><div class="col-n">'+(p.cliNom||'—')+'</div><div class="col-d">'+(p.cliDir||'')+(p.cliNif?'<br>NIF: '+p.cliNif:'')+(p.cliTel?'<br>Tel: '+p.cliTel:'')+'</div></div><div class="col"><div class="col-tit">Obra / Proyecto</div><div class="col-n">'+(p.obraNom||p.obraDir||'—')+'</div><div class="col-d">'+(p.obraDir&&p.obraNom?p.obraDir+'<br>':'')+'Operario: '+(p.op||cfg.res||'')+'<br><span class="tipo-badge">'+(p.tipo||'')+'</span></div></div></div><div class="sec">Descripción del trabajo</div><div class="bloque">'+(p.desc||'—')+'</div>'+(p.obs?'<div class="sec">Observaciones</div><div class="bloque">'+p.obs+'</div>':'')+(p.mat?'<div class="sec">Materiales utilizados</div><div class="bloque">'+p.mat+'</div>':'')+fotosSec+'<div class="firmas"><div class="firma-box"><div class="firma-lbl">Conforme / Firma del cliente:</div>'+firmaSec+'<div class="firma-nom">'+(p.firmaNom?'Nombre: '+p.firmaNom:'')+(p.firmaDni?' · DNI: '+p.firmaDni:'')+'</div></div><div class="firma-box"><div class="firma-lbl">Firma del técnico:</div><div class="firma-nom" style="margin-top:30px">'+(p.op||cfg.res||'')+'</div></div></div><div class="pie">'+(cfg.emp||'')+' · NIF: '+(cfg.nif||'')+' · '+(cfg.ri||'')+' · '+(cfg.rm||'')+'</div></div></body></html>';
+  var win=window.open('','_blank','width=900,height=700');
+  if(!win){ msg('Permite ventanas emergentes para generar el PDF'); if(btn){btn.disabled=false;btn.innerHTML='Generar y descargar PDF';} return; }
+  win.document.write(html); win.document.close();
+  win.onload=function(){ setTimeout(function(){ win.focus(); win.print(); },300); };
   if(btn){btn.disabled=false;btn.innerHTML='Generar y descargar PDF';}
-  msg('Usa "Guardar como PDF" en el dialogo de impresion');
+  msg('Usa "Guardar como PDF" en el diálogo');
 }
 
-// ── EXPONER FUNCIONES GLOBALES (requerido en ES module) ──
-window.go=go; window.guardarCfg=guardarCfg; window.abrirCli=abrirCli;
-window.guardarCli=guardarCli; window.borrarCli=borrarCli; window.abrirObra=abrirObra;
-window.guardarObra=guardarObra; window.borrarObra=borrarObra; window.nuevoParte=nuevoParte;
-window.elegirCli=elegirCli; window.elegirObra=elegirObra; window.irP2=irP2;
-window.elegirTipo=elegirTipo; window.irP3=irP3; window.irP4=irP4; window.irP5=irP5;
+// ── CLIENTES / OBRAS ─────────────────────────────────
+function setTabCO(tab){
+  tabCO=tab;
+  // tabs
+  document.getElementById('tab-clis').classList.toggle('on',tab==='cli');
+  document.getElementById('tab-obras').classList.toggle('on',tab==='obra');
+  document.getElementById('tab-buscar').classList.toggle('on',tab==='buscar');
+  // panels
+  document.getElementById('panel-cli').style.display=tab==='cli'?'block':'none';
+  document.getElementById('panel-obra').style.display=tab==='obra'?'block':'none';
+  document.getElementById('panel-buscar').style.display=tab==='buscar'?'block':'none';
+  if(tab==='buscar'){
+    setTimeout(function(){ var e=document.getElementById('buscar-inp'); if(e){ e.focus(); e.value=''; } renderBuscar(); },80);
+  }
+  if(tab==='cli') renderCli();
+  if(tab==='obra') renderObras();
+}
+function renderBuscar(){
+  var q=(document.getElementById('buscar-inp').value||'').toLowerCase();
+  var cont=document.getElementById('lista-buscar'); if(!cont) return;
+  if(!q){ cont.innerHTML='<div class="empty"><div class="empty-t">Escribe para buscar</div></div>'; return; }
+  var clis=DB.clientes().filter(function(c){ return (c.n||'').toLowerCase().includes(q)||(c.cp||'').toLowerCase().includes(q); });
+  var obras=DB.obras().filter(function(o){ return (o.n||'').toLowerCase().includes(q)||(o.cliNom||'').toLowerCase().includes(q); });
+  if(!clis.length&&!obras.length){ cont.innerHTML='<div class="empty"><div class="empty-t">Sin resultados</div></div>'; return; }
+  var html='';
+  if(clis.length){ html+='<div class="lbl">Clientes ('+clis.length+')</div>'+clis.map(function(c){ return '<div class="item" onclick="abrirCli(\''+c.id+'\')"><div class="ava">'+ini(c.n)+'</div><div class="item-inf"><div class="item-t">'+x(c.n)+'</div><div class="item-s">'+x(c.cp||'')+(c.t?' · '+c.t:'')+'</div></div><span class="chev">›</span></div>'; }).join(''); }
+  if(obras.length){ html+='<div class="lbl">Obras ('+obras.length+')</div>'+obras.map(function(o){ return '<div class="item" onclick="abrirObra(\''+o.id+'\')"><div class="ava">OB</div><div class="item-inf"><div class="item-t">'+x(o.n)+'</div><div class="item-s">'+x(o.d||o.p||'')+(o.cliNom?' · '+o.cliNom:'')+'</div></div><span class="chev">›</span></div>'; }).join(''); }
+  cont.innerHTML=html;
+}
+function renderCli(){
+  var lista=DB.clientes(),cont=document.getElementById('lista-cli'); if(!cont) return;
+  if(!lista.length){ cont.innerHTML='<div class="empty"><div class="empty-t">Sin clientes</div><div class="empty-s">Pulsa + para añadir el primero</div></div>'; return; }
+  cont.innerHTML=lista.map(function(c){ return '<div class="item" onclick="abrirCli(\''+c.id+'\')"><div class="ava">'+ini(c.n)+'</div><div class="item-inf"><div class="item-t">'+x(c.n)+'</div><div class="item-s">'+x(c.cp||'')+(c.t?' · '+c.t:'')+'</div></div><span class="chev">›</span></div>'; }).join('');
+}
+function abrirCli(id){
+  editCliId=id;
+  document.getElementById('cli-tit').textContent=id?'Editar cliente':'Nuevo cliente';
+  document.getElementById('btn-del-cli').style.display=id?'block':'none';
+  var sv=function(el,v){ var e=document.getElementById(el); if(e) e.value=v||''; };
+  if(id){ var c=DB.clientes().find(function(z){ return z.id===id; }); if(c){ sv('cl-n',c.n); sv('cl-d',c.d); sv('cl-cp',c.cp); sv('cl-nif',c.nif); sv('cl-t',c.t); sv('cl-e',c.e||''); } }
+  else { ['cl-n','cl-d','cl-cp','cl-nif','cl-t','cl-e'].forEach(function(i){ sv(i,''); }); }
+  goSub('s-cli-form','s-clientes-obras');
+}
+function guardarCli(){
+  var n=document.getElementById('cl-n').value.trim(); if(!n){ msg('El nombre es obligatorio'); return; }
+  var lista=DB.clientes();
+  var c={id:editCliId||('c'+Date.now()),n:n,d:document.getElementById('cl-d').value.trim(),cp:document.getElementById('cl-cp').value.trim(),nif:document.getElementById('cl-nif').value.trim(),t:document.getElementById('cl-t').value.trim(),e:document.getElementById('cl-e').value.trim()};
+  if(editCliId){ var i=lista.findIndex(function(z){ return z.id===editCliId; }); if(i>=0) lista[i]=c; else lista.push(c); } else lista.push(c);
+  DB.s('cli',lista); msg('Cliente guardado'); goSub('s-clientes-obras','s-clientes-obras');
+}
+function borrarCli(){ DB.s('cli',DB.clientes().filter(function(c){ return c.id!==editCliId; })); msg('Cliente eliminado'); goSub('s-clientes-obras','s-clientes-obras'); }
+
+function renderObras(){
+  var lista=DB.obras(),cont=document.getElementById('lista-obra'); if(!cont) return;
+  if(!lista.length){ cont.innerHTML='<div class="empty"><div class="empty-t">Sin obras</div><div class="empty-s">Pulsa + para añadir la primera</div></div>'; return; }
+  cont.innerHTML=lista.map(function(o){ return '<div class="item" onclick="abrirObra(\''+o.id+'\')"><div class="ava">OB</div><div class="item-inf"><div class="item-t">'+x(o.n)+'</div><div class="item-s">'+x(o.d||o.p||'')+(o.cliNom?' · '+o.cliNom:'')+'</div></div><span class="chev">›</span></div>'; }).join('');
+}
+function llenarCliSel(selId){
+  var sel=document.getElementById(selId); if(!sel) return;
+  var actual=sel.value;
+  sel.innerHTML='<option value="">Sin asignar</option>'+DB.clientes().map(function(c){ return '<option value="'+c.id+'">'+x(c.n)+'</option>'; }).join('');
+  sel.value=actual;
+}
+function abrirObra(id){
+  editObraId=id; llenarCliSel('ob-cli');
+  document.getElementById('obra-tit').textContent=id?'Editar obra':'Nueva obra';
+  document.getElementById('btn-del-obra').style.display=id?'block':'none';
+  var sv=function(el,v){ var e=document.getElementById(el); if(e) e.value=v||''; };
+  if(id){ var o=DB.obras().find(function(z){ return z.id===id; }); if(o){ sv('ob-n',o.n); sv('ob-d',o.d); sv('ob-p',o.p); var s=document.getElementById('ob-cli'); if(s) s.value=o.cliId||''; } }
+  else { ['ob-n','ob-d','ob-p'].forEach(function(i){ sv(i,''); }); var s=document.getElementById('ob-cli'); if(s) s.value=''; }
+  goSub('s-obra-form','s-clientes-obras');
+}
+function guardarObra(){
+  var n=document.getElementById('ob-n').value.trim(); if(!n){ msg('El nombre es obligatorio'); return; }
+  var lista=DB.obras();
+  var cliId=document.getElementById('ob-cli').value;
+  var cliNom=''; if(cliId){ var c=DB.clientes().find(function(z){ return z.id===cliId; }); if(c) cliNom=c.n; }
+  var o={id:editObraId||('o'+Date.now()),n:n,d:document.getElementById('ob-d').value.trim(),p:document.getElementById('ob-p').value.trim(),cliId:cliId,cliNom:cliNom};
+  if(editObraId){ var i=lista.findIndex(function(z){ return z.id===editObraId; }); if(i>=0) lista[i]=o; else lista.push(o); } else lista.push(o);
+  DB.s('obras',lista); msg('Obra guardada'); goSub('s-clientes-obras','s-clientes-obras');
+}
+function borrarObra(){ DB.s('obras',DB.obras().filter(function(o){ return o.id!==editObraId; })); msg('Obra eliminada'); goSub('s-clientes-obras','s-clientes-obras'); }
+
+// ── CONTABILIDAD ──────────────────────────────────────
+function setTabCont(tipo){
+  tabCont=tipo;
+  ['fact','pres','alba'].forEach(function(t){
+    var m={fact:'factura',pres:'presupuesto',alba:'albaran'};
+    var b=document.getElementById('tab-'+t); if(b) b.classList.toggle('on',m[t]===tipo);
+  });
+  renderCont();
+}
+function renderCont(){
+  var lista=(DB.cfg()._cont||[]).filter(function(d){ return d.tipo===tabCont; });
+  var cont=document.getElementById('lista-cont'); if(!cont) return;
+  if(!lista.length){ var lbl={factura:'facturas',presupuesto:'presupuestos',albaran:'albaranes'}; cont.innerHTML='<div class="empty"><div class="empty-t">Sin '+lbl[tabCont]+'</div><div class="empty-s">Pulsa + para añadir</div></div>'; return; }
+  var ec={pagado:'tag-real',pendiente:'tag-pend',cancelado:'tag-pend'};
+  cont.innerHTML=lista.slice().reverse().map(function(d){
+    var base=parseFloat(d.base)||0,iva=parseFloat(d.iva)||21,total=(base*(1+iva/100)).toFixed(2);
+    return '<div class="item" onclick="abrirDocCont(\''+d.id+'\')"><div class="ava">'+d.tipo.slice(0,2).toUpperCase()+'</div><div class="item-inf"><div class="item-t">'+x(d.num||'—')+' · '+x(d.cliNom||'Sin cliente')+'</div><div class="item-s">'+x(df(d.fecha))+' · '+total+' €'+(d.obraNom?' · '+x(d.obraNom):'')+'</div></div><span class="tag '+ec[d.estado||'pendiente']+'">'+x(d.estado||'pend')+'</span></div>';
+  }).join('');
+}
+function llenarObraSelCont(){
+  var cliId=document.getElementById('ct-cli').value;
+  var sel=document.getElementById('ct-obra'); if(!sel) return;
+  var actual=sel.value;
+  var obras=DB.obras(); var fil=cliId?obras.filter(function(o){ return o.cliId===cliId; }):obras;
+  sel.innerHTML='<option value="">Sin asignar</option>'+fil.map(function(o){ return '<option value="'+o.id+'">'+x(o.n)+'</option>'; }).join('');
+  sel.value=actual;
+}
+function abrirDocCont(id){
+  editContId=id;
+  document.getElementById('cont-tit').textContent=id?'Editar documento':'Nuevo documento';
+  document.getElementById('btn-del-cont').style.display=id?'block':'none';
+  var pdfBtn=document.getElementById('btn-pdf-cont'); if(pdfBtn) pdfBtn.style.display=id?'block':'none';
+  llenarCliSel('ct-cli');
+  llenarObraSelCont();
+  var sv=function(el,v){ var e=document.getElementById(el); if(e) e.value=v||''; };
+  if(id){
+    var d=(DB.cfg()._cont||[]).find(function(z){ return z.id===id; });
+    if(d){
+      sv('ct-tipo',d.tipo); sv('ct-num',d.num); sv('ct-fecha',d.fecha); sv('ct-base',d.base);
+      sv('ct-iva',d.iva||'21'); sv('ct-desc',d.desc); sv('ct-estado',d.estado||'pendiente');
+      var sc=document.getElementById('ct-cli'); if(sc){ sc.value=d.cliId||''; llenarObraSelCont(); }
+      var so=document.getElementById('ct-obra'); if(so) so.value=d.obraId||'';
+    }
+  } else {
+    sv('ct-tipo',tabCont); sv('ct-num',''); sv('ct-fecha',hoy()); sv('ct-base',''); sv('ct-iva','21'); sv('ct-desc',''); sv('ct-estado','pendiente');
+    var sc2=document.getElementById('ct-cli'); if(sc2) sc2.value='';
+    var so2=document.getElementById('ct-obra'); if(so2) so2.value='';
+  }
+  goSub('s-cont-form','s-contabilidad');
+}
+function guardarDocCont(){
+  var cfg=DB.cfg(); var lista=cfg._cont||[];
+  var cliId=document.getElementById('ct-cli').value;
+  var cliNom=''; if(cliId){ var c=DB.clientes().find(function(z){ return z.id===cliId; }); if(c) cliNom=c.n; }
+  var obraId=document.getElementById('ct-obra').value;
+  var obraNom=''; if(obraId){ var o=DB.obras().find(function(z){ return z.id===obraId; }); if(o) obraNom=o.n; }
+  var d={id:editContId||('dc'+Date.now()),tipo:document.getElementById('ct-tipo').value,
+    num:document.getElementById('ct-num').value.trim(),fecha:document.getElementById('ct-fecha').value,
+    cliId:cliId,cliNom:cliNom,obraId:obraId,obraNom:obraNom,
+    base:document.getElementById('ct-base').value,iva:document.getElementById('ct-iva').value,
+    desc:document.getElementById('ct-desc').value.trim(),estado:document.getElementById('ct-estado').value};
+  if(editContId){ var i=lista.findIndex(function(z){ return z.id===editContId; }); if(i>=0) lista[i]=d; else lista.push(d); } else lista.push(d);
+  editContId=d.id; // actualizar para que el botón PDF funcione tras guardar
+  cfg._cont=lista; DB.s('cfg',cfg); msg('Documento guardado');
+  var pdfBtn=document.getElementById('btn-pdf-cont'); if(pdfBtn) pdfBtn.style.display='block';
+}
+function borrarDocCont(){ var cfg=DB.cfg(); cfg._cont=(cfg._cont||[]).filter(function(d){ return d.id!==editContId; }); DB.s('cfg',cfg); msg('Eliminado'); goSub('s-contabilidad','s-empresa'); }
+
+function generarPDFFactura(){
+  var cfg=DB.cfg(); var lista=cfg._cont||[];
+  var d=editContId?(lista.find(function(z){ return z.id===editContId; })):null;
+  if(!d){ msg('Guarda el documento primero'); return; }
+  var base=parseFloat(d.base)||0, iva=parseFloat(d.iva)||21;
+  var cuotaIva=base*iva/100, total=base+cuotaIva;
+  var tipoLabel={factura:'FACTURA',presupuesto:'PRESUPUESTO',albaran:'ALBARÁN'}[d.tipo]||d.tipo.toUpperCase();
+  var estadoColor={pagado:'#22c55e',pendiente:'#f59e0b',cancelado:'#ef4444'}[d.estado||'pendiente']||'#888';
+  var html='<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>'+tipoLabel+' '+x(d.num)+'</title><style>'
+    +'*{box-sizing:border-box;margin:0;padding:0}'
+    +'body{font-family:Arial,sans-serif;font-size:11px;color:#111;background:#fff}'
+    +'.page{width:210mm;min-height:297mm;padding:14mm 16mm;display:flex;flex-direction:column}'
+    +'.cab{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #111}'
+    +'.cab-emp{font-size:18px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px}'
+    +'.cab-sub{font-size:8px;color:#555;line-height:1.7}'
+    +'.cab-r{text-align:right}'
+    +'.doc-tipo{font-size:20px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#111;margin-bottom:4px}'
+    +'.doc-num{font-size:11px;color:#555;margin-bottom:2px}'
+    +'.doc-fecha{font-size:11px;color:#555}'
+    +'.estado-badge{display:inline-block;padding:3px 10px;border-radius:3px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#fff;background:'+estadoColor+';margin-top:6px}'
+    +'.cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}'
+    +'.col-box{border:1px solid #e8e8e6;border-radius:4px;padding:10px}'
+    +'.col-lbl{font-size:8px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}'
+    +'.col-nom{font-size:13px;font-weight:600;margin-bottom:3px}'
+    +'.col-det{font-size:9px;color:#555;line-height:1.6}'
+    +'.concepto-hdr{display:flex;justify-content:space-between;font-size:8px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.06em;padding:6px 0;border-bottom:1px solid #e0e0dd;margin-top:14px}'
+    +'.concepto-row{padding:10px 0;border-bottom:1px solid #f0f0ee;font-size:11px;line-height:1.5}'
+    +'.totales{margin-left:auto;width:220px;margin-top:10px}'
+    +'.tot-row{display:flex;justify-content:space-between;padding:5px 0;font-size:11px;border-bottom:1px solid #f0f0ee}'
+    +'.tot-row:last-child{border-bottom:none;font-weight:700;font-size:13px;padding-top:8px}'
+    +'.tot-k{color:#555}'
+    +'.pie{margin-top:auto;padding-top:12px;border-top:1px solid #e0e0dd;font-size:8px;color:#888;text-align:center;line-height:1.7}'
+    +'@media print{body{margin:0}.page{padding:10mm 12mm}}'
+    +'</style></head><body><div class="page">'
+    +'<div class="cab">'
+    +'<div><div class="cab-emp">'+(cfg.emp||'Alaro Clima')+'</div><div class="cab-sub">'+(cfg.dir||'')+' · '+(cfg.cp||'')+'<br>Tel: '+(cfg.mov||'')+' · NIF: '+(cfg.nif||'')+'<br>Reg. Industrial: '+(cfg.ri||'')+' · Reg. Medioamb: '+(cfg.rm||'')+'</div></div>'
+    +'<div class="cab-r"><div class="doc-tipo">'+tipoLabel+'</div><div class="doc-num">Núm. '+x(d.num)+'</div><div class="doc-fecha">Fecha: '+df(d.fecha)+'</div><div class="estado-badge">'+x(d.estado||'pendiente')+'</div></div>'
+    +'</div>'
+    +'<div class="cols">'
+    +'<div class="col-box"><div class="col-lbl">Cliente</div><div class="col-nom">'+x(d.cliNom||'—')+'</div>'+(function(){ var c=d.cliId?DB.clientes().find(function(z){ return z.id===d.cliId; }):null; return c?'<div class="col-det">'+(c.d||'')+(c.cp?'<br>'+c.cp:'')+(c.nif?'<br>NIF: '+c.nif:'')+(c.t?'<br>Tel: '+c.t:'')+'</div>':''; })()+'</div>'
+    +'<div class="col-box"><div class="col-lbl">Obra / Proyecto</div><div class="col-nom">'+x(d.obraNom||'—')+'</div>'+(function(){ var o=d.obraId?DB.obras().find(function(z){ return z.id===d.obraId; }):null; return o?'<div class="col-det">'+(o.d||'')+(o.p?'<br>'+o.p:'')+'</div>':''; })()+'</div>'
+    +'</div>'
+    +'<div class="concepto-hdr"><span>Concepto</span><span>Importe</span></div>'
+    +'<div class="concepto-row"><div style="margin-bottom:4px;font-weight:500;">'+x(d.desc||'Servicios de climatización')+'</div><div style="text-align:right;font-weight:500;">'+base.toFixed(2)+' €</div></div>'
+    +'<div class="totales">'
+    +'<div class="tot-row"><span class="tot-k">Base imponible</span><span>'+base.toFixed(2)+' €</span></div>'
+    +'<div class="tot-row"><span class="tot-k">IVA ('+iva+'%)</span><span>'+cuotaIva.toFixed(2)+' €</span></div>'
+    +'<div class="tot-row"><span class="tot-k">Total</span><span>'+total.toFixed(2)+' €</span></div>'
+    +'</div>'
+    +'<div class="pie">'+(cfg.emp||'Alaro Clima')+' · NIF: '+(cfg.nif||'')+' · '+(cfg.ri||'')+' · '+(cfg.rm||'')+'</div>'
+    +'</div></body></html>';
+  var win=window.open('','_blank','width=900,height=700');
+  if(!win){ msg('Permite ventanas emergentes para generar el PDF'); return; }
+  win.document.write(html); win.document.close();
+  win.onload=function(){ setTimeout(function(){ win.focus(); win.print(); },300); };
+  msg('Usa "Guardar como PDF" en el diálogo');
+}
+
+// ── PROVEEDORES ───────────────────────────────────────
+var MARCAS_FIJAS={
+  aermec:{n:'Aermec',esp:'Climatización',web:'https://www.aermec.com',tel:'',email:'',cont:''},
+  mitsubishi:{n:'Mitsubishi Electric',esp:'Aire acondicionado',web:'https://www.mitsubishielectric.es',tel:'',email:'',cont:''},
+  carrier:{n:'Carrier',esp:'HVAC',web:'https://www.carrier.com/es',tel:'',email:'',cont:''}
+};
+function setTabProv(tab){
+  tabProv=tab;
+  document.getElementById('tab-prov-cont').classList.toggle('on',tab==='contactos');
+  document.getElementById('tab-prov-fichas').classList.toggle('on',tab==='fichas');
+  document.getElementById('panel-prov-contactos').style.display=tab==='contactos'?'block':'none';
+  document.getElementById('panel-prov-fichas').style.display=tab==='fichas'?'block':'none';
+  if(tab==='fichas') renderFichas();
+}
+function renderProv(){
+  var lista=DB.cfg()._prov||[];
+  var cont=document.getElementById('lista-prov'); if(!cont) return;
+  if(!lista.length){ cont.innerHTML=''; return; }
+  cont.innerHTML=lista.map(function(p){ return '<div class="item" onclick="abrirProvCust(\''+p.id+'\')"><div class="ava">'+ini(p.n)+'</div><div class="item-inf"><div class="item-t">'+x(p.n)+'</div><div class="item-s">'+x(p.esp||'')+(p.tel?' · '+p.tel:'')+'</div></div><span class="chev">›</span></div>'; }).join('');
+}
+function cargarMarcaFija(id){
+  var f=MARCAS_FIJAS[id]; if(!f) return;
+  editProvId=null;
+  document.getElementById('prov-tit').textContent='Ver proveedor';
+  document.getElementById('btn-del-prov').style.display='none';
+  var sv=function(el,v){ var e=document.getElementById(el); if(e) e.value=v||''; };
+  sv('pv-n',f.n); sv('pv-esp',f.esp); sv('pv-web',f.web); sv('pv-tel',f.tel); sv('pv-email',f.email); sv('pv-cont',f.cont); sv('pv-notas','');
+}
+function abrirProvCust(id){
+  editProvId=id;
+  document.getElementById('prov-tit').textContent=id?'Editar proveedor':'Nuevo proveedor';
+  document.getElementById('btn-del-prov').style.display=id?'block':'none';
+  var sv=function(el,v){ var e=document.getElementById(el); if(e) e.value=v||''; };
+  if(id){
+    var datos=(DB.cfg()._prov||[]).find(function(z){ return z.id===id; });
+    if(datos){ sv('pv-n',datos.n); sv('pv-esp',datos.esp); sv('pv-web',datos.web); sv('pv-tel',datos.tel); sv('pv-email',datos.email); sv('pv-cont',datos.cont); sv('pv-notas',datos.notas||''); }
+  } else {
+    ['pv-n','pv-esp','pv-web','pv-tel','pv-email','pv-cont','pv-notas'].forEach(function(i){ sv(i,''); });
+  }
+  goSub('s-prov-form','s-proveedores');
+}
+function guardarProv(){
+  var n=document.getElementById('pv-n').value.trim(); if(!n){ msg('El nombre es obligatorio'); return; }
+  var cfg=DB.cfg(); var lista=cfg._prov||[];
+  var p={id:editProvId||('pv'+Date.now()),n:n,esp:document.getElementById('pv-esp').value.trim(),web:document.getElementById('pv-web').value.trim(),tel:document.getElementById('pv-tel').value.trim(),email:document.getElementById('pv-email').value.trim(),cont:document.getElementById('pv-cont').value.trim(),notas:document.getElementById('pv-notas').value.trim()};
+  if(editProvId){ var i=lista.findIndex(function(z){ return z.id===editProvId; }); if(i>=0) lista[i]=p; else lista.push(p); } else lista.push(p);
+  cfg._prov=lista; DB.s('cfg',cfg); msg('Proveedor guardado'); goSub('s-proveedores','s-empresa');
+}
+function borrarProv(){ var cfg=DB.cfg(); cfg._prov=(cfg._prov||[]).filter(function(p){ return p.id!==editProvId; }); DB.s('cfg',cfg); msg('Eliminado'); goSub('s-proveedores','s-empresa'); }
+
+// ── FICHAS TÉCNICAS ───────────────────────────────────
+function renderFichas(){
+  var lista=DB.cfg()._fichas||[];
+  var cont=document.getElementById('lista-fichas'); if(!cont) return;
+  if(!lista.length){ cont.innerHTML='<div class="empty"><div class="empty-t">Sin fichas técnicas</div><div class="empty-s">Pulsa + para añadir manuales, catálogos o certificados</div></div>'; return; }
+  var tipos={manual:'Manual',ficha:'Ficha técnica',catalogo:'Catálogo',certificado:'Certificado',otro:'Otro'};
+  cont.innerHTML=lista.map(function(f){ return '<div class="item" onclick="abrirFicha(\''+f.id+'\')"><div class="ava">'+f.tipo.slice(0,2).toUpperCase()+'</div><div class="item-inf"><div class="item-t">'+x(f.nom)+'</div><div class="item-s">'+x(f.marca||'')+(f.modelo?' · '+f.modelo:'')+' · '+x(tipos[f.tipo]||f.tipo)+'</div></div><span class="chev">›</span></div>'; }).join('');
+}
+function abrirFicha(id){
+  editFichaId=id;
+  document.getElementById('ficha-tit').textContent=id?'Editar ficha':'Nueva ficha técnica';
+  document.getElementById('btn-del-ficha').style.display=id?'block':'none';
+  var sv=function(el,v){ var e=document.getElementById(el); if(e) e.value=v||''; };
+  if(id){ var f=(DB.cfg()._fichas||[]).find(function(z){ return z.id===id; }); if(f){ sv('ft-nom',f.nom); sv('ft-marca',f.marca); sv('ft-modelo',f.modelo); sv('ft-tipo',f.tipo); sv('ft-url',f.url); sv('ft-notas',f.notas); } }
+  else { ['ft-nom','ft-marca','ft-modelo','ft-url','ft-notas'].forEach(function(i){ sv(i,''); }); var ts=document.getElementById('ft-tipo'); if(ts) ts.value='manual'; }
+  goSub('s-ficha-form','s-proveedores');
+}
+function guardarFicha(){
+  var nom=document.getElementById('ft-nom').value.trim(); if(!nom){ msg('El nombre es obligatorio'); return; }
+  var cfg=DB.cfg(); var lista=cfg._fichas||[];
+  var f={id:editFichaId||('ft'+Date.now()),nom:nom,marca:document.getElementById('ft-marca').value.trim(),modelo:document.getElementById('ft-modelo').value.trim(),tipo:document.getElementById('ft-tipo').value,url:document.getElementById('ft-url').value.trim(),notas:document.getElementById('ft-notas').value.trim()};
+  if(editFichaId){ var i=lista.findIndex(function(z){ return z.id===editFichaId; }); if(i>=0) lista[i]=f; else lista.push(f); } else lista.push(f);
+  cfg._fichas=lista; DB.s('cfg',cfg); msg('Ficha guardada'); goSub('s-proveedores','s-empresa'); setTimeout(function(){ setTabProv('fichas'); },100);
+}
+function borrarFicha(){ var cfg=DB.cfg(); cfg._fichas=(cfg._fichas||[]).filter(function(f){ return f.id!==editFichaId; }); DB.s('cfg',cfg); msg('Ficha eliminada'); goSub('s-proveedores','s-empresa'); }
+
+// ── EXPONER GLOBALES ──────────────────────────────────
+window.navTo=navTo; window.goSub=goSub; window.goBack=goBack;
+window.toggleFiltros=toggleFiltros; window.renderHome=renderHome;
+window.guardarCfg=guardarCfg; window.abrirCli=abrirCli; window.guardarCli=guardarCli; window.borrarCli=borrarCli;
+window.abrirObra=abrirObra; window.guardarObra=guardarObra; window.borrarObra=borrarObra;
+window.setTabCO=setTabCO; window.renderBuscar=renderBuscar;
+window.nuevoParte=nuevoParte; window.elegirCli=elegirCli; window.elegirObra=elegirObra;
+window.irP2=irP2; window.elegirTipo=elegirTipo; window.irP3=irP3; window.irP4=irP4; window.irP5=irP5;
 window.añadirFotos=añadirFotos; window.quitarFoto=quitarFoto; window.borrarFirma=borrarFirma;
 window.soloGuardar=soloGuardar; window.generarPDF=generarPDF; window.verParte=verParte;
 window.borrarParte=borrarParte; window.pdfDe=pdfDe; window.cancelar=cancelar;
 window.cerrarModal=cerrarModal; window.descartar=descartar;
 window.setTabPartes=setTabPartes; window.elegirEstado=elegirEstado; window.toggleEstado=toggleEstado;
+window.setTabCont=setTabCont; window.abrirDocCont=abrirDocCont; window.guardarDocCont=guardarDocCont; window.borrarDocCont=borrarDocCont; window.llenarObraSelCont=llenarObraSelCont; window.generarPDFFactura=generarPDFFactura;
+window.setTabProv=setTabProv; window.cargarMarcaFija=cargarMarcaFija; window.abrirProvCust=abrirProvCust; window.guardarProv=guardarProv; window.borrarProv=borrarProv;
+window.abrirFicha=abrirFicha; window.guardarFicha=guardarFicha; window.borrarFicha=borrarFicha;
 </script>
 </body>
 </html>
