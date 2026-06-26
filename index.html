@@ -112,6 +112,7 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:-apple-sy
   <div class="hdr">
     <div class="hdr-ico">❄</div>
     <span class="hdr-tit">Alaro Clima</span>
+    <span id="sync-badge" title="Sincronizando..." style="font-size:14px;cursor:default">🔄</span>
     <button class="hdr-btn" onclick="go('s-cfg')" title="Ajustes">⚙</button>
   </div>
   <div style="padding:14px 14px 4px">
@@ -337,16 +338,139 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:-apple-sy
 
 <div class="toast" id="toast"></div>
 
-<script>
-// ── DB ──────────────────────────────────────────────
-var DB = {
-  g: function(k) { try { return JSON.parse(localStorage.getItem('ac2_'+k)); } catch(e) { return null; } },
-  s: function(k, v) { localStorage.setItem('ac2_'+k, JSON.stringify(v)); },
-  clientes: function() { return DB.g('cli') || []; },
-  obras: function() { return DB.g('obras') || []; },
-  partes: function() { return DB.g('partes') || []; },
-  cfg: function() { return DB.g('cfg') || { emp:'Alaro Clima', res:'Luis Salvador Daviu Fueris', dir:'Poligono IV parcela 567', cp:'07340 Alaro', nif:'43151871F', mov:'677 711 704', ri:'04/62531 CAIB', rm:'NIMA 0700010246 CAIB' }; }
+<script type="module">
+// ── FIREBASE ─────────────────────────────────────────
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getFirestore, doc, getDoc, setDoc, onSnapshot, enableIndexedDbPersistence }
+  from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+// ── CONFIGURACION FIREBASE ───────────────────────────
+// Sustituye estos valores por los de tu proyecto Firebase
+var FBcfg = {
+  apiKey:            "AIzaSyAud7H7z-oJ5DokAfO8D_fkE710TStNAM4",
+  authDomain:        "alaro-clima.firebaseapp.com",
+  projectId:         "alaro-clima",
+  storageBucket:     "alaro-clima.firebasestorage.app",
+  messagingSenderId: "334204792734",
+  appId:             "1:334204792734:web:2a17ae8d552b2e607f308f"
 };
+
+var fbApp  = initializeApp(FBcfg);
+var db     = getFirestore(fbApp);
+var auth   = getAuth(fbApp);
+
+// Persistencia offline
+try { enableIndexedDbPersistence(db); } catch(e) {}
+
+// Coleccion unica tipo "documento raiz"
+var DOC_ID = 'datos';
+var COL    = 'alaro';
+
+// ── CACHE LOCAL (fuente de verdad en memoria) ─────────
+var _cache = { cli:[], obras:[], partes:[], cfg: null, _loaded: false };
+
+var CFG_DEFAULT = {
+  emp:'Alaro Clima', res:'Luis Salvador Daviu Fueris',
+  dir:'Poligono IV parcela 567', cp:'07340 Alaro',
+  nif:'43151871F', mov:'677 711 704',
+  ri:'04/62531 CAIB', rm:'NIMA 0700010246 CAIB'
+};
+
+// ── INDICADOR DE SINCRONIZACION ───────────────────────
+function syncBadge(estado) {
+  var b = document.getElementById('sync-badge');
+  if (!b) return;
+  if (estado === 'ok')     { b.textContent='🟢'; b.title='Sincronizado'; }
+  if (estado === 'sync')   { b.textContent='🔄'; b.title='Sincronizando...'; }
+  if (estado === 'error')  { b.textContent='🔴'; b.title='Sin conexion (datos locales)'; }
+}
+
+// ── LEER DE FIRESTORE Y ACTUALIZAR CACHE ──────────────
+function aplicarSnapshot(data) {
+  if (!data) return;
+  _cache.cli    = data.cli    || [];
+  _cache.obras  = data.obras  || [];
+  _cache.partes = data.partes || [];
+  _cache.cfg    = data.cfg    || CFG_DEFAULT;
+  _cache._loaded = true;
+  syncBadge('ok');
+  // Re-render de la pantalla activa
+  var activa = document.querySelector('.scr.on');
+  if (activa) {
+    var id = activa.id;
+    if (id==='s-home')     renderHome();
+    if (id==='s-clientes') renderCli();
+    if (id==='s-obras')    renderObras();
+    if (id==='s-partes')   renderPartes();
+  }
+}
+
+// ── GUARDAR TODO A FIRESTORE ──────────────────────────
+async function guardarFirestore() {
+  syncBadge('sync');
+  try {
+    await setDoc(doc(db, COL, DOC_ID), {
+      cli:    _cache.cli,
+      obras:  _cache.obras,
+      partes: _cache.partes,
+      cfg:    _cache.cfg || CFG_DEFAULT,
+      ts:     new Date().toISOString()
+    });
+    syncBadge('ok');
+  } catch(e) {
+    syncBadge('error');
+    console.error('Firestore write error:', e);
+  }
+}
+
+// ── DB ────────────────────────────────────────────────
+var DB = {
+  clientes: function() { return _cache.cli || []; },
+  obras:    function() { return _cache.obras || []; },
+  partes:   function() { return _cache.partes || []; },
+  cfg:      function() { return _cache.cfg || CFG_DEFAULT; },
+
+  s: function(k, v) {
+    if (k==='cli')    _cache.cli    = v;
+    if (k==='obras')  _cache.obras  = v;
+    if (k==='partes') _cache.partes = v;
+    if (k==='cfg')    _cache.cfg    = v;
+    guardarFirestore();
+  }
+};
+
+// ── LISTENER TIEMPO REAL ──────────────────────────────
+var _unsubscribe = null;
+function iniciarListener() {
+  if (_unsubscribe) _unsubscribe();
+  _unsubscribe = onSnapshot(
+    doc(db, COL, DOC_ID),
+    function(snap) { aplicarSnapshot(snap.exists() ? snap.data() : null); },
+    function(err)  { syncBadge('error'); console.warn('Snapshot error:', err); }
+  );
+}
+
+// ── POLLING SEGURIDAD CADA 10s ────────────────────────
+async function pollFirestore() {
+  try {
+    var snap = await getDoc(doc(db, COL, DOC_ID));
+    aplicarSnapshot(snap.exists() ? snap.data() : null);
+  } catch(e) { syncBadge('error'); }
+}
+
+// ── ARRANQUE ──────────────────────────────────────────
+signInAnonymously(auth)
+  .then(function() {
+    iniciarListener();
+    setInterval(pollFirestore, 10000); // backup poll cada 10s
+  })
+  .catch(function(e) {
+    syncBadge('error');
+    console.error('Auth error:', e);
+    // Funciona en modo local si falla Firebase
+    _cache._loaded = true;
+  });
 
 // ── STATE ────────────────────────────────────────────
 var P = {}, fotos = [], editCliId = null, editObraId = null, fCtx = null, firmaSi = false;
@@ -361,8 +485,16 @@ window.onload = function() {
   var h = d.getHours();
   var sal = document.getElementById('saludo');
   if (sal) sal.textContent = (h < 13 ? 'Buenos dias' : h < 20 ? 'Buenas tardes' : 'Buenas noches') + ' 👋';
-  cargarCfg();
-  renderHome();
+  // Esperar a que Firebase cargue los datos (max 4s, luego renderiza igual)
+  var intentos = 0;
+  var esperar = setInterval(function() {
+    intentos++;
+    if (_cache._loaded || intentos > 40) {
+      clearInterval(esperar);
+      cargarCfg();
+      renderHome();
+    }
+  }, 100);
 };
 
 // ── NAVEGACION ───────────────────────────────────────
@@ -718,6 +850,17 @@ function hacerPDF(p) {
   if(btn){btn.disabled=false;btn.innerHTML='Generar y descargar PDF';}
   msg('Usa "Guardar como PDF" en el dialogo de impresion');
 }
+
+// ── EXPONER FUNCIONES GLOBALES (requerido en ES module) ──
+window.go=go; window.guardarCfg=guardarCfg; window.abrirCli=abrirCli;
+window.guardarCli=guardarCli; window.borrarCli=borrarCli; window.abrirObra=abrirObra;
+window.guardarObra=guardarObra; window.borrarObra=borrarObra; window.nuevoParte=nuevoParte;
+window.elegirCli=elegirCli; window.elegirObra=elegirObra; window.irP2=irP2;
+window.elegirTipo=elegirTipo; window.irP3=irP3; window.irP4=irP4; window.irP5=irP5;
+window.añadirFotos=añadirFotos; window.quitarFoto=quitarFoto; window.borrarFirma=borrarFirma;
+window.soloGuardar=soloGuardar; window.generarPDF=generarPDF; window.verParte=verParte;
+window.borrarParte=borrarParte; window.pdfDe=pdfDe; window.cancelar=cancelar;
+window.cerrarModal=cerrarModal; window.descartar=descartar;
 </script>
 </body>
 </html>
