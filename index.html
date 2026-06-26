@@ -915,6 +915,11 @@ function verParte(id) {
   var fh='',fi='';
   if(p.fotos&&p.fotos.length) fh='<div class="lbl">Fotos ('+p.fotos.length+')</div><div style="padding:0 16px 12px;display:flex;flex-wrap:wrap;gap:7px">'+p.fotos.map(function(s){ return '<img src="'+s+'" style="width:75px;height:75px;object-fit:cover;border-radius:6px;border:1px solid var(--b1)">'; }).join('')+'</div>';
   if(p.firmaImg) fi='<div class="lbl">Firma del cliente</div><div style="padding:0 16px 12px"><img src="'+p.firmaImg+'" style="max-width:100%;border:1px solid var(--b1);border-radius:8px;background:#fff;display:block"></div>';
+
+  // Obtener email del cliente si existe
+  var cliEmail='';
+  if(p.cliId){ var c=DB.clientes().find(function(z){ return z.id===p.cliId; }); if(c&&c.e) cliEmail=c.e; }
+
   document.getElementById('ver-body').innerHTML=
     '<div class="res-card"><div class="res-row"><span class="res-k">Fecha</span><span class="res-v">'+x(df(p.fecha))+'</span></div><div class="res-row"><span class="res-k">Operario</span><span class="res-v">'+x(p.op)+'</span></div><div class="res-row"><span class="res-k">Cliente</span><span class="res-v">'+x(p.cliNom)+'</span></div>'+(p.cliDir?'<div class="res-row"><span class="res-k">Domicilio</span><span class="res-v">'+x(p.cliDir)+'</span></div>':'')+'<div class="res-row"><span class="res-k">Obra</span><span class="res-v">'+x(p.obraNom||p.obraDir||'—')+'</span></div><div class="res-row"><span class="res-k">Tipo</span><span class="res-v">'+x(p.tipo)+'</span></div></div>'
     +'<div class="lbl">Descripción</div><div style="background:var(--s1);border-top:1px solid var(--b1);border-bottom:1px solid var(--b1);padding:13px 16px;font-size:13px;line-height:1.7;white-space:pre-wrap;margin-bottom:2px">'+x(p.desc||'—')+'</div>'
@@ -924,6 +929,7 @@ function verParte(id) {
     +'<div class="gap"></div>'
     +'<button class="btn2" onclick="toggleEstado(\''+id+'\')">'+((p.estado||'realizado')==='realizado'?'Marcar como pendiente':'Marcar como realizado')+'</button>'
     +'<button class="btn" onclick="pdfDe(\''+id+'\')">Generar PDF</button>'
+    +'<button class="btn2" onclick="emailParte(\''+id+'\')">'+(cliEmail?'Enviar al cliente':'Enviar por email')+'</button>'
     +'<button class="btnd" onclick="borrarParte(\''+id+'\')">Eliminar parte</button><div class="gap"></div>';
   goSub('s-parte-ver','s-carpeta-partes');
 }
@@ -935,6 +941,75 @@ function toggleEstado(id){
   lista[i].estado=(lista[i].estado||'realizado')==='realizado'?'pendiente':'realizado';
   DB.s('partes',lista); msg('Estado actualizado'); verParte(id);
 }
+
+function emailParte(id){
+  var p=DB.partes().find(function(z){ return z.id===id; }); if(!p) return;
+  var cfg=DB.cfg();
+
+  // Email del cliente si está guardado
+  var toEmail='';
+  if(p.cliId){ var c=DB.clientes().find(function(z){ return z.id===p.cliId; }); if(c&&c.e) toEmail=c.e; }
+
+  var asunto=encodeURIComponent(
+    'Parte de trabajo #'+p.num+' — '+(p.cliNom||'Sin cliente')+' — '+df(p.fecha)
+  );
+
+  var lineas=[
+    'Estimado/a '+(p.cliNom||'cliente')+',',
+    '',
+    'Le enviamos el resumen del parte de trabajo realizado.',
+    '',
+    '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+    'PARTE DE TRABAJO Núm. '+p.num,
+    '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+    '',
+    'Fecha:      '+df(p.fecha),
+    'Operario:   '+(p.op||cfg.res||'—'),
+    'Cliente:    '+(p.cliNom||'—'),
+    'Domicilio:  '+(p.cliDir||'—'),
+    'Obra:       '+(p.obraNom||p.obraDir||'—'),
+    'Tipo:       '+(p.tipo||'—'),
+    '',
+    '── DESCRIPCIÓN DEL TRABAJO ──────────────',
+    (p.desc||'—'),
+  ];
+
+  if(p.obs){
+    lineas.push('');
+    lineas.push('── OBSERVACIONES ────────────────────────');
+    lineas.push(p.obs);
+  }
+  if(p.mat){
+    lineas.push('');
+    lineas.push('── MATERIALES UTILIZADOS ────────────────');
+    lineas.push(p.mat);
+  }
+
+  lineas.push('');
+  lineas.push('── CONFORMIDAD ──────────────────────────');
+  lineas.push('Firmado: '+(p.firmada?'Sí — '+(p.firmaNom||'')+(p.firmaDni?' ('+p.firmaDni+')':''):'No'));
+
+  lineas.push('');
+  lineas.push('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  lineas.push((cfg.emp||'Alaro Clima')+' · NIF: '+(cfg.nif||''));
+  lineas.push((cfg.dir||'')+' · '+(cfg.cp||''));
+  lineas.push('Tel: '+(cfg.mov||'')+' · '+(cfg.ri||''));
+  lineas.push('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+  var cuerpo=encodeURIComponent(lineas.join('\n'));
+  var mailto='mailto:'+toEmail+'?subject='+asunto+'&body='+cuerpo;
+
+  // Los mailto tienen límite ~2000 chars en algunos clientes; avisamos si es muy largo
+  if(mailto.length>2000){
+    // Truncar cuerpo para compatibilidad y avisar
+    var cuerpoCorto=encodeURIComponent(lineas.slice(0,20).join('\n')+'\n\n[Ver parte completo en la app]');
+    mailto='mailto:'+toEmail+'?subject='+asunto+'&body='+cuerpoCorto;
+  }
+
+  window.location.href=mailto;
+  msg(toEmail?'Abriendo correo a '+toEmail+'…':'Abriendo cliente de correo…');
+}
+window.emailParte=emailParte;
 
 // ── NUEVO PARTE ───────────────────────────────────────
 function numSig(){ return String(DB.partes().reduce(function(m,p){ return Math.max(m,parseInt(p.num)||0); },0)+1).padStart(4,'0'); }
