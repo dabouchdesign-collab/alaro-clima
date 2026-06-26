@@ -37,6 +37,21 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:-apple-sy
 .item-s{font-size:12px;color:var(--t2);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chev{color:var(--t3);font-size:16px;flex-shrink:0}
 .tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:12px;background:#e5f2e0;color:#2e6b1a;flex-shrink:0}
+.tag-pend{background:#fff3e0;color:#bf6900}
+.tag-real{background:#e5f2e0;color:#2e6b1a}
+/* TABS PARTES */
+.tabs{display:flex;gap:0;padding:0 14px 10px}
+.tab-btn{flex:1;padding:9px 4px;font-size:13px;font-weight:500;border:none;background:var(--w);color:var(--t2);cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;transition:all .12s}
+.tab-btn.on{color:var(--g);border-bottom-color:var(--g);font-weight:600}
+.tab-btn:active{opacity:.7}
+/* ESTADO SELECTOR */
+.est-g{display:flex;gap:8px;padding:0 14px 14px}
+.est-b{flex:1;border:.5px solid var(--b2);background:var(--w);border-radius:var(--r);padding:12px 8px;cursor:pointer;text-align:center;font-family:inherit;transition:background .08s}
+.est-b.on{border-width:1.5px}
+.est-b.on-real{background:#e5f2e0;border-color:#2e6b1a}
+.est-b.on-pend{background:#fff3e0;border-color:#bf6900}
+.est-em{font-size:18px;margin-bottom:4px}
+.est-tx{font-size:12px;font-weight:500;color:var(--t1)}
 /* DASHBOARD */
 .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px}
 .hero{grid-column:1/-1;background:var(--g);border-radius:var(--rl);padding:16px 18px;cursor:pointer;display:flex;align-items:center;gap:14px}
@@ -204,7 +219,11 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:-apple-sy
 
 <!-- PARTES -->
 <div id="s-partes" class="scr">
-  <div class="hdr"><button class="hdr-btn" onclick="go('s-home')">←</button><span class="hdr-tit">Partes realizados</span></div>
+  <div class="hdr"><button class="hdr-btn" onclick="go('s-home')">←</button><span class="hdr-tit">Partes</span></div>
+  <div class="tabs">
+    <button class="tab-btn on" id="tab-real" onclick="setTabPartes('realizado')">Realizados</button>
+    <button class="tab-btn" id="tab-pend" onclick="setTabPartes('pendiente')">Pendientes</button>
+  </div>
   <div id="lista-partes"></div>
 </div>
 <div id="s-parte-ver" class="scr">
@@ -316,6 +335,11 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:-apple-sy
   <div class="res-card" id="res-datos"></div>
   <div class="lbl">Fotos</div>
   <div id="res-fotos" style="padding:0 14px 12px;display:flex;flex-wrap:wrap;gap:7px"></div>
+  <div class="lbl">Estado del parte</div>
+  <div class="est-g">
+    <button class="est-b on on-real" id="est-real" onclick="elegirEstado('realizado')"><div class="est-em">✅</div><div class="est-tx">Realizado</div></button>
+    <button class="est-b" id="est-pend" onclick="elegirEstado('pendiente')"><div class="est-em">⏳</div><div class="est-tx">Pendiente</div></button>
+  </div>
   <div class="gap"></div>
   <button class="btn" id="btn-pdf" onclick="generarPDF()">📄 Generar y descargar PDF</button>
   <button class="btn2" onclick="soloGuardar()">Guardar sin PDF</button>
@@ -338,38 +362,28 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:-apple-sy
 
 <div class="toast" id="toast"></div>
 
-<script type="module">
-// ── FIREBASE ─────────────────────────────────────────
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getFirestore, doc, getDoc, setDoc, onSnapshot, enableIndexedDbPersistence }
-  from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-
-// ── CONFIGURACION FIREBASE ───────────────────────────
-// Sustituye estos valores por los de tu proyecto Firebase
+<!-- Firebase compat SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script>
+// ── FIREBASE ─────────────────────────────────────────────
 var FBcfg = {
-  apiKey:            "AIzaSyAud7H7z-oJ5DokAfO8D_fkE710TStNAM4",
-  authDomain:        "alaro-clima.firebaseapp.com",
-  projectId:         "alaro-clima",
-  storageBucket:     "alaro-clima.firebasestorage.app",
+  apiKey: "AIzaSyAud7H7z-oJ5DokAfO8D_fkE710TStNAM4",
+  authDomain: "alaro-clima.firebaseapp.com",
+  projectId: "alaro-clima",
+  storageBucket: "alaro-clima.firebasestorage.app",
   messagingSenderId: "334204792734",
-  appId:             "1:334204792734:web:2a17ae8d552b2e607f308f"
+  appId: "1:334204792734:web:2a17ae8d552b2e607f308f"
 };
+firebase.initializeApp(FBcfg);
+var db = firebase.firestore();
+var auth = firebase.auth();
+db.enablePersistence().catch(function(e){ console.warn('Persistence:', e.code); });
 
-var fbApp  = initializeApp(FBcfg);
-var db     = getFirestore(fbApp);
-var auth   = getAuth(fbApp);
-
-// Persistencia offline
-try { enableIndexedDbPersistence(db); } catch(e) {}
-
-// Coleccion unica tipo "documento raiz"
 var DOC_ID = 'datos';
-var COL    = 'alaro';
-
-// ── CACHE LOCAL (fuente de verdad en memoria) ─────────
-var _cache = { cli:[], obras:[], partes:[], cfg: null, _loaded: false };
-
+var COL = 'alaro';
+var _cache = { cli:[], obras:[], partes:[], cfg:null, _loaded:false };
 var CFG_DEFAULT = {
   emp:'Alaro Clima', res:'Luis Salvador Daviu Fueris',
   dir:'Poligono IV parcela 567', cp:'07340 Alaro',
@@ -377,100 +391,56 @@ var CFG_DEFAULT = {
   ri:'04/62531 CAIB', rm:'NIMA 0700010246 CAIB'
 };
 
-// ── INDICADOR DE SINCRONIZACION ───────────────────────
 function syncBadge(estado) {
-  var b = document.getElementById('sync-badge');
-  if (!b) return;
-  if (estado === 'ok')     { b.textContent='🟢'; b.title='Sincronizado'; }
-  if (estado === 'sync')   { b.textContent='🔄'; b.title='Sincronizando...'; }
-  if (estado === 'error')  { b.textContent='🔴'; b.title='Sin conexion (datos locales)'; }
+  var b = document.getElementById('sync-badge'); if (!b) return;
+  if (estado==='ok')    { b.textContent='🟢'; b.title='Sincronizado'; }
+  if (estado==='sync')  { b.textContent='🔄'; b.title='Sincronizando...'; }
+  if (estado==='error') { b.textContent='🔴'; b.title='Sin conexion'; }
 }
 
-// ── LEER DE FIRESTORE Y ACTUALIZAR CACHE ──────────────
 function aplicarSnapshot(data) {
   if (!data) return;
-  _cache.cli    = data.cli    || [];
-  _cache.obras  = data.obras  || [];
-  _cache.partes = data.partes || [];
-  _cache.cfg    = data.cfg    || CFG_DEFAULT;
-  _cache._loaded = true;
-  syncBadge('ok');
-  // Re-render de la pantalla activa
-  var activa = document.querySelector('.scr.on');
-  if (activa) {
-    var id = activa.id;
-    if (id==='s-home')     renderHome();
-    if (id==='s-clientes') renderCli();
-    if (id==='s-obras')    renderObras();
-    if (id==='s-partes')   renderPartes();
-  }
+  _cache.cli=data.cli||[]; _cache.obras=data.obras||[]; _cache.partes=data.partes||[];
+  _cache.cfg=data.cfg||CFG_DEFAULT; _cache._loaded=true; syncBadge('ok');
+  var activa=document.querySelector('.scr.on');
+  if(activa){var id=activa.id;if(id==='s-home')renderHome();if(id==='s-clientes')renderCli();if(id==='s-obras')renderObras();if(id==='s-partes')renderPartes();}
 }
 
-// ── GUARDAR TODO A FIRESTORE ──────────────────────────
-async function guardarFirestore() {
+function guardarFirestore() {
   syncBadge('sync');
-  try {
-    await setDoc(doc(db, COL, DOC_ID), {
-      cli:    _cache.cli,
-      obras:  _cache.obras,
-      partes: _cache.partes,
-      cfg:    _cache.cfg || CFG_DEFAULT,
-      ts:     new Date().toISOString()
-    });
-    syncBadge('ok');
-  } catch(e) {
-    syncBadge('error');
-    console.error('Firestore write error:', e);
-  }
+  db.collection(COL).doc(DOC_ID).set({
+    cli:_cache.cli, obras:_cache.obras, partes:_cache.partes,
+    cfg:_cache.cfg||CFG_DEFAULT, ts:new Date().toISOString()
+  }).then(function(){ syncBadge('ok'); })
+   .catch(function(e){ syncBadge('error'); console.error('Firestore write:', e); });
 }
 
-// ── DB ────────────────────────────────────────────────
 var DB = {
-  clientes: function() { return _cache.cli || []; },
-  obras:    function() { return _cache.obras || []; },
-  partes:   function() { return _cache.partes || []; },
-  cfg:      function() { return _cache.cfg || CFG_DEFAULT; },
-
-  s: function(k, v) {
-    if (k==='cli')    _cache.cli    = v;
-    if (k==='obras')  _cache.obras  = v;
-    if (k==='partes') _cache.partes = v;
-    if (k==='cfg')    _cache.cfg    = v;
+  clientes: function(){ return _cache.cli||[]; },
+  obras:    function(){ return _cache.obras||[]; },
+  partes:   function(){ return _cache.partes||[]; },
+  cfg:      function(){ return _cache.cfg||CFG_DEFAULT; },
+  s: function(k,v){
+    if(k==='cli')_cache.cli=v; if(k==='obras')_cache.obras=v;
+    if(k==='partes')_cache.partes=v; if(k==='cfg')_cache.cfg=v;
     guardarFirestore();
   }
 };
 
-// ── LISTENER TIEMPO REAL ──────────────────────────────
-var _unsubscribe = null;
-function iniciarListener() {
-  if (_unsubscribe) _unsubscribe();
-  _unsubscribe = onSnapshot(
-    doc(db, COL, DOC_ID),
-    function(snap) { aplicarSnapshot(snap.exists() ? snap.data() : null); },
-    function(err)  { syncBadge('error'); console.warn('Snapshot error:', err); }
+function iniciarListener(){
+  db.collection(COL).doc(DOC_ID).onSnapshot(
+    function(snap){ aplicarSnapshot(snap.exists?snap.data():null); },
+    function(err){ syncBadge('error'); }
   );
 }
-
-// ── POLLING SEGURIDAD CADA 10s ────────────────────────
-async function pollFirestore() {
-  try {
-    var snap = await getDoc(doc(db, COL, DOC_ID));
-    aplicarSnapshot(snap.exists() ? snap.data() : null);
-  } catch(e) { syncBadge('error'); }
+function pollFirestore(){
+  db.collection(COL).doc(DOC_ID).get()
+    .then(function(snap){ aplicarSnapshot(snap.exists?snap.data():null); })
+    .catch(function(e){ syncBadge('error'); });
 }
-
-// ── ARRANQUE ──────────────────────────────────────────
-signInAnonymously(auth)
-  .then(function() {
-    iniciarListener();
-    setInterval(pollFirestore, 10000); // backup poll cada 10s
-  })
-  .catch(function(e) {
-    syncBadge('error');
-    console.error('Auth error:', e);
-    // Funciona en modo local si falla Firebase
-    _cache._loaded = true;
-  });
+auth.signInAnonymously()
+  .then(function(){ iniciarListener(); setInterval(pollFirestore,10000); })
+  .catch(function(e){ syncBadge('error'); _cache._loaded=true; });
 
 // ── STATE ────────────────────────────────────────────
 var P = {}, fotos = [], editCliId = null, editObraId = null, fCtx = null, firmaSi = false;
@@ -556,7 +526,9 @@ function renderHome() {
     return;
   }
   cont.innerHTML = rec.map(function(p) {
-    return '<div class="item" onclick="verParte(\''+p.id+'\')"><div class="ava">'+ini(p.cliNom)+'</div><div class="item-inf"><div class="item-t">'+x(p.cliNom||'Sin cliente')+'</div><div class="item-s">'+x(df(p.fecha))+' · '+x(p.tipo||'')+'</div></div><div class="tag">#'+x(p.num)+'</div></div>';
+    var estCls = (p.estado||'realizado')==='pendiente' ? 'tag tag-pend' : 'tag tag-real';
+    var estIco = (p.estado||'realizado')==='pendiente' ? '⏳ ' : '✅ ';
+    return '<div class="item" onclick="verParte(\''+p.id+'\')"><div class="ava">'+ini(p.cliNom)+'</div><div class="item-inf"><div class="item-t">'+x(p.cliNom||'Sin cliente')+'</div><div class="item-s">'+x(df(p.fecha))+' · '+x(p.tipo||'')+'</div></div><div class="'+estCls+'">#'+x(p.num)+'</div></div>';
   }).join('');
 }
 
@@ -634,7 +606,7 @@ function numSig() {
   return String(max+1).padStart(4,'0');
 }
 function nuevoParte() {
-  P = {}; fotos = []; firmaSi = false; borrarFirma();
+  P = {estado:'realizado'}; fotos = []; firmaSi = false; borrarFirma();
   var g = document.getElementById('foto-grid'); if (g) g.innerHTML='';
   var c = document.getElementById('foto-cnt'); if (c) c.textContent='0 fotos';
   ['p3-desc','p3-obs','p3-mat','p4-nom','p4-dni'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
@@ -723,7 +695,7 @@ function irP5() {
 // ── RESUMEN ──────────────────────────────────────────
 function renderResumen() {
   var r=document.getElementById('res-datos'); if(!r) return;
-  var filas=[['Num. de parte','#'+P.num],['Fecha',df(P.fecha)],['Operario',P.op],['Cliente',P.cliNom],['Domicilio',P.cliDir],['Obra',P.obraNom||P.obraDir||'-'],['Tipo',P.tipo],['Firmado',P.firmada?'Si ('+P.firmaNom+')':'No']];
+  var filas=[['Num. de parte','#'+P.num],['Fecha',df(P.fecha)],['Operario',P.op],['Cliente',P.cliNom],['Domicilio',P.cliDir],['Obra',P.obraNom||P.obraDir||'-'],['Tipo',P.tipo],['Firmado',P.firmada?'Si ('+P.firmaNom+')':'No'],['Estado',(P.estado||'realizado')==='realizado'?'✅ Realizado':'⏳ Pendiente']];
   r.innerHTML=filas.filter(function(f){return f[1];}).map(function(f){ return '<div class="res-row"><span class="res-k">'+f[0]+'</span><span class="res-v">'+x(f[1])+'</span></div>'; }).join('');
   var rf=document.getElementById('res-fotos'); if(!rf) return;
   rf.innerHTML=P.fotos&&P.fotos.length?P.fotos.map(function(s){ return '<img src="'+s+'" style="width:66px;height:66px;object-fit:cover;border-radius:8px;border:.5px solid rgba(0,0,0,.1)">'; }).join(''):'<span style="font-size:13px;color:var(--t3)">Sin fotos</span>';
@@ -731,7 +703,7 @@ function renderResumen() {
 
 // ── GUARDAR ──────────────────────────────────────────
 function buildParte() {
-  return { id:'p'+Date.now(), num:P.num, fecha:P.fecha, op:P.op||'', cliId:P.cliId||'', cliNom:P.cliNom||'', cliDir:P.cliDir||'', cliTel:P.cliTel||'', cliNif:P.cliNif||'', obraId:P.obraId||'', obraNom:P.obraNom||'', obraDir:P.obraDir||'', tipo:P.tipo||'', desc:P.desc||'', obs:P.obs||'', mat:P.mat||'', fotos:P.fotos||[], firmada:P.firmada||false, firmaImg:P.firmaImg||'', firmaNom:P.firmaNom||'', firmaDni:P.firmaDni||'', ts:new Date().toISOString() };
+  return { id:'p'+Date.now(), num:P.num, fecha:P.fecha, op:P.op||'', cliId:P.cliId||'', cliNom:P.cliNom||'', cliDir:P.cliDir||'', cliTel:P.cliTel||'', cliNif:P.cliNif||'', obraId:P.obraId||'', obraNom:P.obraNom||'', obraDir:P.obraDir||'', tipo:P.tipo||'', desc:P.desc||'', obs:P.obs||'', mat:P.mat||'', fotos:P.fotos||[], firmada:P.firmada||false, firmaImg:P.firmaImg||'', firmaNom:P.firmaNom||'', firmaDni:P.firmaDni||'', estado:P.estado||'realizado', ts:new Date().toISOString() };
 }
 function soloGuardar() {
   var lista=DB.partes(), p=buildParte(); lista.push(p); DB.s('partes',lista);
@@ -739,10 +711,37 @@ function soloGuardar() {
 }
 
 // ── PARTES LIST ───────────────────────────────────────
+var _tabPartes = 'realizado';
+function setTabPartes(tab) {
+  _tabPartes = tab;
+  document.getElementById('tab-real').classList.toggle('on', tab==='realizado');
+  document.getElementById('tab-pend').classList.toggle('on', tab==='pendiente');
+  renderPartes();
+}
+function elegirEstado(est) {
+  P.estado = est;
+  document.getElementById('est-real').className = 'est-b' + (est==='realizado' ? ' on on-real' : '');
+  document.getElementById('est-pend').className = 'est-b' + (est==='pendiente' ? ' on on-pend' : '');
+}
+function toggleEstado(id) {
+  var lista = DB.partes();
+  var p = lista.find(function(z){ return z.id===id; });
+  if (!p) return;
+  p.estado = (p.estado==='pendiente') ? 'realizado' : 'pendiente';
+  DB.s('partes', lista);
+  msg(p.estado==='realizado' ? 'Marcado como realizado' : 'Marcado como pendiente');
+  verParte(id);
+}
 function renderPartes() {
-  var lista=DB.partes().slice().reverse(), cont=document.getElementById('lista-partes'); if(!cont) return;
-  if(!lista.length){ cont.innerHTML='<div class="empty"><div class="empty-i">📋</div><div class="empty-t">Sin partes</div><div class="empty-s">Los partes creados apareceran aqui</div></div>'; return; }
-  cont.innerHTML=lista.map(function(p){ return '<div class="item" onclick="verParte(\''+p.id+'\')"><div class="ava">'+ini(p.cliNom)+'</div><div class="item-inf"><div class="item-t">'+x(p.cliNom||'Sin cliente')+'</div><div class="item-s">#'+x(p.num)+' · '+x(df(p.fecha))+' · '+x(p.tipo||'')+'</div></div><span class="chev">›</span></div>'; }).join('');
+  var todas=DB.partes().slice().reverse(), cont=document.getElementById('lista-partes'); if(!cont) return;
+  var lista=todas.filter(function(p){ return (p.estado||'realizado')===_tabPartes; });
+  var total=todas.length;
+  if(!total){ cont.innerHTML='<div class="empty"><div class="empty-i">📋</div><div class="empty-t">Sin partes</div><div class="empty-s">Los partes creados apareceran aqui</div></div>'; return; }
+  if(!lista.length){ cont.innerHTML='<div class="empty"><div class="empty-i">'+(_tabPartes==='realizado'?'✅':'⏳')+'</div><div class="empty-t">Sin partes '+(_tabPartes==='realizado'?'realizados':'pendientes')+'</div><div class="empty-s">Los partes con este estado apareceran aqui</div></div>'; return; }
+  cont.innerHTML=lista.map(function(p){
+    var estTag = (p.estado||'realizado')==='pendiente' ? '<div class="tag tag-pend">⏳</div>' : '<div class="tag tag-real">✅</div>';
+    return '<div class="item" onclick="verParte(\''+p.id+'\')"><div class="ava">'+ini(p.cliNom)+'</div><div class="item-inf"><div class="item-t">'+x(p.cliNom||'Sin cliente')+'</div><div class="item-s">#'+x(p.num)+' · '+x(df(p.fecha))+' · '+x(p.tipo||'')+'</div></div>'+estTag+'<span class="chev">›</span></div>';
+  }).join('');
 }
 
 // ── VER PARTE ────────────────────────────────────────
@@ -758,7 +757,9 @@ function verParte(id) {
     +(p.obs?'<div class="lbl">Observaciones</div><div style="background:var(--w);border-top:.5px solid var(--b1);border-bottom:.5px solid var(--b1);padding:13px 14px;font-size:14px;line-height:1.65;white-space:pre-wrap;margin-bottom:2px">'+x(p.obs)+'</div>':'')
     +(p.mat?'<div class="lbl">Materiales</div><div style="background:var(--w);border-top:.5px solid var(--b1);border-bottom:.5px solid var(--b1);padding:13px 14px;font-size:14px;line-height:1.65;white-space:pre-wrap;margin-bottom:2px">'+x(p.mat)+'</div>':'')
     +fh+fi
-    +'<div class="gap"></div><button class="btn" onclick="pdfDe(\''+id+'\')">Generar PDF</button><button class="btnd" onclick="borrarParte(\''+id+'\')">Eliminar parte</button><div class="gap"></div>';
+    +'<div class="gap"></div>'
+    +'<button class="btn2" onclick="toggleEstado(\''+id+'\')">'+((p.estado||'realizado')==='realizado'?'⏳ Marcar como pendiente':'✅ Marcar como realizado')+'</button>'
+    +'<button class="btn" onclick="pdfDe(\''+id+'\')">Generar PDF</button><button class="btnd" onclick="borrarParte(\''+id+'\')">Eliminar parte</button><div class="gap"></div>';
   go('s-parte-ver');
 }
 function borrarParte(id) { DB.s('partes',DB.partes().filter(function(p){ return p.id!==id; })); msg('Parte eliminado'); go('s-partes'); }
@@ -861,6 +862,7 @@ window.añadirFotos=añadirFotos; window.quitarFoto=quitarFoto; window.borrarFir
 window.soloGuardar=soloGuardar; window.generarPDF=generarPDF; window.verParte=verParte;
 window.borrarParte=borrarParte; window.pdfDe=pdfDe; window.cancelar=cancelar;
 window.cerrarModal=cerrarModal; window.descartar=descartar;
+window.setTabPartes=setTabPartes; window.elegirEstado=elegirEstado; window.toggleEstado=toggleEstado;
 </script>
 </body>
 </html>
