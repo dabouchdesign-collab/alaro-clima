@@ -661,124 +661,216 @@ function delParte(id){DB.s('partes',window.DB.partes().filter(function(p){return
 function pdfDe(id){var p=window.DB.partes().find(function(x){return x.id===id;});if(p)doPDF(p);}
 
 function generarPDF(){
-  var partes=window.DB.partes();
-  var existe=partes.find(function(x){return x.num===P.num;});
-  var p=existe||buildP();
-  if(!existe){partes.push(p);DB.s('partes',partes);}
-  renderDash();doPDF(p);
+  var btn=document.getElementById('btn-pdf');
+  if(btn){btn.disabled=true;btn.textContent='Guardando...';}
+  var p=buildParte();
+  window.DB.saveParte(p).then(function(){
+    P={}; fotos=[];
+    if(btn){btn.disabled=false;btn.innerHTML='&#128196; Generar y descargar PDF';}
+    doPDF(p);
+  }).catch(function(e){ msg('Error al guardar: '+e.message); if(btn){btn.disabled=false;btn.innerHTML='&#128196; Generar y descargar PDF';} });
+}
+
+function pdfDe(id){
+  var p=(window.DB?window.DB.partes():[]).find(function(z){ return z.id===id; });
+  if(p) doPDF(p);
 }
 
 function doPDF(p){
   var btn=document.getElementById('btn-pdf');
-  if(btn){btn.disabled=true;btn.textContent='Generando...';}
-  var cfg=window.DB.cfg();
-  var jsPDF=window.jspdf&&window.jspdf.jsPDF;
-  if(!jsPDF){toast('Libreria PDF no cargada. Recarga la pagina.');if(btn){btn.disabled=false;btn.innerHTML='Generar y descargar PDF';}return;}
-  try{
+  if(btn){btn.disabled=true;btn.textContent='Generando PDF...';}
+  // Load jsPDF dynamically and generate
+  function doGenerate(){
+    var jsPDF=window.jspdf&&window.jspdf.jsPDF;
+    if(!jsPDF){ msg('Error: libreria PDF no disponible'); if(btn){btn.disabled=false;btn.innerHTML='&#128196; Generar y descargar PDF';} return; }
+    var cfg=(window.DB&&window.DB.cfg())||{emp:'Alaro Clima',res:'',nif:'',dir:'',cp:'',mov:'',ri:'',rm:''};
     var doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-    var W=210,mg=14,cw=W-mg*2,PH=297;
-    var GR=[29,158,117],GG=[200,240,225],TX=[26,26,24],TX2=[100,100,100],BD=[220,220,218];
-    doc.setFillColor(GR[0],GR[1],GR[2]);doc.rect(0,0,W,30,'F');
-    doc.setFont('helvetica','bold');doc.setFontSize(17);doc.setTextColor(255,255,255);
-    doc.text(cfg.emp||'Alaro Clima',mg,13);
-    doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(GG[0],GG[1],GG[2]);
-    doc.text('Instalaciones y mantenimiento de climatizacion - RITE - Electricidad B.T.',mg,19);
-    doc.text((cfg.dir||'')+' - '+(cfg.cp||'')+' - '+(cfg.mov||''),mg,25);
-    doc.setFont('helvetica','bold');doc.setFontSize(13);doc.setTextColor(255,255,255);
-    doc.text('PARTE DE TRABAJO',W-mg,12,{align:'right'});
-    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(GG[0],GG[1],GG[2]);
-    doc.text('N '+p.num,W-mg,19,{align:'right'});
-    doc.text('Fecha: '+fd(p.fecha),W-mg,25,{align:'right'});
-    var y=35;
-    doc.setFillColor(245,245,243);doc.setDrawColor(BD[0],BD[1],BD[2]);doc.setLineWidth(0.3);
-    doc.roundedRect(mg,y,cw,12,2,2,'FD');
-    doc.setFontSize(7.5);doc.setTextColor(TX2[0],TX2[1],TX2[2]);
-    doc.text('Empresa acreditada - Reg. Industrial: '+(cfg.ri||'')+' - Reg. Medioambiente: '+(cfg.rm||''),mg+4,y+5);
-    doc.text('NIF: '+(cfg.nif||'')+' - Tel: '+(cfg.mov||''),mg+4,y+9.5);
-    y+=17;
-    var hw=(cw-4)/2;
-    doc.setFillColor(230,241,251);doc.roundedRect(mg,y,hw,44,2,2,'FD');
-    doc.setFont('helvetica','bold');doc.setFontSize(7.5);doc.setTextColor(TX[0],TX[1],TX[2]);
-    doc.text('CLIENTE',mg+3,y+6);
-    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(TX[0],TX[1],TX[2]);
-    doc.text(p.cliNom||'-',mg+3,y+13);
-    doc.setFontSize(7.5);doc.setTextColor(TX2[0],TX2[1],TX2[2]);
-    if(p.cliDir)doc.text(p.cliDir,mg+3,y+19);
-    if(p.cliNif)doc.text('NIF: '+p.cliNif,mg+3,y+25);
-    if(p.cliTel)doc.text('Tel: '+p.cliTel,mg+3,y+31);
-    var ox=mg+hw+4;
-    doc.setFillColor(245,245,243);doc.roundedRect(ox,y,hw,44,2,2,'FD');
-    doc.setFont('helvetica','bold');doc.setFontSize(7.5);doc.setTextColor(TX[0],TX[1],TX[2]);
-    doc.text('OBRA / PROYECTO',ox+3,y+6);
-    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(TX[0],TX[1],TX[2]);
-    doc.text(p.obraNom||p.obraDir||'-',ox+3,y+13);
-    doc.setFontSize(7.5);doc.setTextColor(TX2[0],TX2[1],TX2[2]);
-    if(p.obraDir&&p.obraNom)doc.text(p.obraDir,ox+3,y+19);
-    doc.text('Tipo:',ox+3,y+27);
-    doc.setFont('helvetica','bold');doc.setTextColor(GR[0],GR[1],GR[2]);
-    doc.text(p.tipo||'-',ox+3,y+33);
-    doc.setFont('helvetica','normal');doc.setTextColor(TX2[0],TX2[1],TX2[2]);
-    doc.text('Operario: '+(p.op||cfg.res||''),ox+3,y+39);
-    y+=49;
-    doc.setDrawColor(GR[0],GR[1],GR[2]);doc.setLineWidth(0.5);doc.line(mg,y,mg+cw,y);y+=6;
-    doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(GR[0],GR[1],GR[2]);
-    doc.text('DESCRIPCION DEL TRABAJO / INCIDENCIA / ASISTENCIA',mg,y);y+=5;
-    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(TX[0],TX[1],TX[2]);
-    var dL=doc.splitTextToSize(p.desc||'-',cw-6);
-    var dH=Math.max(dL.length*5.5+8,24);
-    doc.setFillColor(252,252,250);doc.setDrawColor(BD[0],BD[1],BD[2]);doc.setLineWidth(0.3);
-    doc.roundedRect(mg,y,cw,dH,2,2,'FD');doc.text(dL,mg+3,y+6);y+=dH+5;
+    var W=210, MG=12, CW=W-MG*2, PH=297;
+    var GR=[29,158,117], GGL=[200,240,225], TX=[26,26,24], TX2=[100,100,100], BD=[215,215,212];
+    var y=0;
+
+    // helper: nueva pagina si no cabe
+    function checkPage(needed){
+      if(y+needed > PH-20){ addPie(); doc.addPage(); addCab(); }
+    }
+
+    function addCab(){
+      // Cabecera verde
+      doc.setFillColor(GR[0],GR[1],GR[2]);
+      doc.rect(0,0,W,26,'F');
+      doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.setTextColor(255,255,255);
+      doc.text(cfg.emp||'Alaro Clima', MG, 11);
+      doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(GGL[0],GGL[1],GGL[2]);
+      doc.text('Instalaciones y mantenimiento de climatizacion  -  RITE  -  Electricidad B.T.', MG, 17);
+      doc.text((cfg.dir||'')+' - '+(cfg.cp||'')+'  |  Tel: '+(cfg.mov||''), MG, 22);
+      doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(255,255,255);
+      doc.text('PARTE DE TRABAJO', W-MG, 10, {align:'right'});
+      doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(GGL[0],GGL[1],GGL[2]);
+      doc.text('Num. '+p.num, W-MG, 17, {align:'right'});
+      doc.text('Fecha: '+fd(p.fecha), W-MG, 22, {align:'right'});
+      y=30;
+    }
+
+    function addPie(){
+      doc.setFillColor(GR[0],GR[1],GR[2]);
+      doc.rect(0,PH-10,W,10,'F');
+      doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(GGL[0],GGL[1],GGL[2]);
+      doc.text((cfg.emp||'')+' - NIF: '+(cfg.nif||'')+' - '+(cfg.ri||'')+' - '+(cfg.rm||''), W/2, PH-4, {align:'center'});
+    }
+
+    // PAGINA 1
+    addCab();
+
+    // Registros
+    doc.setFillColor(245,245,243); doc.setDrawColor(BD[0],BD[1],BD[2]); doc.setLineWidth(0.25);
+    doc.roundedRect(MG,y,CW,10,1.5,1.5,'FD');
+    doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(TX2[0],TX2[1],TX2[2]);
+    doc.text('Empresa acreditada  -  Reg. Industrial: '+(cfg.ri||'')+' - Reg. Medioambiente: '+(cfg.rm||'')+' - NIF: '+(cfg.nif||''), MG+3, y+4.5);
+    y+=13;
+
+    // Cliente + Obra en 2 columnas
+    var hw=(CW-3)/2;
+    // Caja cliente
+    doc.setFillColor(230,241,252); doc.setDrawColor(BD[0],BD[1],BD[2]);
+    doc.roundedRect(MG,y,hw,40,1.5,1.5,'FD');
+    doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(TX2[0],TX2[1],TX2[2]);
+    doc.text('CLIENTE', MG+3, y+5.5);
+    doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(TX[0],TX[1],TX[2]);
+    var cliLines=doc.splitTextToSize(p.cliNom||'-', hw-6);
+    doc.text(cliLines, MG+3, y+11);
+    doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(TX2[0],TX2[1],TX2[2]);
+    var cy=y+11+cliLines.length*4;
+    if(p.cliDir){ var dl=doc.splitTextToSize(p.cliDir,hw-6); doc.text(dl,MG+3,cy); cy+=dl.length*3.8; }
+    if(p.cliNif){ doc.text('NIF: '+p.cliNif,MG+3,cy); cy+=4; }
+    if(p.cliTel){ doc.text('Tel: '+p.cliTel,MG+3,cy); }
+    // Caja obra
+    var ox=MG+hw+3;
+    doc.setFillColor(245,245,243); doc.setDrawColor(BD[0],BD[1],BD[2]);
+    doc.roundedRect(ox,y,hw,40,1.5,1.5,'FD');
+    doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(TX2[0],TX2[1],TX2[2]);
+    doc.text('OBRA / PROYECTO', ox+3, y+5.5);
+    doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(TX[0],TX[1],TX[2]);
+    var obraNom=p.obraNom||p.obraDir||'-';
+    var oLines=doc.splitTextToSize(obraNom,hw-6);
+    doc.text(oLines,ox+3,y+11);
+    doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(TX2[0],TX2[1],TX2[2]);
+    var oy=y+11+oLines.length*4;
+    if(p.obraDir&&p.obraNom){ var odl=doc.splitTextToSize(p.obraDir,hw-6); doc.text(odl,ox+3,oy); oy+=odl.length*3.8; }
+    doc.text('Operario: '+(p.op||''), ox+3, oy); oy+=4;
+    // Badge tipo
+    var tipoTxt=p.tipo||'-';
+    doc.setFillColor(GR[0],GR[1],GR[2]);
+    var tw=doc.getTextWidth(tipoTxt)+4;
+    doc.roundedRect(ox+3,oy-3,Math.min(tw,hw-6),5.5,1,1,'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(255,255,255);
+    doc.text(tipoTxt,ox+5,oy+0.5);
+    y+=43;
+
+    // Linea separadora
+    doc.setDrawColor(GR[0],GR[1],GR[2]); doc.setLineWidth(0.4);
+    doc.line(MG,y,MG+CW,y); y+=5;
+
+    // Descripcion
+    doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(GR[0],GR[1],GR[2]);
+    doc.text('DESCRIPCION DEL TRABAJO / INCIDENCIA / ASISTENCIA', MG, y); y+=4;
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(TX[0],TX[1],TX[2]);
+    var descLines=doc.splitTextToSize(p.desc||'-', CW-6);
+    var descH=Math.max(descLines.length*4.8+7, 20);
+    doc.setFillColor(252,252,250); doc.setDrawColor(BD[0],BD[1],BD[2]); doc.setLineWidth(0.25);
+    doc.roundedRect(MG,y,CW,descH,1.5,1.5,'FD');
+    doc.text(descLines,MG+3,y+5.5); y+=descH+4;
+
+    // Observaciones
     if(p.obs){
-      doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(GR[0],GR[1],GR[2]);
-      doc.text('OBSERVACIONES / INCIDENCIAS',mg,y);y+=5;
-      var oL=doc.splitTextToSize(p.obs,cw-6);var oH=Math.max(oL.length*5.5+8,18);
-      doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(TX[0],TX[1],TX[2]);
-      doc.setFillColor(252,252,250);doc.setDrawColor(BD[0],BD[1],BD[2]);
-      doc.roundedRect(mg,y,cw,oH,2,2,'FD');doc.text(oL,mg+3,y+6);y+=oH+5;
+      checkPage(20);
+      doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(GR[0],GR[1],GR[2]);
+      doc.text('OBSERVACIONES / INCIDENCIAS', MG, y); y+=4;
+      var obsLines=doc.splitTextToSize(p.obs,CW-6);
+      var obsH=Math.max(obsLines.length*4.8+7,14);
+      doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(TX[0],TX[1],TX[2]);
+      doc.setFillColor(252,252,250); doc.setDrawColor(BD[0],BD[1],BD[2]);
+      doc.roundedRect(MG,y,CW,obsH,1.5,1.5,'FD');
+      doc.text(obsLines,MG+3,y+5.5); y+=obsH+4;
     }
+
+    // Materiales
     if(p.mat){
-      doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(GR[0],GR[1],GR[2]);
-      doc.text('MATERIALES UTILIZADOS',mg,y);y+=5;
-      var mL=doc.splitTextToSize(p.mat,cw-6);var mH=Math.max(mL.length*5.5+8,14);
-      doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(TX[0],TX[1],TX[2]);
-      doc.setFillColor(252,252,250);doc.setDrawColor(BD[0],BD[1],BD[2]);
-      doc.roundedRect(mg,y,cw,mH,2,2,'FD');doc.text(mL,mg+3,y+6);y+=mH+5;
+      checkPage(18);
+      doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(GR[0],GR[1],GR[2]);
+      doc.text('MATERIALES UTILIZADOS', MG, y); y+=4;
+      var matLines=doc.splitTextToSize(p.mat,CW-6);
+      var matH=Math.max(matLines.length*4.8+7,12);
+      doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(TX[0],TX[1],TX[2]);
+      doc.setFillColor(252,252,250); doc.setDrawColor(BD[0],BD[1],BD[2]);
+      doc.roundedRect(MG,y,CW,matH,1.5,1.5,'FD');
+      doc.text(matLines,MG+3,y+5.5); y+=matH+4;
     }
+
+    // Fotos
     if(p.fotos&&p.fotos.length){
-      var ppr=3,fW=(cw-(ppr-1)*4)/ppr,fH=fW*0.72,rowsN=Math.ceil(p.fotos.length/ppr);
-      if(y+14+rowsN*(fH+4)>270){doc.addPage();y=mg;}
-      doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(GR[0],GR[1],GR[2]);
-      doc.text('FOTOGRAFIAS DE LA VISITA ('+p.fotos.length+')',mg,y);y+=6;
-      p.fotos.forEach(function(src,i){
-        var row=Math.floor(i/ppr),col=i%ppr;
-        var fx=mg+col*(fW+4),fy=y+row*(fH+4);
-        if(fy+fH>272){doc.addPage();y=mg;fy=y;}
-        try{doc.addImage(src,src.indexOf('data:image/png')===0?'PNG':'JPEG',fx,fy,fW,fH);doc.setDrawColor(BD[0],BD[1],BD[2]);doc.setLineWidth(0.2);doc.rect(fx,fy,fW,fH);}catch(e){}
-      });
-      y+=rowsN*(fH+4)+6;
+      var ppr=3, fW=(CW-(ppr-1)*3)/ppr, fH=fW*0.7;
+      var rowsN=Math.ceil(p.fotos.length/ppr);
+      checkPage(12+rowsN*(fH+3));
+      doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(GR[0],GR[1],GR[2]);
+      doc.text('FOTOGRAFIAS DE LA VISITA ('+p.fotos.length+')', MG, y); y+=5;
+      for(var i=0;i<p.fotos.length;i++){
+        var row=Math.floor(i/ppr), col=i%ppr;
+        var fx=MG+col*(fW+3), fy=y+row*(fH+3);
+        if(fy+fH>PH-22){ addPie(); doc.addPage(); addCab(); y=y; fy=y+Math.floor(i%ppr===0?0:row)*(fH+3); }
+        try{
+          var fmt=p.fotos[i].indexOf('data:image/png')===0?'PNG':'JPEG';
+          doc.addImage(p.fotos[i],fmt,fx,fy,fW,fH);
+          doc.setDrawColor(BD[0],BD[1],BD[2]); doc.setLineWidth(0.2);
+          doc.rect(fx,fy,fW,fH);
+        }catch(e){}
+      }
+      y+=rowsN*(fH+3)+4;
     }
-    if(y+46>272){doc.addPage();y=mg;}
-    doc.setDrawColor(BD[0],BD[1],BD[2]);doc.setLineWidth(0.3);doc.line(mg,y,mg+cw,y);y+=5;
-    var fw2=(cw-6)/2;
-    doc.setFillColor(252,252,250);doc.roundedRect(mg,y,fw2,36,2,2,'FD');
-    doc.setFont('helvetica','bold');doc.setFontSize(7.5);doc.setTextColor(TX2[0],TX2[1],TX2[2]);
-    doc.text('Conforme / Firma del cliente:',mg+3,y+6);
-    if(p.firmaImg){try{doc.addImage(p.firmaImg,'PNG',mg+4,y+8,fw2-8,20);}catch(e){}}
-    doc.setFont('helvetica','normal');doc.setFontSize(7);
-    if(p.firmaNom)doc.text('Nombre: '+p.firmaNom,mg+3,y+32);
-    var tx2x=mg+fw2+6;
-    doc.setFillColor(252,252,250);doc.roundedRect(tx2x,y,fw2,36,2,2,'FD');
-    doc.setFont('helvetica','bold');doc.setFontSize(7.5);doc.setTextColor(TX2[0],TX2[1],TX2[2]);
-    doc.text('Firma del tecnico / Operario:',tx2x+3,y+6);
-    doc.setFont('helvetica','normal');doc.setFontSize(7);doc.text(p.op||cfg.res||'',tx2x+3,y+32);
-    doc.setFillColor(GR[0],GR[1],GR[2]);doc.rect(0,PH-12,W,12,'F');
-    doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(GG[0],GG[1],GG[2]);
-    doc.text((cfg.emp||'')+' - NIF: '+(cfg.nif||'')+' - '+(cfg.ri||'')+' - '+(cfg.rm||''),W/2,PH-5.5,{align:'center'});
-    var fname='Parte_'+p.num+'_'+(p.cliNom||'cliente').replace(/\s+/g,'_').substring(0,20)+'_'+fd(p.fecha).replace(/\//g,'')+'.pdf';
+
+    // Firmas
+    var firmaH=38;
+    checkPage(firmaH+6);
+    doc.setDrawColor(BD[0],BD[1],BD[2]); doc.setLineWidth(0.3);
+    doc.line(MG,y,MG+CW,y); y+=4;
+    var fw=(CW-4)/2;
+    // Firma cliente
+    doc.setFillColor(252,252,250); doc.roundedRect(MG,y,fw,firmaH,1.5,1.5,'FD');
+    doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(TX2[0],TX2[1],TX2[2]);
+    doc.text('Conforme / Firma del cliente:', MG+3, y+5.5);
+    if(p.firmaImg){
+      try{ doc.addImage(p.firmaImg,'PNG',MG+3,y+7,fw-6,22); }catch(e){}
+    }
+    doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(TX[0],TX[1],TX[2]);
+    if(p.firmaNom) doc.text('Nombre: '+p.firmaNom, MG+3, y+firmaH-5);
+    if(p.firmaDni) doc.text('DNI: '+p.firmaDni, MG+3+fw/2, y+firmaH-5);
+    // Firma tecnico
+    var tx2=MG+fw+4;
+    doc.setFillColor(252,252,250); doc.roundedRect(tx2,y,fw,firmaH,1.5,1.5,'FD');
+    doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(TX2[0],TX2[1],TX2[2]);
+    doc.text('Firma del tecnico / Operario:', tx2+3, y+5.5);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(TX[0],TX[1],TX[2]);
+    doc.text(p.op||cfg.res||'', tx2+3, y+firmaH-5);
+
+    // Pie ultima pagina
+    addPie();
+
+    // Descargar directamente
+    var fname='Parte_'+p.num+'_'+(p.cliNom||'cliente').replace(/\s+/g,'_').substring(0,18)+'_'+fd(p.fecha).replace(/\//g,'')+'.pdf';
     doc.save(fname);
-    toast('PDF descargado: '+fname);
-  }catch(err){toast('Error: '+err.message);console.error(err);}
-  if(btn){btn.disabled=false;btn.innerHTML='Generar y descargar PDF';}
+    msg('PDF descargado: '+fname);
+    if(btn){btn.disabled=false;btn.innerHTML='&#128196; Generar y descargar PDF';}
+  }
+
+  // Si jsPDF ya cargado, generar. Si no, cargar y generar.
+  if(window.jspdf&&window.jspdf.jsPDF){
+    doGenerate();
+  } else {
+    var s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s.onload=function(){ doGenerate(); };
+    s.onerror=function(){ msg('Error cargando libreria PDF. Comprueba la conexion.'); if(btn){btn.disabled=false;btn.innerHTML='&#128196; Generar y descargar PDF';} };
+    document.head.appendChild(s);
+  }
 }
 </script>
 <script type="module">
