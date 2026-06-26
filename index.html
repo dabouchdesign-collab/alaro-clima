@@ -364,15 +364,15 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:-apple-sy
 
 <div class="toast" id="toast"></div>
 
-<script type="module">
+<!-- Firebase compat SDKs (funciona sin ES modules) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script>
 // ── FIREBASE ─────────────────────────────────────────
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getFirestore, doc, getDoc, setDoc, onSnapshot, enableIndexedDbPersistence }
-  from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+// (usando compat SDK - no requiere ES modules)
 
 // ── CONFIGURACION FIREBASE ───────────────────────────
-// Sustituye estos valores por los de tu proyecto Firebase
 var FBcfg = {
   apiKey:            "AIzaSyAud7H7z-oJ5DokAfO8D_fkE710TStNAM4",
   authDomain:        "alaro-clima.firebaseapp.com",
@@ -382,18 +382,17 @@ var FBcfg = {
   appId:             "1:334204792734:web:2a17ae8d552b2e607f308f"
 };
 
-var fbApp  = initializeApp(FBcfg);
-var db     = getFirestore(fbApp);
-var auth   = getAuth(fbApp);
+firebase.initializeApp(FBcfg);
+var db   = firebase.firestore();
+var auth = firebase.auth();
 
 // Persistencia offline
-try { enableIndexedDbPersistence(db); } catch(e) {}
+db.enablePersistence().catch(function(e){ console.warn('Persistence:', e.code); });
 
-// Coleccion unica tipo "documento raiz"
 var DOC_ID = 'datos';
 var COL    = 'alaro';
 
-// ── CACHE LOCAL (fuente de verdad en memoria) ─────────
+// ── CACHE LOCAL ───────────────────────────────────────
 var _cache = { cli:[], obras:[], partes:[], cfg: null, _loaded: false };
 
 var CFG_DEFAULT = {
@@ -407,9 +406,9 @@ var CFG_DEFAULT = {
 function syncBadge(estado) {
   var b = document.getElementById('sync-badge');
   if (!b) return;
-  if (estado === 'ok')     { b.textContent='🟢'; b.title='Sincronizado'; }
-  if (estado === 'sync')   { b.textContent='🔄'; b.title='Sincronizando...'; }
-  if (estado === 'error')  { b.textContent='🔴'; b.title='Sin conexion (datos locales)'; }
+  if (estado === 'ok')    { b.textContent='\uD83D\uDFE2'; b.title='Sincronizado'; }
+  if (estado === 'sync')  { b.textContent='\uD83D\uDD04'; b.title='Sincronizando...'; }
+  if (estado === 'error') { b.textContent='\uD83D\uDD34'; b.title='Sin conexion (datos locales)'; }
 }
 
 // ── LEER DE FIRESTORE Y ACTUALIZAR CACHE ──────────────
@@ -421,7 +420,6 @@ function aplicarSnapshot(data) {
   _cache.cfg    = data.cfg    || CFG_DEFAULT;
   _cache._loaded = true;
   syncBadge('ok');
-  // Re-render de la pantalla activa
   var activa = document.querySelector('.scr.on');
   if (activa) {
     var id = activa.id;
@@ -433,30 +431,25 @@ function aplicarSnapshot(data) {
 }
 
 // ── GUARDAR TODO A FIRESTORE ──────────────────────────
-async function guardarFirestore() {
+function guardarFirestore() {
   syncBadge('sync');
-  try {
-    await setDoc(doc(db, COL, DOC_ID), {
-      cli:    _cache.cli,
-      obras:  _cache.obras,
-      partes: _cache.partes,
-      cfg:    _cache.cfg || CFG_DEFAULT,
-      ts:     new Date().toISOString()
-    });
-    syncBadge('ok');
-  } catch(e) {
-    syncBadge('error');
-    console.error('Firestore write error:', e);
-  }
+  db.collection(COL).doc(DOC_ID).set({
+    cli:    _cache.cli,
+    obras:  _cache.obras,
+    partes: _cache.partes,
+    cfg:    _cache.cfg || CFG_DEFAULT,
+    ts:     new Date().toISOString()
+  })
+  .then(function(){ syncBadge('ok'); })
+  .catch(function(e){ syncBadge('error'); console.error('Firestore write:', e); });
 }
 
 // ── DB ────────────────────────────────────────────────
 var DB = {
-  clientes: function() { return _cache.cli || []; },
-  obras:    function() { return _cache.obras || []; },
+  clientes: function() { return _cache.cli    || []; },
+  obras:    function() { return _cache.obras  || []; },
   partes:   function() { return _cache.partes || []; },
-  cfg:      function() { return _cache.cfg || CFG_DEFAULT; },
-
+  cfg:      function() { return _cache.cfg    || CFG_DEFAULT; },
   s: function(k, v) {
     if (k==='cli')    _cache.cli    = v;
     if (k==='obras')  _cache.obras  = v;
@@ -467,40 +460,34 @@ var DB = {
 };
 
 // ── LISTENER TIEMPO REAL ──────────────────────────────
-var _unsubscribe = null;
 function iniciarListener() {
-  if (_unsubscribe) _unsubscribe();
-  _unsubscribe = onSnapshot(
-    doc(db, COL, DOC_ID),
-    function(snap) { aplicarSnapshot(snap.exists() ? snap.data() : null); },
+  db.collection(COL).doc(DOC_ID).onSnapshot(
+    function(snap) { aplicarSnapshot(snap.exists ? snap.data() : null); },
     function(err)  { syncBadge('error'); console.warn('Snapshot error:', err); }
   );
 }
 
 // ── POLLING SEGURIDAD CADA 10s ────────────────────────
-async function pollFirestore() {
-  try {
-    var snap = await getDoc(doc(db, COL, DOC_ID));
-    aplicarSnapshot(snap.exists() ? snap.data() : null);
-  } catch(e) { syncBadge('error'); }
+function pollFirestore() {
+  db.collection(COL).doc(DOC_ID).get()
+    .then(function(snap){ aplicarSnapshot(snap.exists ? snap.data() : null); })
+    .catch(function(e){ syncBadge('error'); });
 }
 
-// ── ARRANQUE ──────────────────────────────────────────
-signInAnonymously(auth)
+// ── ARRANQUE FIREBASE ─────────────────────────────────
+auth.signInAnonymously()
   .then(function() {
     iniciarListener();
-    setInterval(pollFirestore, 10000); // backup poll cada 10s
+    setInterval(pollFirestore, 10000);
   })
   .catch(function(e) {
     syncBadge('error');
     console.error('Auth error:', e);
-    // Funciona en modo local si falla Firebase
     _cache._loaded = true;
   });
 
 // ── STATE ────────────────────────────────────────────
 var P = {}, fotos = [], editCliId = null, editObraId = null, fCtx = null, firmaSi = false;
-
 // ── INIT ─────────────────────────────────────────────
 window.onload = function() {
   var d = new Date();
@@ -937,6 +924,7 @@ window.añadirFotos=añadirFotos; window.quitarFoto=quitarFoto; window.borrarFir
 window.soloGuardar=soloGuardar; window.generarPDF=generarPDF; window.verParte=verParte;
 window.borrarParte=borrarParte; window.pdfDe=pdfDe; window.cancelar=cancelar;
 window.cerrarModal=cerrarModal; window.descartar=descartar;
+
 </script>
 </body>
 </html>
