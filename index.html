@@ -12,7 +12,7 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--tx);font-size:15px;line-height:1.5;overscroll-behavior:none}
 #app{max-width:480px;margin:0 auto;min-height:100vh}
-.hdr{background:var(--card);border-bottom:.5px solid var(--b);padding:0 16px;height:54px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50}
+.hdr{background:var(--w);border-bottom:.5px solid var(--b);padding:0 16px;height:54px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50}
 .hdr-logo{width:34px;height:34px;background:var(--g);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px}
 .hdr-title{font-size:16px;font-weight:600;flex:1;letter-spacing:-.3px}
 .hdr-btn{background:none;border:none;cursor:pointer;color:var(--tx2);width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:22px}
@@ -20,14 +20,14 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
 .screen{display:none;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:calc(100vh - 54px)}
 .screen.active{display:flex}
 .sec-lbl{padding:16px 16px 5px;font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em}
-.cg{background:var(--card);border-top:.5px solid var(--b);border-bottom:.5px solid var(--b);margin-bottom:2px}
+.cg{background:var(--w);border-top:.5px solid var(--b);border-bottom:.5px solid var(--b);margin-bottom:2px}
 .row{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:.5px solid var(--b);min-height:48px}
 .row:last-child{border-bottom:none}
 .rl{font-size:13px;color:var(--tx2);min-width:96px;flex-shrink:0}
 .row select,.row input{flex:1;border:none;background:none;font-size:15px;color:var(--tx);text-align:right;outline:none;font-family:inherit;min-width:0}
 .row-ta{padding:12px 16px}
 .row-ta textarea{width:100%;border:none;background:none;font-size:15px;color:var(--tx);outline:none;font-family:inherit;resize:none;line-height:1.6;min-height:80px}
-.li{background:var(--card);border-bottom:.5px solid var(--b);padding:13px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:background .08s;min-height:62px}
+.li{background:var(--w);border-bottom:.5px solid var(--b);padding:13px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:background .08s;min-height:62px}
 .li:first-child{border-top:.5px solid var(--b)}
 .li:active{background:#F0F0EE}
 .av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0;background:var(--gl);color:var(--gd)}
@@ -40,7 +40,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
 .dash-hero{grid-column:1/-1;background:var(--g);border-radius:var(--rlg);padding:18px;cursor:pointer;display:flex;align-items:center;gap:14px}
 .dash-hero:active{opacity:.88}
 .dhi{width:46px;height:46px;background:rgba(255,255,255,.15);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
-.dc{background:var(--card);border:.5px solid var(--b);border-radius:var(--rlg);padding:16px 14px;cursor:pointer}
+.dc{background:var(--w);border:.5px solid var(--b);border-radius:var(--rlg);padding:16px 14px;cursor:pointer}
 .dc:active{opacity:.8}
 .dc-i{font-size:22px;margin-bottom:7px}.dc-l{font-size:13px;font-weight:600}.dc-s{font-size:11px;color:var(--tx2);margin-top:2px}
 .step-bar{padding:10px 16px 2px;display:flex;gap:4px}
@@ -48,7 +48,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
 .step.done{background:var(--g)}.step.cur{background:#5DCAA5}
 .step-info{padding:3px 16px 10px;font-size:12px;color:var(--tx2)}
 .tipo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 16px 16px}
-.tipo-btn{border:.5px solid var(--b2);background:var(--card);border-radius:var(--rmd);padding:14px 10px;cursor:pointer;text-align:center;font-family:inherit}
+.tipo-btn{border:.5px solid var(--b2);background:var(--w);border-radius:var(--rmd);padding:14px 10px;cursor:pointer;text-align:center;font-family:inherit}
 .tipo-btn.sel{background:var(--gl);border-color:var(--g);border-width:1.5px}
 .ti{font-size:22px;margin-bottom:6px;line-height:1}
 .tl{font-size:12px;font-weight:500;color:var(--tx);line-height:1.3}
@@ -60,16 +60,16 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
 .fadd{border:1.5px dashed var(--b2);background:none;border-radius:var(--rmd);padding:13px;cursor:pointer;display:flex;align-items:center;gap:10px;width:100%;font-family:inherit;font-size:14px;color:var(--tx2)}
 #foto-input{display:none}
 .firma-wrap{padding:0 16px 6px}
-.firma-box{border:.5px solid var(--b2);border-radius:var(--rmd);background:var(--card);position:relative;overflow:hidden}
+.firma-box{border:.5px solid var(--b2);border-radius:var(--rmd);background:var(--w);position:relative;overflow:hidden}
 #firma-canvas{display:block;width:100%;height:160px;cursor:crosshair;touch-action:none}
 .firma-ph{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:13px;color:var(--tx3);pointer-events:none;text-align:center;line-height:1.6}
 .firma-clr{font-size:12px;color:var(--tx2);background:none;border:none;cursor:pointer;padding:6px 0;font-family:inherit}
 .btn-p{background:var(--g);color:#fff;border:none;border-radius:var(--rmd);padding:14px 20px;font-size:15px;font-weight:600;cursor:pointer;width:calc(100% - 32px);margin:0 16px 10px;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px}
 .btn-p:active{opacity:.85}.btn-p:disabled{opacity:.5;cursor:default}
-.btn-s{background:var(--card);color:var(--tx);border:.5px solid var(--b2);border-radius:var(--rmd);padding:13px 20px;font-size:14px;cursor:pointer;width:calc(100% - 32px);margin:0 16px 8px;font-family:inherit}
+.btn-s{background:var(--w);color:var(--tx);border:.5px solid var(--b2);border-radius:var(--rmd);padding:13px 20px;font-size:14px;cursor:pointer;width:calc(100% - 32px);margin:0 16px 8px;font-family:inherit}
 .btn-d{background:none;color:var(--red);border:none;padding:12px 20px;font-size:14px;cursor:pointer;width:calc(100% - 32px);margin:0 16px 6px;font-family:inherit}
 .sp{height:20px}
-.sum-card{background:var(--card);border-top:.5px solid var(--b);border-bottom:.5px solid var(--b);margin-bottom:6px}
+.sum-card{background:var(--w);border-top:.5px solid var(--b);border-bottom:.5px solid var(--b);margin-bottom:6px}
 .sr{display:flex;justify-content:space-between;align-items:baseline;padding:10px 16px;border-bottom:.5px solid var(--b);font-size:14px}
 .sr:last-child{border-bottom:none}
 .sk{color:var(--tx2)}.sv{font-weight:500;text-align:right;max-width:58%;line-height:1.4}
@@ -81,11 +81,41 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;display:none;align-items:flex-end}
 .modal-ov.open{display:flex}
-.modal-box{background:var(--card);border-radius:20px 20px 0 0;padding:24px 20px 20px;width:100%;max-width:480px;margin:0 auto}
+.modal-box{background:var(--w);border-radius:20px 20px 0 0;padding:24px 20px 20px;width:100%;max-width:480px;margin:0 auto}
 .modal-t{font-size:16px;font-weight:600;margin-bottom:8px}
 .modal-s{font-size:14px;color:var(--tx2);margin-bottom:20px;line-height:1.5}
 @keyframes spin{to{transform:rotate(360deg)}}
 .dot.ok{background:#1D9E75!important}.dot.err{background:#e53!important}
+
+.pdf-page{width:210mm;min-height:297mm;background:#fff;margin:0 auto 12px;box-shadow:0 2px 12px rgba(0,0,0,.18);padding:12mm 14mm;font-family:Arial,sans-serif;font-size:11px;color:#111;display:flex;flex-direction:column;position:relative}
+.pdf-cab{background:#1D9E75;color:#fff;padding:10px 14px;border-radius:5px;display:flex;justify-content:space-between;margin-bottom:8px}
+.pdf-cab-emp{font-size:15px;font-weight:700;margin-bottom:2px}
+.pdf-cab-sub{font-size:7.5px;opacity:.85;line-height:1.5}
+.pdf-cab-r{text-align:right}
+.pdf-cab-tit{font-size:13px;font-weight:700;margin-bottom:2px}
+.pdf-regs{background:#f5f5f3;border:1px solid #e0e0dd;border-radius:3px;padding:4px 8px;font-size:7px;color:#666;margin-bottom:8px}
+.pdf-cols{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:8px}
+.pdf-col{border:1px solid #e0e0dd;border-radius:3px;padding:7px}
+.pdf-col-tit{font-size:7px;font-weight:700;color:#666;text-transform:uppercase;margin-bottom:4px;letter-spacing:.05em}
+.pdf-col-n{font-size:11px;font-weight:700;margin-bottom:3px}
+.pdf-col-d{font-size:8px;color:#555;line-height:1.5}
+.pdf-badge{display:inline-block;background:#1D9E75;color:#fff;font-size:8px;font-weight:700;padding:1px 7px;border-radius:8px;margin-top:3px}
+.pdf-sec{font-size:7.5px;font-weight:700;color:#1D9E75;text-transform:uppercase;letter-spacing:.06em;margin:7px 0 3px}
+.pdf-bloque{border:1px solid #e8e8e6;border-radius:3px;padding:7px;font-size:9.5px;line-height:1.6;white-space:pre-wrap;background:#fcfcfb;min-height:28px;margin-bottom:5px}
+.pdf-fotos{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:7px}
+.pdf-fotos img{width:58mm;height:43mm;object-fit:cover;border-radius:3px;border:1px solid #e0e0dd}
+.pdf-firmas{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:auto;padding-top:7px;border-top:1px solid #e0e0dd}
+.pdf-fbox{border:1px solid #e0e0dd;border-radius:3px;padding:6px;min-height:55px}
+.pdf-flbl{font-size:7px;color:#777;margin-bottom:3px}
+.pdf-fimg{max-width:100%;max-height:45px;display:block;margin-top:4px}
+.pdf-fnom{font-size:7.5px;color:#333;margin-top:4px;padding-top:3px;border-top:1px solid #e0e0dd}
+.pdf-pie{background:#1D9E75;color:rgba(255,255,255,.8);font-size:6.5px;text-align:center;padding:4px;border-radius:3px;margin-top:8px}
+@media print{
+  body *{visibility:hidden}
+  #pdf-preview,#pdf-preview *{visibility:visible}
+  #pdf-preview{position:fixed;left:0;top:0;width:100%;background:#fff}
+  .pdf-page{box-shadow:none;margin:0;page-break-after:always}
+}
 </style>
 </head>
 <body>
@@ -177,11 +207,36 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
 
 <div id="s-partes" class="screen">
   <div class="hdr"><button class="hdr-btn" onclick="nav('s-dash')">&#8592;</button><span class="hdr-title">Partes realizados</span></div>
+  <div style="background:var(--w);border-bottom:.5px solid var(--b);padding:10px 14px;display:flex;flex-direction:column;gap:8px">
+    <div style="display:flex;gap:8px">
+      <div style="flex:1;position:relative">
+        <span style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--tx2)">&#128197;</span>
+        <input id="f-fecha" type="date" oninput="filtrarPartes()" style="width:100%;border:.5px solid var(--b);border-radius:8px;padding:7px 8px 7px 26px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--tx);outline:none">
+      </div>
+      <button onclick="limpiarFiltros()" style="border:.5px solid var(--b);background:var(--bg);border-radius:8px;padding:7px 10px;font-size:12px;color:var(--tx2);cursor:pointer;white-space:nowrap;font-family:inherit">Limpiar</button>
+    </div>
+    <select id="f-cli" oninput="filtrarPartes()" style="border:.5px solid var(--b);border-radius:8px;padding:7px 8px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--tx);outline:none;width:100%">
+      <option value="">Todos los clientes</option>
+    </select>
+    <select id="f-obra" oninput="filtrarPartes()" style="border:.5px solid var(--b);border-radius:8px;padding:7px 8px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--tx);outline:none;width:100%">
+      <option value="">Todas las obras</option>
+    </select>
+  </div>
+  <div style="padding:6px 14px 2px;font-size:11px;color:var(--tx2)" id="partes-count"></div>
   <div id="lista-partes"></div>
 </div>
 <div id="s-parte-det" class="screen">
   <div class="hdr"><button class="hdr-btn" onclick="nav('s-partes')">&#8592;</button><span class="hdr-title" id="det-t">Parte</span></div>
   <div id="det-body"></div>
+</div>
+
+<div id="s-pdf" class="screen">
+  <div class="hdr" style="background:var(--g)">
+    <button class="hdr-btn" style="color:#fff" onclick="cerrarPDF()">&#10005; Cerrar</button>
+    <span class="hdr-title" style="color:#fff" id="pdf-tit">Parte</span>
+    <button class="hdr-btn" style="color:#fff;font-size:15px;font-weight:600;width:auto;padding:0 10px" onclick="imprimirPDF()" id="btn-imprimir">&#128196; Guardar PDF</button>
+  </div>
+  <div id="pdf-preview" style="flex:1;overflow-y:auto;background:#e8e8e6;padding:10px 0"></div>
 </div>
 
 <div id="s-p1" class="screen">
@@ -333,7 +388,7 @@ function nav(id){
   if(s){s.classList.add('active');s.scrollTop=0;}
   if(id==='s-clientes')renderClientes();
   if(id==='s-obras')renderObras();
-  if(id==='s-partes')renderPartes();
+  if(id==='s-partes'){llenarFiltros();renderPartes();}
   if(id==='s-dash')renderDash();
 }
 var tT;
@@ -614,9 +669,58 @@ function soloGuardar(){
   toast('Parte #'+p.num+' guardado');P={};fotos=[];nav('s-dash');
 }
 
-window._rPartes = function(){ renderPartes(); }; function renderPartes(){
-  var lista=window.DB.partes().slice().reverse(),cont=document.getElementById('lista-partes');if(!cont)return;
-  if(!lista.length){cont.innerHTML='<div class="empty"><div class="ei">&#128203;</div><div class="et">Sin partes</div><div class="es">Los partes creados apareceran aqui</div></div>';return;}
+window._rPartes = function(){ renderPartes(); };
+window._llenarFiltros = function(){ llenarFiltros(); }; function renderPartes(){
+  filtrarPartes();
+}
+
+function llenarFiltros(){
+  var partes=window.DB?window.DB.partes():[];
+  var selCli=document.getElementById('f-cli');
+  var selObra=document.getElementById('f-obra');
+  if(!selCli||!selObra) return;
+  var cliActual=selCli.value, obraActual=selObra.value;
+  var clientes=[...new Set(partes.map(function(p){return p.cliNom||'';}).filter(Boolean))].sort();
+  var obras=[...new Set(partes.map(function(p){return p.obraNom||'';}).filter(Boolean))].sort();
+  selCli.innerHTML='<option value="">Todos los clientes</option>'+clientes.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('');
+  selCli.value=cliActual;
+  selObra.innerHTML='<option value="">Todas las obras</option>'+obras.map(function(o){return '<option value="'+esc(o)+'">'+esc(o)+'</option>';}).join('');
+  selObra.value=obraActual;
+}
+
+function filtrarPartes(){
+  var cont=document.getElementById('lista-partes'); if(!cont) return;
+  var partes=window.DB?window.DB.partes().slice().reverse():[];
+  var fFecha=document.getElementById('f-fecha'); var vFecha=fFecha?fFecha.value:'';
+  var fCli=document.getElementById('f-cli'); var vCli=fCli?fCli.value:'';
+  var fObra=document.getElementById('f-obra'); var vObra=fObra?fObra.value:'';
+  var lista=partes.filter(function(p){
+    if(vFecha && p.fecha!==vFecha) return false;
+    if(vCli && (p.cliNom||'')!==vCli) return false;
+    if(vObra && (p.obraNom||'')!==vObra) return false;
+    return true;
+  });
+  var cnt=document.getElementById('partes-count');
+  if(cnt) cnt.textContent=lista.length+' parte'+(lista.length!==1?'s':'')+(partes.length!==lista.length?' de '+partes.length:'');
+  if(!lista.length){
+    cont.innerHTML='<div class="empty"><div class="ei">&#128203;</div><div class="et">'+(partes.length?'Sin resultados':'Sin partes')+'</div><div class="es">'+(partes.length?'Prueba con otros filtros':'Los partes creados apareceran aqui')+'</div></div>';
+    return;
+  }
+  cont.innerHTML=lista.map(function(p){
+    return '<div class="li" onclick="verParte(''+p.id+'')">'
+      +'<div class="av">'+ini(p.cliNom)+'</div>'
+      +'<div class="li-info"><div class="li-t">'+esc(p.cliNom||'Sin cliente')+'</div>'
+      +'<div class="li-m">#'+esc(p.num)+' - '+esc(fd(p.fecha))+' - '+esc(p.tipo||'')+'</div></div>'
+      +'<span class="chv">&#8250;</span></div>';
+  }).join('');
+}
+
+function limpiarFiltros(){
+  var f=document.getElementById('f-fecha'); if(f) f.value='';
+  var c=document.getElementById('f-cli'); if(c) c.value='';
+  var o=document.getElementById('f-obra'); if(o) o.value='';
+  filtrarPartes();
+}
   cont.innerHTML=lista.map(function(p){
     return '<div class="li" onclick="verParte(''+p.id+'')">'
       +'<div class="av">'+ini(p.cliNom)+'</div>'
@@ -647,9 +751,9 @@ function verParte(id){
     +'<div class="sr"><span class="sk">Firmado</span><span class="sv">'+(p.firmada?'Si':'No')+'</span></div>'
     +'</div>'
     +'<div class="sec-lbl">Descripcion del trabajo</div>'
-    +'<div style="background:var(--card);border-top:.5px solid var(--b);border-bottom:.5px solid var(--b);padding:14px 16px;font-size:14px;line-height:1.7;white-space:pre-wrap;margin-bottom:2px">'+esc(p.desc||'-')+'</div>'
-    +(p.obs?'<div class="sec-lbl">Observaciones</div><div style="background:var(--card);border-top:.5px solid var(--b);border-bottom:.5px solid var(--b);padding:14px 16px;font-size:14px;line-height:1.7;white-space:pre-wrap;margin-bottom:2px">'+esc(p.obs)+'</div>':'')
-    +(p.mat?'<div class="sec-lbl">Materiales</div><div style="background:var(--card);border-top:.5px solid var(--b);border-bottom:.5px solid var(--b);padding:14px 16px;font-size:14px;line-height:1.7;white-space:pre-wrap;margin-bottom:2px">'+esc(p.mat)+'</div>':'')
+    +'<div style="background:var(--w);border-top:.5px solid var(--b);border-bottom:.5px solid var(--b);padding:14px 16px;font-size:14px;line-height:1.7;white-space:pre-wrap;margin-bottom:2px">'+esc(p.desc||'-')+'</div>'
+    +(p.obs?'<div class="sec-lbl">Observaciones</div><div style="background:var(--w);border-top:.5px solid var(--b);border-bottom:.5px solid var(--b);padding:14px 16px;font-size:14px;line-height:1.7;white-space:pre-wrap;margin-bottom:2px">'+esc(p.obs)+'</div>':'')
+    +(p.mat?'<div class="sec-lbl">Materiales</div><div style="background:var(--w);border-top:.5px solid var(--b);border-bottom:.5px solid var(--b);padding:14px 16px;font-size:14px;line-height:1.7;white-space:pre-wrap;margin-bottom:2px">'+esc(p.mat)+'</div>':'')
     +fh+fis
     +'<div class="sp"></div>'
     +'<button class="btn-p" onclick="pdfDe(''+id+'')">Generar PDF</button>'
@@ -667,16 +771,91 @@ function generarPDF(){
   window.DB.saveParte(p).then(function(){
     P={}; fotos=[];
     if(btn){btn.disabled=false;btn.innerHTML='&#128196; Generar y descargar PDF';}
-    doPDF(p);
+    mostrarPDF(p);
   }).catch(function(e){ msg('Error al guardar: '+e.message); if(btn){btn.disabled=false;btn.innerHTML='&#128196; Generar y descargar PDF';} });
 }
 
 function pdfDe(id){
   var p=(window.DB?window.DB.partes():[]).find(function(z){ return z.id===id; });
-  if(p) doPDF(p);
+  if(p) mostrarPDF(p);
 }
 
-function doPDF(p){
+var _pdfAnterior='';
+
+function mostrarPDF(p){
+  _pdfAnterior = document.querySelector('.screen.active') ? document.querySelector('.screen.active').id : 's-home';
+  var cfg=(window.DB&&window.DB.cfg())||{emp:'Alaro Clima',res:'',nif:'',dir:'',cp:'',mov:'',ri:'',rm:''};
+  var tit=document.getElementById('pdf-tit');
+  if(tit) tit.textContent='Parte #'+p.num+' - '+esc(p.cliNom||'');
+
+  var fotosSec='';
+  if(p.fotos&&p.fotos.length){
+    fotosSec='<div class="pdf-sec">FOTOGRAFIAS DE LA VISITA ('+p.fotos.length+')</div>'
+      +'<div class="pdf-fotos">'+p.fotos.map(function(s){ return '<img src="'+s+'">'; }).join('')+'</div>';
+  }
+  var firmaSec='';
+  if(p.firmaImg) firmaSec='<img class="pdf-fimg" src="'+p.firmaImg+'">';
+
+  var html=''
+    +'<div class="pdf-cab">'
+    +'<div><div class="pdf-cab-emp">'+(cfg.emp||'Alaro Clima')+'</div>'
+    +'<div class="pdf-cab-sub">Instalaciones y mantenimiento de climatizacion &nbsp;·&nbsp; RITE &nbsp;·&nbsp; Electricidad B.T.<br>'+(cfg.dir||'')+' &nbsp;·&nbsp; '+(cfg.cp||'')+' &nbsp;&nbsp; Tel: '+(cfg.mov||'')+'</div></div>'
+    +'<div class="pdf-cab-r"><div class="pdf-cab-tit">PARTE DE TRABAJO</div><div style="font-size:8.5px;opacity:.85">Num. '+p.num+'<br>Fecha: '+fd(p.fecha)+'</div></div>'
+    +'</div>'
+    +'<div class="pdf-regs">Empresa acreditada &nbsp;·&nbsp; Reg. Industrial: '+(cfg.ri||'')+' &nbsp;·&nbsp; Reg. Medioambiente: '+(cfg.rm||'')+' &nbsp;·&nbsp; NIF: '+(cfg.nif||'')+'</div>'
+    +'<div class="pdf-cols">'
+    +'<div class="pdf-col"><div class="pdf-col-tit">Cliente</div><div class="pdf-col-n">'+(p.cliNom||'-')+'</div>'
+    +'<div class="pdf-col-d">'+(p.cliDir||'')+(p.cliNif?'<br>NIF: '+p.cliNif:'')+(p.cliTel?'<br>Tel: '+p.cliTel:'')+'</div></div>'
+    +'<div class="pdf-col"><div class="pdf-col-tit">Obra / Proyecto</div><div class="pdf-col-n">'+(p.obraNom||p.obraDir||'-')+'</div>'
+    +'<div class="pdf-col-d">'+(p.obraDir&&p.obraNom?p.obraDir+'<br>':'')+'Operario: '+(p.op||'')+' <span class="pdf-badge">'+(p.tipo||'')+'</span></div></div>'
+    +'</div>'
+    +'<div class="pdf-sec">DESCRIPCION DEL TRABAJO / INCIDENCIA / ASISTENCIA</div>'
+    +'<div class="pdf-bloque">'+(p.desc||'-')+'</div>'
+    +(p.obs?'<div class="pdf-sec">OBSERVACIONES / INCIDENCIAS</div><div class="pdf-bloque">'+p.obs+'</div>':'')
+    +(p.mat?'<div class="pdf-sec">MATERIALES UTILIZADOS</div><div class="pdf-bloque">'+p.mat+'</div>':'')
+    +fotosSec
+    +'<div class="pdf-firmas">'
+    +'<div class="pdf-fbox"><div class="pdf-flbl">Conforme / Firma del cliente:</div>'+firmaSec
+    +'<div class="pdf-fnom">'+(p.firmaNom?'Nombre: '+p.firmaNom:'')+(p.firmaDni?' &nbsp; DNI: '+p.firmaDni:'')+'</div></div>'
+    +'<div class="pdf-fbox"><div class="pdf-flbl">Firma del tecnico / Operario:</div>'
+    +'<div style="margin-top:28px;font-size:8px;color:#333">'+(p.op||cfg.res||'')+'</div></div>'
+    +'</div>'
+    +'<div class="pdf-pie">'+(cfg.emp||'')+' &nbsp;·&nbsp; NIF: '+(cfg.nif||'')+' &nbsp;·&nbsp; '+(cfg.ri||'')+' &nbsp;·&nbsp; '+(cfg.rm||'')+'</div>';
+
+  var preview=document.getElementById('pdf-preview');
+  if(preview){
+    preview.innerHTML='<div class="pdf-page">'+html+'</div>';
+  }
+  // Store parte for jsPDF download
+  window._parteActual=p;
+  nav('s-pdf');
+}
+
+function cerrarPDF(){
+  nav(_pdfAnterior||'s-home');
+}
+
+function imprimirPDF(){
+  var btn=document.getElementById('btn-imprimir');
+  if(btn){btn.disabled=true;btn.textContent='Generando...';}
+  function doGen(){
+    var jsPDF=window.jspdf&&window.jspdf.jsPDF;
+    if(!jsPDF){ msg('Error cargando libreria PDF'); if(btn){btn.disabled=false;btn.textContent='&#128196; Guardar PDF';} return; }
+    doPDF(window._parteActual, function(){
+      if(btn){btn.disabled=false;btn.innerHTML='&#128196; Guardar PDF';}
+    });
+  }
+  if(window.jspdf&&window.jspdf.jsPDF){ doGen(); }
+  else {
+    var s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s.onload=doGen;
+    s.onerror=function(){ msg('Error cargando libreria. Comprueba conexion.'); if(btn){btn.disabled=false;btn.innerHTML='&#128196; Guardar PDF';} };
+    document.head.appendChild(s);
+  }
+}
+
+function doPDF(p, onDone){
   var btn=document.getElementById('btn-pdf');
   if(btn){btn.disabled=true;btn.textContent='Generando PDF...';}
   // Load jsPDF dynamically and generate
@@ -858,7 +1037,7 @@ function doPDF(p){
     var fname='Parte_'+p.num+'_'+(p.cliNom||'cliente').replace(/\s+/g,'_').substring(0,18)+'_'+fd(p.fecha).replace(/\//g,'')+'.pdf';
     doc.save(fname);
     msg('PDF descargado: '+fname);
-    if(btn){btn.disabled=false;btn.innerHTML='&#128196; Generar y descargar PDF';}
+    if(onDone) onDone();
   }
 
   // Si jsPDF ya cargado, generar. Si no, cargar y generar.
@@ -885,7 +1064,7 @@ signInAnonymously(auth).then(function(){
   dot("ok");
   onSnapshot(collection(db,"clientes"),function(snap){CLI=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});CLI.sort(function(a,b){return(a.n||"").localeCompare(b.n||"");});window.fbReady&&window.fbReady();window._rCli&&window._rCli();window._rHome&&window._rHome();var el=document.getElementById("cnt-c");if(el)el.textContent=CLI.length+" guardado"+(CLI.length!==1?"s":"");});
   onSnapshot(collection(db,"obras"),function(snap){OBRAS=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});OBRAS.sort(function(a,b){return(a.n||"").localeCompare(b.n||"");});window._rObras&&window._rObras();window._rHome&&window._rHome();var el=document.getElementById("cnt-o");if(el)el.textContent=OBRAS.length+" activa"+(OBRAS.length!==1?"s":"");});
-  onSnapshot(collection(db,"partes"),function(snap){PARTES=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});PARTES.sort(function(a,b){return(b.ts||"").localeCompare(a.ts||"");});window._rPartes&&window._rPartes();window._rHome&&window._rHome();var el=document.getElementById("cnt-p");if(el)el.textContent=PARTES.length+" registrado"+(PARTES.length!==1?"s":"");});
+  onSnapshot(collection(db,"partes"),function(snap){PARTES=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});PARTES.sort(function(a,b){return(b.ts||"").localeCompare(a.ts||"");});window._rPartes&&window._rPartes(); window._llenarFiltros&&window._llenarFiltros();window._rHome&&window._rHome();var el=document.getElementById("cnt-p");if(el)el.textContent=PARTES.length+" registrado"+(PARTES.length!==1?"s":"");});
 }).catch(function(e){dot("err");var el=document.getElementById("home-list");if(el)el.innerHTML="<div class=\"empty\"><div class=\"empty-i\">&#9888;</div><div class=\"empty-t\">Sin conexion</div><div class=\"empty-s\">Comprueba la conexion a internet.</div></div>";});
 window.DB={
   clientes:function(){return CLI;},obras:function(){return OBRAS;},partes:function(){return PARTES;},
