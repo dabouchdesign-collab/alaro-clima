@@ -37,6 +37,10 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:-apple-sy
 .item-s{font-size:12px;color:var(--t2);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chev{color:var(--t3);font-size:16px;flex-shrink:0}
 .tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:12px;background:#e5f2e0;color:#2e6b1a;flex-shrink:0}
+/* FILTROS HOME */
+.filt-btn{flex:1;border:.5px solid var(--b2);background:var(--w);border-radius:8px;padding:7px 4px;font-size:12px;font-weight:500;color:var(--t2);font-family:inherit;cursor:pointer;transition:background .1s}
+.filt-btn.on{background:var(--gl);border-color:var(--g);color:var(--gd);font-weight:600}
+.filt-btn:active{opacity:.75}
 /* DASHBOARD */
 .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px}
 .hero{grid-column:1/-1;background:var(--g);border-radius:var(--rl);padding:16px 18px;cursor:pointer;display:flex;align-items:center;gap:14px}
@@ -134,7 +138,29 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:-apple-sy
       <div class="dcard-i">📍</div><div class="dcard-l">Obras</div><div class="dcard-s" id="cnt-o">0 activas</div>
     </div>
   </div>
-  <div class="lbl">Ultimos partes</div>
+  <div style="padding:12px 14px 4px;display:flex;align-items:center;justify-content:space-between">
+    <span style="font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.06em">Partes</span>
+    <span style="font-size:12px;color:var(--t2)" id="home-count"></span>
+  </div>
+  <div id="home-filtros" style="padding:0 14px 10px;display:flex;flex-direction:column;gap:8px">
+    <div style="display:flex;gap:6px">
+      <button class="filt-btn on" onclick="setFiltroFecha(this,'todos')">Todos</button>
+      <button class="filt-btn" onclick="setFiltroFecha(this,'semana')">Esta semana</button>
+      <button class="filt-btn" onclick="setFiltroFecha(this,'mes')">Este mes</button>
+    </div>
+    <div style="position:relative">
+      <select id="filt-cli" onchange="renderHome()" style="width:100%;border:.5px solid var(--b2);background:var(--w);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--t1);font-family:inherit;appearance:none;-webkit-appearance:none;cursor:pointer">
+        <option value="">🏢 Todos los clientes</option>
+      </select>
+      <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--t3)">&#8250;</span>
+    </div>
+    <div style="position:relative">
+      <select id="filt-obra" onchange="renderHome()" style="width:100%;border:.5px solid var(--b2);background:var(--w);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--t1);font-family:inherit;appearance:none;-webkit-appearance:none;cursor:pointer">
+        <option value="">📍 Todas las obras</option>
+      </select>
+      <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--t3)">&#8250;</span>
+    </div>
+  </div>
   <div id="home-list"></div>
 </div>
 
@@ -542,24 +568,74 @@ function guardarCfg() {
   DB.s('cfg', c); msg('Datos guardados'); go('s-home');
 }
 
-// ── HOME ─────────────────────────────────────────────
+// ── HOME FILTROS ─────────────────────────────────────────────────────
+var _filtFecha = 'todos';
+function setFiltroFecha(btn, val) {
+  _filtFecha = val;
+  document.querySelectorAll('.filt-btn').forEach(function(b){ b.classList.remove('on'); });
+  btn.classList.add('on');
+  renderHome();
+}
+function llenarFiltrosHome() {
+  var partes = DB.partes();
+  var selCli = document.getElementById('filt-cli');
+  if (selCli) {
+    var valCli = selCli.value;
+    var cliMap = {}, opts = ['<option value="">🏢 Todos los clientes</option>'];
+    partes.forEach(function(p){ if(p.cliId && !cliMap[p.cliId]) cliMap[p.cliId]=p.cliNom||p.cliId; });
+    Object.keys(cliMap).forEach(function(id){ opts.push('<option value="'+id+'">'+x(cliMap[id])+'</option>'); });
+    selCli.innerHTML = opts.join('');
+    selCli.value = valCli;
+  }
+  var selObra = document.getElementById('filt-obra');
+  if (selObra) {
+    var valObra = selObra.value;
+    var obraMap = {}, opts2 = ['<option value="">📍 Todas las obras</option>'];
+    partes.forEach(function(p){ if(p.obraId && !obraMap[p.obraId]) obraMap[p.obraId]=p.obraNom||p.obraDir||p.obraId; });
+    Object.keys(obraMap).forEach(function(id){ opts2.push('<option value="'+id+'">'+x(obraMap[id])+'</option>'); });
+    selObra.innerHTML = opts2.join('');
+    selObra.value = valObra;
+  }
+}
+// ── HOME ─────────────────────────────────────────────────────
 function renderHome() {
   var partes = DB.partes(), cli = DB.clientes(), obras = DB.obras();
   var el;
   el = document.getElementById('cnt-p'); if (el) el.textContent = partes.length + ' registrado' + (partes.length!==1?'s':'');
   el = document.getElementById('cnt-c'); if (el) el.textContent = cli.length + ' guardado' + (cli.length!==1?'s':'');
   el = document.getElementById('cnt-o'); if (el) el.textContent = obras.length + ' activa' + (obras.length!==1?'s':'');
+  llenarFiltrosHome();
   var cont = document.getElementById('home-list'); if (!cont) return;
-  var rec = partes.slice(-5).reverse();
-  if (!rec.length) {
-    cont.innerHTML = '<div class="empty"><div class="empty-i">📋</div><div class="empty-t">Sin partes aun</div><div class="empty-s">Pulsa Nuevo parte para registrar la primera visita</div></div>';
+  var hoyD = new Date(); hoyD.setHours(0,0,0,0);
+  var selCli = document.getElementById('filt-cli');
+  var selObra = document.getElementById('filt-obra');
+  var filtrados = partes.slice().reverse().filter(function(p) {
+    if (_filtFecha !== 'todos' && p.fecha) {
+      var fp = new Date(p.fecha + 'T00:00:00');
+      if (_filtFecha === 'semana') {
+        var lunes = new Date(hoyD); lunes.setDate(hoyD.getDate() - ((hoyD.getDay()+6)%7));
+        if (fp < lunes) return false;
+      }
+      if (_filtFecha === 'mes') {
+        if (fp.getMonth() !== hoyD.getMonth() || fp.getFullYear() !== hoyD.getFullYear()) return false;
+      }
+    }
+    if (selCli && selCli.value && p.cliId !== selCli.value) return false;
+    if (selObra && selObra.value && p.obraId !== selObra.value) return false;
+    return true;
+  });
+  var cnt = document.getElementById('home-count');
+  if (cnt) cnt.textContent = filtrados.length + ' parte' + (filtrados.length!==1?'s':'');
+  if (!filtrados.length) {
+    var hayPartes = partes.length > 0;
+    cont.innerHTML = '<div class="empty"><div class="empty-i">📋</div><div class="empty-t">'+(hayPartes?'Sin resultados':'Sin partes aun')+'</div><div class="empty-s">'+(hayPartes?'Prueba con otros filtros':'Pulsa Nuevo parte para registrar la primera visita')+'</div></div>';
     return;
   }
-  cont.innerHTML = rec.map(function(p) {
-    return '<div class="item" onclick="verParte(\''+p.id+'\')"><div class="ava">'+ini(p.cliNom)+'</div><div class="item-inf"><div class="item-t">'+x(p.cliNom||'Sin cliente')+'</div><div class="item-s">'+x(df(p.fecha))+' · '+x(p.tipo||'')+'</div></div><div class="tag">#'+x(p.num)+'</div></div>';
+  cont.innerHTML = filtrados.map(function(p) {
+    var sub = [df(p.fecha), p.obraNom||p.obraDir||'', p.tipo||''].filter(Boolean).join(' · ');
+    return '<div class="item" onclick="verParte(''+p.id+'')"><div class="ava">'+ini(p.cliNom)+'</div><div class="item-inf"><div class="item-t">'+x(p.cliNom||'Sin cliente')+'</div><div class="item-s">'+x(sub)+'</div></div><div class="tag">#'+x(p.num)+'</div></div>';
   }).join('');
 }
-
 // ── CLIENTES ─────────────────────────────────────────
 function renderCli() {
   var lista = DB.clientes(), cont = document.getElementById('lista-cli'); if (!cont) return;
@@ -852,7 +928,7 @@ function hacerPDF(p) {
 }
 
 // ── EXPONER FUNCIONES GLOBALES (requerido en ES module) ──
-window.go=go; window.guardarCfg=guardarCfg; window.abrirCli=abrirCli;
+window.setFiltroFecha=setFiltroFecha; window.go=go; window.guardarCfg=guardarCfg; window.abrirCli=abrirCli;
 window.guardarCli=guardarCli; window.borrarCli=borrarCli; window.abrirObra=abrirObra;
 window.guardarObra=guardarObra; window.borrarObra=borrarObra; window.nuevoParte=nuevoParte;
 window.elegirCli=elegirCli; window.elegirObra=elegirObra; window.irP2=irP2;
