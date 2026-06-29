@@ -397,7 +397,7 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'Inter',s
     <button class="est-b" id="est-pend" onclick="elegirEstado('pendiente')"><div class="est-tx">Pendiente</div></button>
   </div>
   <div class="gap"></div>
-  <button class="btn" id="btn-pdf" onclick="generarPDF()">Generar y descargar PDF</button>
+  <button class="btn" id="btn-pdf" onclick="generarPDF()">Generar PDF</button>
   <button class="btn2" onclick="soloGuardar()">Guardar sin PDF</button>
   <button class="btnd" onclick="cancelar()">Descartar parte</button>
   <div class="gap"></div>
@@ -649,7 +649,7 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'Inter',s
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 // ── FIREBASE ──────────────────────────────────────────
 var FBcfg = {
@@ -1053,37 +1053,165 @@ function generarPDF(){ var lista=DB.partes(),existe=lista.find(function(z){ retu
 
 function hacerPDF(p){
   var btn=document.getElementById('btn-pdf'); if(btn){btn.disabled=true;btn.textContent='Generando...';}
+  guardarPDFArchivo(p, btn);
+}
+function _hacerPDF_legacy(p){
   var cfg=DB.cfg();
   var fotosSec=''; if(p.fotos&&p.fotos.length){ fotosSec='<div class="sec">FOTOGRAFÍAS ('+p.fotos.length+')</div><div class="fotos-wrap">'+p.fotos.map(function(s){ return '<img src="'+s+'">'; }).join('')+'</div>'; }
   var firmaSec=''; if(p.firmaImg) firmaSec='<img src="'+p.firmaImg+'" class="firma-img">';
   var html='<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Parte '+p.num+'</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:11px;color:#111;background:#fff}.page{width:210mm;min-height:297mm;padding:12mm 14mm;display:flex;flex-direction:column}.cab{background:#111;color:#fff;padding:10px 14px;border-radius:4px;display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}.cab-emp{font-size:16px;font-weight:700;margin-bottom:3px}.cab-sub{font-size:8px;opacity:.7;line-height:1.5}.cab-r{text-align:right}.cab-tit{font-size:13px;font-weight:700;margin-bottom:3px;letter-spacing:.05em;text-transform:uppercase}.cab-num{font-size:10px;opacity:.8}.regs{background:#f5f5f3;border:1px solid #e0e0dd;border-radius:4px;padding:5px 8px;font-size:8px;color:#555;margin-bottom:8px}.cols{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}.col{border:1px solid #e0e0dd;border-radius:4px;padding:8px}.col-tit{font-size:8px;font-weight:700;color:#555;text-transform:uppercase;margin-bottom:5px;letter-spacing:.05em}.col-n{font-size:12px;font-weight:600;margin-bottom:3px}.col-d{font-size:9px;color:#555;line-height:1.5}.tipo-badge{display:inline-block;background:#22c55e;color:#000;font-size:8px;font-weight:700;padding:2px 7px;border-radius:3px;margin-top:3px;text-transform:uppercase;letter-spacing:.05em}.sec{font-size:8px;font-weight:700;color:#22c55e;text-transform:uppercase;letter-spacing:.07em;margin:8px 0 4px}.bloque{border:1px solid #e8e8e6;border-radius:4px;padding:8px;font-size:10px;line-height:1.6;white-space:pre-wrap;margin-bottom:6px;min-height:32px;background:#fcfcfb}.fotos-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.fotos-wrap img{width:58mm;height:43mm;object-fit:cover;border-radius:4px;border:1px solid #e0e0dd}.firmas{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto;padding-top:8px;border-top:1px solid #e0e0dd}.firma-box{border:1px solid #e0e0dd;border-radius:4px;padding:6px;min-height:60px}.firma-lbl{font-size:8px;color:#777;margin-bottom:4px}.firma-img{max-width:100%;max-height:50px;display:block}.firma-nom{font-size:8px;color:#333;margin-top:4px;border-top:1px solid #e0e0dd;padding-top:3px}.pie{background:#111;color:rgba(255,255,255,.7);font-size:7px;text-align:center;padding:5px;border-radius:4px;margin-top:8px;letter-spacing:.04em}@media print{body{margin:0}.page{padding:10mm 12mm}}</style></head><body><div class="page"><div class="cab"><div><div class="cab-emp">'+(cfg.emp||'Alaro Clima')+'</div><div class="cab-sub">Instalaciones y mantenimiento de climatización · RITE · Electricidad B.T.<br>'+(cfg.dir||'')+' · '+(cfg.cp||'')+' · '+(cfg.mov||'')+'</div></div><div class="cab-r"><div class="cab-tit">Parte de trabajo</div><div class="cab-num">Núm. '+p.num+'<br>Fecha: '+df(p.fecha)+'</div></div></div><div class="regs">Empresa acreditada · Reg. Industrial: '+(cfg.ri||'')+' · Reg. Medioambiente: '+(cfg.rm||'')+' · NIF: '+(cfg.nif||'')+'</div><div class="cols"><div class="col"><div class="col-tit">Cliente</div><div class="col-n">'+(p.cliNom||'—')+'</div><div class="col-d">'+(p.cliDir||'')+(p.cliNif?'<br>NIF: '+p.cliNif:'')+(p.cliTel?'<br>Tel: '+p.cliTel:'')+'</div></div><div class="col"><div class="col-tit">Obra / Proyecto</div><div class="col-n">'+(p.obraNom||p.obraDir||'—')+'</div><div class="col-d">'+(p.obraDir&&p.obraNom?p.obraDir+'<br>':'')+'Operario: '+(p.op||cfg.res||'')+'<br><span class="tipo-badge">'+(p.tipo||'')+'</span></div></div></div><div class="sec">Descripción del trabajo</div><div class="bloque">'+(p.desc||'—')+'</div>'+(p.obs?'<div class="sec">Observaciones</div><div class="bloque">'+p.obs+'</div>':'')+(p.mat?'<div class="sec">Materiales utilizados</div><div class="bloque">'+p.mat+'</div>':'')+fotosSec+'<div class="firmas"><div class="firma-box"><div class="firma-lbl">Conforme / Firma del cliente:</div>'+firmaSec+'<div class="firma-nom">'+(p.firmaNom?'Nombre: '+p.firmaNom:'')+(p.firmaDni?' · DNI: '+p.firmaDni:'')+'</div></div><div class="firma-box"><div class="firma-lbl">Firma del técnico:</div><div class="firma-nom" style="margin-top:30px">'+(p.op||cfg.res||'')+'</div></div></div><div class="pie">'+(cfg.emp||'')+' · NIF: '+(cfg.nif||'')+' · '+(cfg.ri||'')+' · '+(cfg.rm||'')+'</div></div></body></html>';
-  guardarPDFArchivo(html, p, btn);
+  return html;
 }
 
-// ── GUARDAR PDF EN ARCHIVO (iPad/móvil → OneDrive → 00_Partes de Trabajo) ──
-function guardarPDFArchivo(fullHtml, p, btn){
-  function fin(){ if(btn){btn.disabled=false;btn.innerHTML='Generar y descargar PDF';} }
-  if(typeof html2pdf==='undefined'){ imprimirPDFClasico(fullHtml, btn); return; }
-  var fname=nombrePDF(p);
-  var iframe=document.createElement('iframe');
-  iframe.style.cssText='position:fixed;left:-10000px;top:0;width:230mm;height:320mm;border:0';
-  document.body.appendChild(iframe);
-  var idoc=iframe.contentWindow.document;
-  idoc.open(); idoc.write(fullHtml); idoc.close();
-  var opt={margin:0,filename:fname,image:{type:'jpeg',quality:0.95},html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff'},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},pagebreak:{mode:['css','legacy']}};
-  setTimeout(function(){
-    var page=idoc.querySelector('.page')||idoc.body;
-    html2pdf().set(opt).from(page).toPdf().output('blob').then(function(blob){
-      if(iframe.parentNode) document.body.removeChild(iframe);
-      fin();
-      compartirPDF(blob, fname);
-    }).catch(function(e){
-      if(iframe.parentNode) document.body.removeChild(iframe);
-      fin();
-      imprimirPDFClasico(fullHtml, null);
-    });
-  }, 350);
+// ── GUARDAR PDF (PC: carpeta directa · iPad/móvil: compartir) ──
+var dirPartesHandle=null;
+(function(){ if(window.indexedDB){ try{ idbGet('dirPartes').then(function(h){ if(h) dirPartesHandle=h; }).catch(function(){}); }catch(e){} } })();
+
+function guardarPDFArchivo(p, btn){
+  function fin(){ if(btn){btn.disabled=false;btn.innerHTML='Generar PDF';} }
+  var JsPDF=(window.jspdf&&window.jspdf.jsPDF)||window.jsPDF;
+  if(!JsPDF){ fin(); msg('No se pudo cargar el generador de PDF'); return; }
+  var fname=nombrePDF(p), blob;
+  try{
+    var doc=new JsPDF({unit:'mm',format:'a4',orientation:'portrait'});
+    drawParte(doc, p, DB.cfg());
+    blob=doc.output('blob');
+  }catch(e){ fin(); msg('Error al generar el PDF'); return; }
+  // PC (Chrome/Edge): guardar directo en la carpeta elegida, sin diálogo de compartir
+  if(window.showDirectoryPicker){
+    pedirPermisoCarpeta().then(function(dir){
+      guardarEnCarpeta(dir, blob, fname).then(function(){ fin(); msg('PDF guardado en 00_Partes de Trabajo'); })
+        .catch(function(e){ fin(); descargarPDF(blob, fname); });
+    }).catch(function(e){ fin(); descargarPDF(blob, fname); });
+    return;
+  }
+  // iPad / móvil: hoja de compartir (Guardar en Archivos)
+  fin(); compartirPDF(blob, fname);
 }
+function pedirPermisoCarpeta(){
+  var opts={mode:'readwrite'};
+  if(dirPartesHandle){
+    return dirPartesHandle.requestPermission(opts).then(function(pp){
+      if(pp==='granted') return dirPartesHandle;
+      throw new Error('permiso denegado');
+    });
+  }
+  return window.showDirectoryPicker({mode:'readwrite', id:'partesTrabajo'}).then(function(h){
+    dirPartesHandle=h;
+    try{ idbSet('dirPartes', h); }catch(e){}
+    return h;
+  });
+}
+function guardarEnCarpeta(dir, blob, fname){
+  return dir.getFileHandle(fname, {create:true}).then(function(fh){
+    return fh.createWritable().then(function(w){
+      return w.write(blob).then(function(){ return w.close(); });
+    });
+  });
+}
+// ── GENERADOR PDF VECTORIAL (parte de trabajo profesional) ──
+function drawParte(doc, p, cfg){
+  cfg=cfg||{}; p=p||{};
+  var PW=210, M=14, CW=PW-2*M;
+  var GREEN=[22,163,74], DARK=[34,34,34], GRY=[110,110,110], LGT=[150,150,150];
+  var BRD=[210,210,205], BG=[252,252,251], DARKBG=[20,20,22];
+  function df(s){ if(!s) return '—'; var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s); return m? (m[3]+'/'+m[2]+'/'+m[1]) : s; }
+  function T(c){ doc.setTextColor(c[0],c[1],c[2]); }
+  function D(c){ doc.setDrawColor(c[0],c[1],c[2]); }
+  function F(c){ doc.setFillColor(c[0],c[1],c[2]); }
+  function font(s,w){ doc.setFontSize(s); doc.setFont('helvetica',w||'normal'); }
+  function label(txt,x,y){ font(7,'bold'); T(GREEN); doc.setCharSpace(0.4); doc.text(txt.toUpperCase(),x,y); doc.setCharSpace(0); }
+  var y=0;
+
+  var hH=26;
+  F(DARKBG); doc.rect(0,0,PW,hH,'F');
+  T([255,255,255]); font(19,'bold'); doc.text((cfg.emp||'Alaro Clima'), M, 12);
+  T([200,200,200]); font(7.5,'normal');
+  doc.text('Instalaciones y mantenimiento de climatización · RITE · Electricidad B.T.', M, 17.5);
+  doc.text(((cfg.dir||'')+' · '+(cfg.cp||'')+' · '+(cfg.mov||'')).replace(/^ · | · $/g,''), M, 21.5);
+  T([255,255,255]); font(13,'bold'); doc.setCharSpace(0.6);
+  doc.text('PARTE DE TRABAJO', PW-M, 11, {align:'right'}); doc.setCharSpace(0);
+  T([190,190,190]); font(9,'normal');
+  doc.text('Núm. '+(p.num||'—'), PW-M, 17, {align:'right'});
+  doc.text('Fecha: '+df(p.fecha), PW-M, 21.5, {align:'right'});
+  y=hH+6;
+
+  F([245,245,243]); D(BRD); doc.setLineWidth(0.2);
+  doc.roundedRect(M,y,CW,8,1.2,1.2,'FD');
+  T(GRY); font(7.5,'normal');
+  var regs='Empresa acreditada  ·  Reg. Industrial: '+(cfg.ri||'—')+'  ·  Reg. Medioambiente: '+(cfg.rm||'—')+'  ·  NIF: '+(cfg.nif||'—');
+  doc.text(regs, M+4, y+5.2);
+  y+=8+6;
+
+  var gap=6, bw=(CW-gap)/2, bh=30;
+  function infoBox(x, lab, nombre, lineas, tipo){
+    F([255,255,255]); D(BRD); doc.setLineWidth(0.3);
+    doc.roundedRect(x,y,bw,bh,1.5,1.5,'FD');
+    label(lab, x+5, y+6.5);
+    T(DARK); font(11.5,'bold'); doc.text(doc.splitTextToSize(nombre||'—', bw-10)[0], x+5, y+12.5);
+    T(GRY); font(8.5,'normal'); var yy=y+17.5;
+    (lineas||[]).forEach(function(ln){ if(ln){ doc.splitTextToSize(ln, bw-10).forEach(function(s){ doc.text(s,x+5,yy); yy+=4.2; }); } });
+    if(tipo){ T(GREEN); font(8,'bold'); doc.text(tipo, x+5, y+bh-4); }
+  }
+  infoBox(M,'Cliente', p.cliNom, [p.cliDir, p.cliNif?('NIF: '+p.cliNif):'', p.cliTel?('Tel: '+p.cliTel):'']);
+  infoBox(M+bw+gap,'Obra / Proyecto', (p.obraNom||p.obraDir), [ (p.obraNom&&p.obraDir)?p.obraDir:'', 'Operario: '+(p.op||cfg.res||'—') ], p.tipo);
+  y+=bh+7;
+
+  function seccion(lab, texto){
+    label(lab, M, y); y+=2.5;
+    var lines=doc.splitTextToSize((texto&&String(texto).trim())||'—', CW-8);
+    var bxh=Math.max(11, lines.length*4.6+5);
+    F(BG); D(BRD); doc.setLineWidth(0.3); doc.roundedRect(M,y,CW,bxh,1.5,1.5,'FD');
+    T([55,55,55]); font(10,'normal');
+    doc.text(lines, M+4, y+5.5);
+    y+=bxh+6;
+  }
+  seccion('Descripción del trabajo / incidencia / asistencia', p.desc);
+  if(p.obs) seccion('Observaciones / incidencias', p.obs);
+  if(p.mat) seccion('Materiales utilizados', p.mat);
+
+  if(p.fotos && p.fotos.length){
+    label('Fotografías de la visita ('+p.fotos.length+')', M, y); y+=3;
+    var cols=3, fg=4, fw=(CW-(cols-1)*fg)/cols, fh=fw*0.72;
+    var col=0, rowY=y;
+    p.fotos.forEach(function(src){
+      var x=M+col*(fw+fg);
+      F([238,238,236]); D(BRD); doc.setLineWidth(0.3); doc.roundedRect(x,rowY,fw,fh,1.5,1.5,'FD');
+      try{ doc.addImage(src,'JPEG',x+0.6,rowY+0.6,fw-1.2,fh-1.2); }
+      catch(e){ try{ doc.addImage(src,'PNG',x+0.6,rowY+0.6,fw-1.2,fh-1.2);}catch(e2){ T(LGT); font(8,'normal'); doc.text('foto', x+fw/2, rowY+fh/2, {align:'center'}); } }
+      col++; if(col>=cols){ col=0; rowY+=fh+fg; }
+    });
+    if(col>0) rowY+=fh+fg;
+    y=rowY+2;
+  }
+
+  var firmaH=34, footerY=287, firmaTop=footerY-6-firmaH;
+  if(y>firmaTop) firmaTop=y+2;
+  var fbw=(CW-gap)/2;
+  function firmaBox(x, lab, img, pie){
+    F([255,255,255]); D(BRD); doc.setLineWidth(0.3); doc.roundedRect(x,firmaTop,fbw,firmaH,1.5,1.5,'FD');
+    T(GRY); font(8,'normal'); doc.text(lab, x+4, firmaTop+6);
+    if(img){ try{ doc.addImage(img,'PNG',x+5,firmaTop+8,fbw*0.5,16);}catch(e){} }
+    D(BRD); doc.setLineWidth(0.2); doc.line(x+4, firmaTop+firmaH-7, x+fbw-4, firmaTop+firmaH-7);
+    T([60,60,60]); font(8,'normal'); if(pie) doc.text(pie, x+4, firmaTop+firmaH-3);
+  }
+  firmaBox(M,'Conforme / Firma del cliente:', p.firmaImg, (p.firmaNom?('Nombre: '+p.firmaNom):'')+(p.firmaDni?('  ·  DNI: '+p.firmaDni):''));
+  firmaBox(M+fbw+gap,'Firma del técnico / Operario:', null, (p.op||cfg.res||''));
+
+  D([225,225,222]); doc.setLineWidth(0.2); doc.line(M,footerY-2,PW-M,footerY-2);
+  T(LGT); font(7.5,'normal');
+  doc.text(((cfg.emp||'Alaro Clima')+'  ·  NIF: '+(cfg.nif||'—')+'  ·  '+(cfg.ri||'')+'  ·  '+(cfg.rm||'')).replace(/ · $/,''), PW/2, footerY+2, {align:'center'});
+}
+function idbDB(){
+  return new Promise(function(res,rej){
+    var r=indexedDB.open('alaroPDF',1);
+    r.onupgradeneeded=function(){ r.result.createObjectStore('kv'); };
+    r.onsuccess=function(){ res(r.result); };
+    r.onerror=function(){ rej(r.error); };
+  });
+}
+function idbGet(k){ return idbDB().then(function(db){ return new Promise(function(res,rej){ var t=db.transaction('kv','readonly').objectStore('kv').get(k); t.onsuccess=function(){res(t.result);}; t.onerror=function(){rej(t.error);}; }); }); }
+function idbSet(k,v){ return idbDB().then(function(db){ return new Promise(function(res,rej){ var t=db.transaction('kv','readwrite').objectStore('kv').put(v,k); t.onsuccess=function(){res();}; t.onerror=function(){rej(t.error);}; }); }); }
 function nombrePDF(p){
   var cli=(p.cliNom||'').replace(/[^\w\sáéíóúñÁÉÍÓÚÑ\-]/g,'').trim().replace(/\s+/g,'_');
   return 'Parte_'+(p.num||'')+(cli?'_'+cli:'')+'.pdf';
