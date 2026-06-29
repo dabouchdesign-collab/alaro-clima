@@ -398,7 +398,7 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'Inter',s
   </div>
   <div class="gap"></div>
   <button class="btn" id="btn-pdf" onclick="generarPDF()">Generar PDF</button>
-  <button class="btn2" onclick="soloGuardar()">Guardar sin PDF</button>
+  <button class="btn2" onclick="soloGuardar()">Guardar parte</button>
   <button class="btnd" onclick="cancelar()">Descartar parte</button>
   <div class="gap"></div>
 </div>
@@ -928,6 +928,7 @@ function verParte(id) {
     +(p.mat?'<div class="lbl">Materiales</div><div style="background:var(--s1);border-top:1px solid var(--b1);border-bottom:1px solid var(--b1);padding:13px 16px;font-size:13px;line-height:1.7;white-space:pre-wrap;margin-bottom:2px">'+x(p.mat)+'</div>':'')
     +fh+fi
     +'<div class="gap"></div>'
+    +'<button class="btn2" onclick="editarParte(\''+id+'\')">Editar parte</button>'
     +'<button class="btn2" onclick="toggleEstado(\''+id+'\')">'+((p.estado||'realizado')==='realizado'?'Marcar como pendiente':'Marcar como realizado')+'</button>'
     +'<button class="btn" onclick="pdfDe(\''+id+'\')">Generar PDF</button>'
     +'<button class="btnd" onclick="borrarParte(\''+id+'\')">Eliminar parte</button><div class="gap"></div>';
@@ -939,7 +940,7 @@ function toggleEstado(id){
   var lista=DB.partes(); var i=lista.findIndex(function(p){ return p.id===id; });
   if(i<0) return;
   lista[i].estado=(lista[i].estado||'realizado')==='realizado'?'pendiente':'realizado';
-  DB.s('partes',lista); msg('Estado actualizado'); verParte(id);
+  DB.s('partes',lista); autoGuardarParteEnCarpeta(lista[i]); msg('Estado actualizado'); verParte(id);
 }
 
 // ── NUEVO PARTE ───────────────────────────────────────
@@ -1022,6 +1023,7 @@ function initFirma(){
   c.ontouchstart=function(e){e.preventDefault();draw=true;var p=pos(e);fCtx.beginPath();fCtx.moveTo(p.x,p.y);ocultarHint();};
   c.ontouchmove=function(e){e.preventDefault();if(!draw)return;var p=pos(e);fCtx.lineTo(p.x,p.y);fCtx.stroke();firmaSi=true;};
   c.ontouchend=function(){draw=false;};
+  if(P.firmaImg){ var fimg=new Image(); fimg.onload=function(){ try{ fCtx.drawImage(fimg,0,0,c.width,c.height); }catch(e){} }; fimg.src=P.firmaImg; ocultarHint(); firmaSi=true; }
 }
 function ocultarHint(){ var h=document.getElementById('firma-hint'); if(h) h.style.display='none'; }
 function borrarFirma(){ firmaSi=false; var c=document.getElementById('firma-c'); if(fCtx&&c) fCtx.clearRect(0,0,c.width,c.height); var h=document.getElementById('firma-hint'); if(h) h.style.display='flex'; }
@@ -1047,9 +1049,33 @@ function elegirEstado(e){
   var er=document.getElementById('est-real'),ep=document.getElementById('est-pend');
   if(er){ er.classList.toggle('on-real',e==='realizado'); ep.classList.toggle('on-pend',e==='pendiente'); }
 }
+function persistParte(){
+  var lista=DB.partes();
+  if(!P.id) P.id='p'+Date.now();
+  var p=Object.assign({}, P);
+  var i=lista.findIndex(function(z){ return z.id===P.id; });
+  if(i>=0) lista[i]=p; else lista.push(p);
+  DB.s('partes',lista); return p;
+}
 function buildParte(){ return Object.assign({id:'p'+Date.now()},P); }
-function soloGuardar(){ var lista=DB.partes(),existe=lista.find(function(z){ return z.num===P.num; }),p=existe||buildParte(); if(!existe){ lista.push(p); DB.s('partes',lista); } msg('Parte guardado'); navTo('partes'); }
-function generarPDF(){ var lista=DB.partes(),existe=lista.find(function(z){ return z.num===P.num; }),p=existe||buildParte(); if(!existe){ lista.push(p); DB.s('partes',lista); } renderHome(); hacerPDF(p); }
+function soloGuardar(){ var p=persistParte(); autoGuardarParteEnCarpeta(p); msg('Parte guardado'); navTo('partes'); }
+function generarPDF(){ var p=persistParte(); renderHome(); hacerPDF(p); }
+function editarParte(id){
+  var src=DB.partes().find(function(z){ return z.id===id; }); if(!src) return;
+  P=JSON.parse(JSON.stringify(src)); if(!P.estado) P.estado='realizado';
+  fotos=(P.fotos||[]).map(function(d){ return {data:d,name:''}; }); firmaSi=!!P.firmaImg;
+  var sv=function(id,v){ var e=document.getElementById(id); if(e) e.value=v||''; };
+  llenarCliSel('p1-cli'); var sc=document.getElementById('p1-cli'); if(sc) sc.value=P.cliId||'';
+  llenarObrasSel(P.cliId||''); var so=document.getElementById('p1-obra'); if(so) so.value=P.obraId||'';
+  sv('p1-dom',P.cliDir); sv('p1-tel',P.cliTel); sv('p1-odir',P.obraDir);
+  sv('p1-num','#'+(P.num||'')); sv('p1-fecha',P.fecha||hoy()); sv('p1-op',P.op);
+  document.querySelectorAll('.tipo-b').forEach(function(b){ var t=b.querySelector('.tipo-tx'); b.classList.toggle('on', !!t && t.textContent.trim()===(P.tipo||'')); });
+  sv('p3-desc',P.desc); sv('p3-obs',P.obs); sv('p3-mat',P.mat); dibujarFotos();
+  sv('p4-nom',P.firmaNom); sv('p4-dni',P.firmaDni);
+  var er=document.getElementById('est-real'),ep=document.getElementById('est-pend');
+  if(er){ er.classList.toggle('on-real',P.estado==='realizado'); ep.classList.toggle('on-pend',P.estado==='pendiente'); }
+  goSub('s-p1','s-carpeta-partes');
+}
 
 function hacerPDF(p){
   var btn=document.getElementById('btn-pdf'); if(btn){btn.disabled=true;btn.textContent='Generando...';}
@@ -1087,6 +1113,16 @@ function guardarPDFArchivo(p, btn){
   }
   // iPad / móvil: hoja de compartir (Guardar en Archivos)
   fin(); compartirPDF(blob, fname);
+}
+function autoGuardarParteEnCarpeta(p){
+  // Archiva el PDF del parte en 00_Partes de Trabajo automáticamente (solo PC con carpeta concedida)
+  if(!window.showDirectoryPicker) return;
+  var JsPDF=(window.jspdf&&window.jspdf.jsPDF)||window.jsPDF; if(!JsPDF) return;
+  var blob;
+  try{ var doc=new JsPDF({unit:'mm',format:'a4',orientation:'portrait'}); drawParte(doc,p,DB.cfg()); blob=doc.output('blob'); }catch(e){ return; }
+  pedirPermisoCarpeta().then(function(dir){
+    guardarEnCarpeta(dir, blob, nombrePDF(p)).then(function(){ msg('Parte archivado en 00_Partes de Trabajo'); }).catch(function(){});
+  }).catch(function(){});
 }
 function pedirPermisoCarpeta(){
   var opts={mode:'readwrite'};
@@ -1541,7 +1577,7 @@ window.setTabCO=setTabCO; window.renderBuscar=renderBuscar;
 window.nuevoParte=nuevoParte; window.elegirCli=elegirCli; window.elegirObra=elegirObra;
 window.irP2=irP2; window.elegirTipo=elegirTipo; window.irP3=irP3; window.irP4=irP4; window.irP5=irP5;
 window.añadirFotos=añadirFotos; window.quitarFoto=quitarFoto; window.borrarFirma=borrarFirma;
-window.soloGuardar=soloGuardar; window.generarPDF=generarPDF; window.verParte=verParte;
+window.soloGuardar=soloGuardar; window.generarPDF=generarPDF; window.verParte=verParte; window.editarParte=editarParte;
 window.borrarParte=borrarParte; window.pdfDe=pdfDe; window.cancelar=cancelar;
 window.cerrarModal=cerrarModal; window.descartar=descartar;
 window.setTabPartes=setTabPartes; window.elegirEstado=elegirEstado; window.toggleEstado=toggleEstado;
