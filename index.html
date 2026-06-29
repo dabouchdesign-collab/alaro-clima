@@ -930,7 +930,6 @@ function verParte(id) {
     +'<div class="gap"></div>'
     +'<button class="btn2" onclick="toggleEstado(\''+id+'\')">'+((p.estado||'realizado')==='realizado'?'Marcar como pendiente':'Marcar como realizado')+'</button>'
     +'<button class="btn" onclick="pdfDe(\''+id+'\')">Generar PDF</button>'
-    +'<button class="btn2" onclick="emailParte(\''+id+'\')">'+(cliEmail?'PDF + Email a '+cliEmail:'PDF + Enviar por email')+'</button>'
     +'<button class="btnd" onclick="borrarParte(\''+id+'\')">Eliminar parte</button><div class="gap"></div>';
   goSub('s-parte-ver','s-carpeta-partes');
 }
@@ -942,73 +941,6 @@ function toggleEstado(id){
   lista[i].estado=(lista[i].estado||'realizado')==='realizado'?'pendiente':'realizado';
   DB.s('partes',lista); msg('Estado actualizado'); verParte(id);
 }
-
-function emailParte(id){
-  var p=DB.partes().find(function(z){ return z.id===id; }); if(!p) return;
-  var cfg=DB.cfg();
-
-  // 1. Generar el PDF primero en ventana nueva
-  hacerPDF(p);
-
-  // 2. Pequeña pausa y luego abrir el mailto
-  setTimeout(function(){
-
-    var toEmail='';
-    if(p.cliId){ var c=DB.clientes().find(function(z){ return z.id===p.cliId; }); if(c&&c.e) toEmail=c.e; }
-
-    var asunto=encodeURIComponent(
-      'Parte de trabajo #'+p.num+' — '+(p.cliNom||'Sin cliente')+' — '+df(p.fecha)
-    );
-
-    var lineas=[
-      'Estimado/a '+(p.cliNom||'cliente')+',',
-      '',
-      'Adjunto encontrará el parte de trabajo correspondiente a la visita realizada.',
-      'Por favor, guarde este documento como justificante del servicio prestado.',
-      '',
-      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
-      'PARTE DE TRABAJO Núm. '+p.num,
-      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
-      '',
-      'Fecha:      '+df(p.fecha),
-      'Operario:   '+(p.op||cfg.res||'—'),
-      'Cliente:    '+(p.cliNom||'—'),
-      'Domicilio:  '+(p.cliDir||'—'),
-      'Obra:       '+(p.obraNom||p.obraDir||'—'),
-      'Tipo:       '+(p.tipo||'—'),
-      '',
-      '── DESCRIPCIÓN DEL TRABAJO ──────────────',
-      (p.desc||'—'),
-    ];
-
-    if(p.obs){
-      lineas.push(''); lineas.push('── OBSERVACIONES ────────────────────────'); lineas.push(p.obs);
-    }
-    if(p.mat){
-      lineas.push(''); lineas.push('── MATERIALES UTILIZADOS ────────────────'); lineas.push(p.mat);
-    }
-
-    lineas.push('');
-    lineas.push('── CONFORMIDAD ──────────────────────────');
-    lineas.push('Firmado: '+(p.firmada?'Sí — '+(p.firmaNom||'')+(p.firmaDni?' ('+p.firmaDni+')':''):'No'));
-    lineas.push('');
-    lineas.push('⚠ ADJUNTE EL PDF GENERADO ANTES DE ENVIAR');
-    lineas.push('   (El archivo se ha abierto/descargado automáticamente)');
-    lineas.push('');
-    lineas.push('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    lineas.push((cfg.emp||'Alaro Clima')+' · NIF: '+(cfg.nif||''));
-    lineas.push((cfg.dir||'')+' · '+(cfg.cp||''));
-    lineas.push('Tel: '+(cfg.mov||'')+' · '+(cfg.ri||''));
-    lineas.push('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-
-    var cuerpo=encodeURIComponent(lineas.join('\n'));
-    var mailto='mailto:'+toEmail+'?subject='+asunto+'&body='+cuerpo;
-    window.location.href=mailto;
-
-    msg('PDF generado · Adjúntalo antes de enviar');
-  }, 800);
-}
-window.emailParte=emailParte;
 
 // ── NUEVO PARTE ───────────────────────────────────────
 function numSig(){ return String(DB.partes().reduce(function(m,p){ return Math.max(m,parseInt(p.num)||0); },0)+1).padStart(4,'0'); }
@@ -1161,7 +1093,7 @@ function compartirPDF(blob, fname){
     var file=new File([blob], fname, {type:'application/pdf'});
     if(navigator.canShare && navigator.canShare({files:[file]})){
       navigator.share({files:[file], title:fname.replace(/\.pdf$/,'')}).then(function(){
-        msg('Guárdalo en OneDrive → 00_Partes de Trabajo');
+        msg('Guárdalo en Google Drive → 00_Partes de Trabajo');
       }).catch(function(err){
         if(err && err.name==='AbortError') return;
         descargarPDF(blob, fname);
