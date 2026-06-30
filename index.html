@@ -1092,6 +1092,25 @@ function _hacerPDF_legacy(p){
 var dirPartesHandle=null;
 (function(){ if(window.indexedDB){ try{ idbGet('dirPartes').then(function(h){ if(h) dirPartesHandle=h; }).catch(function(){}); idbGet('dirFacturas').then(function(h){ if(h) dirFacturasHandle=h; }).catch(function(){}); idbGet('dirPresupuestos').then(function(h){ if(h) dirPresupuestosHandle=h; }).catch(function(){}); }catch(e){} } })();
 
+// ── RESOLUTOR DE CARPETA POR TIPO (raíz 00_Alaro Clima → subcarpetas automáticas) ──
+var dirRootHandle=null;
+(function(){ if(window.indexedDB){ try{ idbGet('dirRoot').then(function(h){ if(h) dirRootHandle=h; }).catch(function(){}); }catch(e){} } })();
+var SUBCARPETAS={parte:'00_Partes de Trabajo',factura:'00_Facturas',presupuesto:'00_Presupuestos',albaran:'00_Albaranes'};
+function carpetaDe(tipo){
+  var sub=SUBCARPETAS[tipo]||'00_Facturas';
+  function desde(root){
+    return root.requestPermission({mode:'readwrite'}).then(function(pp){
+      if(pp!=='granted') throw new Error('permiso denegado');
+      return root.getDirectoryHandle(sub,{create:true});
+    });
+  }
+  if(dirRootHandle) return desde(dirRootHandle);
+  return window.showDirectoryPicker({mode:'readwrite', id:'alaroRoot'}).then(function(h){
+    dirRootHandle=h; try{ idbSet('dirRoot',h); }catch(e){}
+    return h.getDirectoryHandle(sub,{create:true});
+  });
+}
+
 // ── SUBIDA A GOOGLE DRIVE (móvil/tablet · Opción A: drive.file + Picker) ──
 var GDRIVE = {
   clientId: 'PEGA_AQUI_TU_CLIENT_ID.apps.googleusercontent.com',
@@ -1547,13 +1566,11 @@ function guardarFacturaArchivo(d){
   var blob;
   try{ var doc=new JsPDF({unit:'mm',format:'a4',orientation:'portrait'}); drawFactura(doc, d, DB.cfg()); blob=doc.output('blob'); }catch(e){ msg('Error al generar el PDF'); return; }
   var fname=nombreFactura(d);
-  var esPres=(d.tipo==='presupuesto');
-  var permisoFn=esPres?pedirPermisoCarpetaPresupuestos:pedirPermisoCarpetaFacturas;
-  var carpeta=esPres?'00_Presupuestos':'00_Facturas';
+  var carpeta=SUBCARPETAS[d.tipo]||'00_Facturas';
   if(window.showDirectoryPicker){
-    permisoFn().then(function(dir){
-      guardarEnCarpeta(dir, blob, fname).then(function(){ msg('Guardado en '+carpeta); }).catch(function(){ descargarPDF(blob, fname); });
-    }).catch(function(){ descargarPDF(blob, fname); });
+    carpetaDe(d.tipo).then(function(dir){
+      guardarEnCarpeta(dir, blob, fname).then(function(){ msg('Guardado en '+carpeta); }).catch(function(e){ msg('No se pudo guardar: '+((e&&e.message)||'')); descargarPDF(blob, fname); });
+    }).catch(function(e){ if(e&&e.name==='AbortError') return; msg('No se pudo guardar: '+((e&&e.message)||'')); descargarPDF(blob, fname); });
   } else {
     compartirPDF(blob, fname);
   }
