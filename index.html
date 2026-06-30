@@ -1436,7 +1436,7 @@ function guardarDocCont(){
 }
 function borrarDocCont(){ var cfg=DB.cfg(); cfg._cont=(cfg._cont||[]).filter(function(d){ return d.id!==editContId; }); DB.s('cfg',cfg); msg('Eliminado'); goSub('s-contabilidad','s-empresa'); }
 
-function fmtES(n){ // 1234.5 -> "1.234,50"
+function fmtES(n){
   var s=(Math.round(n*100)/100).toFixed(2);
   var p=s.split('.');
   p[0]=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');
@@ -1451,162 +1451,179 @@ function generarPDFFactura(){
   var tipoLabel={factura:'Nº FACTURA',presupuesto:'Nº PRESUPUESTO',albaran:'Nº ALBARÁN'}[d.tipo]||'Nº DOCUMENTO';
   var c=d.cliId?DB.clientes().find(function(z){ return z.id===d.cliId; }):null;
 
-  // Filas de descripción (texto largo arriba, sin importes)
-  var descLineas=[];
-  if(d.inmueble) descLineas.push(x(d.inmueble.toUpperCase()));
-  if(d.dirobra) descLineas.push(x(d.dirobra.toUpperCase()));
-  if(d.cpobra) descLineas.push(x(d.cpobra.toUpperCase()));
-  var descInmueble=descLineas.join('<br>');
+  // Bloques de texto de la descripción (parte superior izquierda de la tabla)
+  var descTop=[];
+  if(d.inmueble) descTop.push(x(d.inmueble.toUpperCase()));
+  if(d.dirobra) descTop.push(x(d.dirobra.toUpperCase()));
+  if(d.cpobra) descTop.push(x(d.cpobra.toUpperCase()));
+  var bloqueInmueble = descTop.length ? '<div class="dblock">'+descTop.join('<br>')+'</div>' : '';
+  var bloqueAviso = d.aviso ? '<div class="dblock">AVISO: '+x(d.aviso.toUpperCase())+'</div>' : '';
+  var bloqueDesc = d.desc ? '<div class="dblock">DESCRIPCION DEL TRABAJO/INCIDENCIA/ ASISTENCIA:<br>'+x(d.desc.toUpperCase()).replace(/\n/g,'<br>')+'</div>' : '';
 
-  var bloqueAviso = d.aviso ? '<div class="desc-block">AVISO: '+x(d.aviso.toUpperCase())+'</div>' : '';
-  var bloqueDesc = d.desc ? '<div class="desc-block">DESCRIPCION DEL TRABAJO/INCIDENCIA/ ASISTENCIA:<br>'+x(d.desc.toUpperCase()).replace(/\n/g,'<br>')+'</div>' : '';
-
-  // Filas de líneas con importe (col derecha)
+  // Filas con importe. Cada línea se imprime como: nombre (con :) + valores a la derecha
   var filasLineas=(d.lineas||[]).filter(function(l){ return (l.desc&&l.desc.trim()) || numES(l.precio)>0; }).map(function(l){
     var imp=importeLinea(l);
-    var cant=l.cant||'';
     var precio=l.precio?fmtES(numES(l.precio)):'';
-    return '<tr class="line-row">'
+    return '<tr class="lrow">'
       +'<td class="c-desc">'+x((l.desc||'').toUpperCase()).replace(/\n/g,'<br>')+':</td>'
-      +'<td class="c-cant">'+x(cant)+'</td>'
+      +'<td class="c-cant">'+x(l.cant||'')+'</td>'
       +'<td class="c-precio">'+precio+'</td>'
-      +'<td class="c-importe">'+fmtES(imp)+'</td>'
+      +'<td class="c-imp">'+fmtES(imp)+'</td>'
       +'<td class="c-iva">'+x(l.iva||'')+'</td>'
       +'</tr>';
   }).join('');
 
-  var bloqueMat = '<tr class="line-row"><td class="c-desc" colspan="5" style="padding-top:10px">MATERIALES:'+(d.mat?'<br>'+x(d.mat.toUpperCase()).replace(/\n/g,'<br>'):'')+'</td></tr>';
-  var bloqueObs = d.obs ? '<tr class="line-row"><td class="c-desc" colspan="5" style="padding-top:10px">OBSERVACIONES:<br>'+x(d.obs.toUpperCase()).replace(/\n/g,'<br>')+'</td></tr>' : '';
+  var bloqueMat = '<tr class="lrow"><td class="c-desc" colspan="5" style="padding-top:12px">MATERIALES:'+(d.mat?'<br>'+x(d.mat.toUpperCase()).replace(/\n/g,'<br>'):'')+'</td></tr>';
+  var bloqueObs = d.obs ? '<tr class="lrow"><td class="c-desc" colspan="5" style="padding-top:12px">OBSERVACIONES:<br>'+x(d.obs.toUpperCase()).replace(/\n/g,'<br>')+'</td></tr>' : '';
 
-  // Desglose IVA (parte inferior izquierda)
+  // Desglose IVA inferior izquierdo (modelo muestra 3 filas tipo: 4,0 / 10,0 / 21,0 con su %RE)
   var ivaRows=Object.keys(t.grupos).sort(function(a,b){return a-b;}).map(function(k){
     var g=t.grupos[k];
     return '<tr><td>'+fmtES(g.base)+'</td><td>'+parseFloat(k).toFixed(1).replace('.',',')+'</td><td>'+fmtES(g.cuota)+'</td><td></td><td></td></tr>';
   }).join('');
-  // rellenar a mínimo 3 filas como el modelo
-  var nFilas=Object.keys(t.grupos).length;
-  for(var i=nFilas;i<3;i++){ ivaRows+='<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr>'; }
+  var nF=Object.keys(t.grupos).length;
+  for(var i=nF;i<3;i++){ ivaRows+='<tr><td></td><td></td><td></td><td></td><td></td></tr>'; }
+
+  var BL='#2f5496'; // azul de cabeceras
+  var BLBG='#dce6f2'; // azul muy claro de fondo de cabecera
 
   var html='<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Factura '+x(d.num)+'</title><style>'
     +'*{box-sizing:border-box;margin:0;padding:0}'
-    +'body{font-family:Arial,Helvetica,sans-serif;font-size:10px;color:#000;background:#fff}'
-    +'.page{width:210mm;min-height:297mm;padding:12mm 14mm}'
-    // Cabecera: empresa en recuadro + logo
-    +'.head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px}'
-    +'.emp-box{border:1px solid #000;padding:8px 12px;font-size:10.5px;line-height:1.5;width:48%}'
-    +'.emp-nom{font-weight:700;font-size:12px;margin-bottom:3px}'
-    +'.logo-box{width:48%;text-align:right;padding-top:6px}'
-    +'.logo-box img{max-width:100%;height:auto;max-height:75px}'
-    // Cliente
-    +'.cli-box{border:1px solid #2356a8;margin-bottom:0}'
-    +'.cli-hdr{background:#fff;color:#2356a8;text-align:center;font-weight:700;letter-spacing:.35em;font-size:11px;padding:4px 0;border-bottom:1px solid #2356a8}'
-    +'.cli-body{padding:7px 12px;font-size:11px;line-height:1.7}'
-    // Fila albarán + meta
-    +'.meta{display:flex;align-items:stretch;margin-top:10px;margin-bottom:0}'
-    +'.alb{flex:1;font-size:11px;display:flex;align-items:center;padding-right:14px}'
-    +'.meta-tbl{border-collapse:collapse}'
-    +'.meta-tbl th{border:1px solid #2356a8;color:#2356a8;font-size:10px;font-weight:700;padding:4px 22px;text-align:center;background:#fff}'
-    +'.meta-tbl td{border:1px solid #2356a8;font-size:11px;font-weight:700;padding:5px 22px;text-align:center}'
+    +'body{font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#000;background:#fff}'
+    +'.page{width:210mm;min-height:297mm;padding:11mm 13mm}'
+    // Fila superior: empresa (recuadro) + logo
+    +'.toprow{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px}'
+    +'.emp{border:1px solid #000;padding:10px 16px;font-size:12.5px;line-height:1.55;min-width:330px}'
+    +'.emp .nom{font-weight:700;font-size:15px;margin-bottom:5px;letter-spacing:.3px}'
+    +'.logo{padding-top:8px}'
+    +'.logo img{height:90px;width:auto;display:block}'
+    // Fila media: izquierda (albaran+tabla fecha) / derecha (cliente)
+    +'.midrow{display:flex;gap:0;align-items:flex-start;margin-bottom:10px}'
+    +'.midleft{width:48%;padding-right:18px}'
+    +'.midright{width:52%}'
+    +'.alb{font-size:12px;margin:6px 0 8px 4px}'
+    +'.ftbl{width:100%;border-collapse:collapse;table-layout:fixed}'
+    +'.ftbl th{border:1px solid '+BL+';background:'+BLBG+';color:'+BL+';font-size:12px;font-weight:400;padding:5px 2px;text-align:center}'
+    +'.ftbl td{border:1px solid '+BL+';font-size:14px;font-weight:700;padding:7px 2px;text-align:center}'
+    +'.ftbl td.fnum{font-size:15px}'
+    // Cliente box
+    +'.clibox{border:1px solid '+BL+'}'
+    +'.clihdr{background:'+BLBG+';color:'+BL+';text-align:center;font-weight:700;letter-spacing:.4em;font-size:13px;padding:5px 0;border-bottom:1px solid '+BL+'}'
+    +'.clibody{padding:8px 14px;font-size:13px;line-height:1.75}'
     // Tabla principal
-    +'table.main{width:100%;border-collapse:collapse;margin-top:12px}'
-    +'table.main thead th{background:#2356a8;color:#fff;font-size:10px;font-weight:700;padding:5px 6px;text-align:left;border:1px solid #2356a8}'
-    +'table.main thead th.c-cant,table.main thead th.c-precio,table.main thead th.c-importe{text-align:center}'
-    +'table.main thead th.c-iva{text-align:center;width:34px}'
-    +'.main-body-wrap{border-left:1px solid #2356a8;border-right:1px solid #2356a8;border-bottom:1px solid #2356a8;min-height:430px;position:relative}'
-    +'table.body-tbl{width:100%;border-collapse:collapse}'
-    +'table.body-tbl td{font-size:10.5px;padding:1px 6px;vertical-align:top}'
-    +'.desc-block{padding:6px 6px 0}'
-    +'td.c-desc{text-align:left;width:56%}'
-    +'td.c-cant{text-align:center;width:13%}'
-    +'td.c-precio{text-align:center;width:13%}'
-    +'td.c-importe{text-align:right;width:13%;padding-right:8px}'
-    +'td.c-iva{text-align:center;width:5%}'
-    +'.line-row td{padding-top:4px;padding-bottom:4px}'
-    // Totales (alineados a la derecha)
-    +'.tot-area{display:flex;justify-content:flex-end;margin-top:14px}'
-    +'.tot-tbl{border-collapse:collapse}'
-    +'.tot-tbl th{border:1px solid #2356a8;color:#2356a8;font-size:10px;font-weight:700;padding:4px 14px;text-align:center}'
-    +'.tot-tbl th.totf{color:#000}'
-    +'.tot-tbl td{border:1px solid #2356a8;font-size:11px;padding:6px 14px;text-align:right;font-weight:400}'
-    +'.tot-tbl td.totf{font-weight:700}'
-    // Parte inferior: desglose IVA + pago
-    +'.bottom{display:flex;gap:14px;margin-top:16px;align-items:flex-start}'
-    +'.ivab{border-collapse:collapse}'
-    +'.ivab th{border:1px solid #000;font-size:8.5px;font-weight:700;padding:3px 6px;text-align:center}'
-    +'.ivab td{border:1px solid #000;font-size:9px;padding:4px 6px;text-align:center;min-width:42px}'
-    +'.pago{flex:1;font-size:10px;line-height:1.9;padding-top:2px}'
-    +'.pago b{font-weight:700}'
+    +'.mtbl{width:100%;border-collapse:collapse;table-layout:fixed}'
+    +'.mtbl col.col-desc{width:auto}'
+    +'.mtbl col.col-cant{width:90px}'
+    +'.mtbl col.col-precio{width:90px}'
+    +'.mtbl col.col-imp{width:95px}'
+    +'.mtbl col.col-iva{width:38px}'
+    +'.mtbl thead th{border:1px solid '+BL+';background:'+BLBG+';color:'+BL+';font-weight:700;font-size:13px;padding:7px 8px;text-align:left;vertical-align:middle}'
+    +'.mtbl thead th.center{text-align:center}'
+    +'.mtbl thead th.iva-h{text-align:center;font-size:10px;line-height:1.05;padding:5px 2px}'
+    +'.mtbl tbody td{border-left:1px solid '+BL+';border-right:1px solid '+BL+';font-size:12.5px;padding:1px 8px;vertical-align:top}'
+    +'.mtbl tbody .c-desc{text-align:left;border-left:1px solid '+BL+';border-right:none}'
+    +'.mtbl tbody .c-cant{text-align:right;border-left:1px solid '+BL+';border-right:none;white-space:nowrap}'
+    +'.mtbl tbody .c-precio{text-align:right;border-left:1px solid '+BL+';border-right:none;white-space:nowrap}'
+    +'.mtbl tbody .c-imp{text-align:right;border-left:1px solid '+BL+';border-right:none;white-space:nowrap}'
+    +'.mtbl tbody .c-iva{text-align:right;border-left:1px solid '+BL+';border-right:1px solid '+BL+';white-space:nowrap}'
+    +'.dblock{padding:3px 0}'
+    +'.mtbl tbody .lrow td{padding-top:5px;padding-bottom:5px}'
+    +'.body-pad{height:1px}'
+    +'.mtbl tbody tr.filler td{border-left:1px solid '+BL+';border-right:1px solid '+BL+';height:30px}'
+    +'.mtbl tbody tr.filler td.sepcol{border-left:1px solid '+BL+'}'
+    +'.botline td{border-bottom:1px solid '+BL+'}'
+    // Totales (derecha)
+    +'.totrow{display:flex;justify-content:flex-end;margin-top:12px}'
+    +'.ttbl{border-collapse:collapse;table-layout:fixed}'
+    +'.ttbl th{border:1px solid '+BL+';color:'+BL+';font-weight:400;font-size:12.5px;padding:6px 18px;text-align:center;white-space:nowrap}'
+    +'.ttbl th.tf{color:#000;font-weight:700}'
+    +'.ttbl td{border:1px solid '+BL+';font-size:13px;padding:8px 18px;text-align:right;white-space:nowrap}'
+    +'.ttbl td.tf{font-weight:700}'
+    // Inferior: desglose IVA + pago
+    +'.botrow{display:flex;gap:30px;margin-top:16px;align-items:flex-start}'
+    +'.ivatbl{border-collapse:collapse;table-layout:fixed}'
+    +'.ivatbl th{border:1px solid '+BL+';color:'+BL+';font-weight:400;font-size:11px;padding:4px 8px;text-align:center;white-space:nowrap}'
+    +'.ivatbl td{border:1px solid '+BL+';font-size:11px;padding:5px 8px;text-align:center;height:20px}'
+    +'.ivatbl td:nth-child(1){min-width:92px;text-align:right}'
+    +'.ivatbl td:nth-child(2){min-width:42px}'
+    +'.ivatbl td:nth-child(3){min-width:78px;text-align:right}'
+    +'.ivatbl td:nth-child(4){min-width:42px}'
+    +'.ivatbl td:nth-child(5){min-width:70px}'
+    +'.pago{font-size:13px;line-height:2;padding-top:2px}'
+    +'.pago .lbl{display:inline-block;min-width:128px}'
     // Pie
-    +'.pie{text-align:center;font-size:8.5px;margin-top:24px;line-height:1.7}'
+    +'.pie{text-align:center;font-size:11px;margin-top:20px;line-height:1.7}'
     +'.pie .mail{font-weight:700}'
-    +'.legal{font-size:6.5px;color:#444;line-height:1.5;margin-top:8px;text-align:center}'
-    +'@media print{body{margin:0}.page{padding:10mm 12mm}}'
+    +'.legal{font-size:8px;color:#000;line-height:1.45;margin-top:10px;text-align:center;padding:0 10px}'
+    +'@media print{body{margin:0}.page{padding:12mm 13mm}}'
     +'</style></head><body><div class="page">'
 
-    // ── CABECERA ──
-    +'<div class="head">'
-    +'<div class="emp-box">'
-    +'<div class="emp-nom">'+x((cfg.emp||'ALARO CLIMA').toUpperCase())+'</div>'
-    +x(cfg.res||'')+'<br>NIF: '+x(cfg.nif||'')+'<br>'+x(cfg.dir||'')+'<br>'+x(cfg.cp||'')+'<br>Telf.: '+x(cfg.mov||'')
+    // ── FILA SUPERIOR ──
+    +'<div class="toprow">'
+    +'<div class="emp">'
+    +'<div class="nom">'+x((cfg.emp||'ALARO CLIMA').toUpperCase())+'</div>'
+    +x(cfg.res||'')+'<br>NIF: '+x(cfg.nif||'')+'<br>'+x(cfg.dir||'')+'<br>'+x((cfg.cp||'').split(' ').slice(1).join(' ')?cfg.cp.replace(/^(\S+)\s/,'$1   '):cfg.cp||'')+'<br>Telf.: '+x(cfg.mov||'')
     +'</div>'
-    +'<div class="logo-box"><img id="pdf-logo" src="data:image/jpeg;base64,'+LOGO_B64+'"></div>'
-    +'</div>'
-
-    // ── CLIENTE ──
-    +'<div class="cli-box">'
-    +'<div class="cli-hdr">C L I E N T E</div>'
-    +'<div class="cli-body">'+x((d.cliNom||'').toUpperCase())+(c&&c.nif?'<br>NIF: '+x(c.nif):'')+(c&&c.d?'<br>'+x(c.d.toUpperCase()):'')+(c&&c.cp?'<br>'+x(c.cp.toUpperCase()):'')+'</div>'
+    +'<div class="logo"><img id="pdf-logo" src="data:image/jpeg;base64,'+LOGO_B64+'"></div>'
     +'</div>'
 
-    // ── META: albarán + fecha/num/pagina ──
-    +'<div class="meta">'
-    +'<div class="alb">Nº de Albarán: '+x(d.albaran||'—')+'</div>'
-    +'<table class="meta-tbl"><tr><th>FECHA</th><th>'+tipoLabel+'</th><th>PÁGINA</th></tr>'
-    +'<tr><td>'+df(d.fecha)+'</td><td>'+x(d.num)+'</td><td>1</td></tr></table>'
+    // ── FILA MEDIA: izquierda tabla / derecha cliente ──
+    +'<div class="midrow">'
+    +'<div class="midleft">'
+    +'<div class="alb">Nº de Albarán:  '+x(d.albaran||'—')+'</div>'
+    +'<table class="ftbl"><tr><th>FECHA</th><th>'+tipoLabel+'</th><th>PÁGINA</th></tr>'
+    +'<tr><td>'+df(d.fecha)+'</td><td class="fnum">'+x(d.num)+'</td><td>1</td></tr></table>'
+    +'</div>'
+    +'<div class="midright">'
+    +'<div class="clibox"><div class="clihdr">C L I E N T E</div>'
+    +'<div class="clibody">'+x((d.cliNom||'').toUpperCase())+(c&&c.nif?'<br>NIF:  '+x(c.nif):'')+(c&&c.d?'<br>'+x(c.d.toUpperCase()).replace(/\n/g,'<br>'):'')+(c&&c.cp?'<br>'+x(c.cp.toUpperCase()):'')+'</div></div>'
+    +'</div>'
     +'</div>'
 
     // ── TABLA PRINCIPAL ──
-    +'<table class="main"><thead><tr>'
-    +'<th class="c-desc">Descripción</th><th class="c-cant">Cantidad</th><th class="c-precio">Precio</th><th class="c-importe">Importe</th><th class="c-iva">% IVA</th>'
-    +'</tr></thead></table>'
-    +'<div class="main-body-wrap"><table class="body-tbl">'
-    +(descInmueble?'<tr><td class="c-desc" colspan="5"><div class="desc-block">'+descInmueble+'</div></td></tr>':'')
-    +(bloqueAviso?'<tr><td colspan="5">'+bloqueAviso+'</td></tr>':'')
-    +(bloqueDesc?'<tr><td colspan="5">'+bloqueDesc+'</td></tr>':'')
+    +'<table class="mtbl">'
+    +'<colgroup><col class="col-desc"><col class="col-cant"><col class="col-precio"><col class="col-imp"><col class="col-iva"></colgroup>'
+    +'<thead><tr>'
+    +'<th>Descripción</th><th class="center">Cantidad</th><th class="center">Precio</th><th class="center">Importe</th><th class="iva-h">%<br>IVA</th>'
+    +'</tr></thead><tbody>'
+    +(bloqueInmueble?'<tr class="lrow"><td class="c-desc">'+bloqueInmueble+'</td><td class="c-cant"></td><td class="c-precio"></td><td class="c-imp"></td><td class="c-iva"></td></tr>':'')
+    +(bloqueAviso?'<tr class="lrow"><td class="c-desc">'+bloqueAviso+'</td><td class="c-cant"></td><td class="c-precio"></td><td class="c-imp"></td><td class="c-iva"></td></tr>':'')
+    +(bloqueDesc?'<tr class="lrow"><td class="c-desc">'+bloqueDesc+'</td><td class="c-cant"></td><td class="c-precio"></td><td class="c-imp"></td><td class="c-iva"></td></tr>':'')
     +filasLineas
     +bloqueMat
     +bloqueObs
-    +'</table></div>'
+    +'<tr class="filler"><td class="c-desc"></td><td class="c-cant"></td><td class="c-precio"></td><td class="c-imp"></td><td class="c-iva"></td></tr>'
+    +'<tr class="botline"><td class="c-desc"></td><td class="c-cant"></td><td class="c-precio"></td><td class="c-imp"></td><td class="c-iva"></td></tr>'
+    +'</tbody></table>'
 
-    // ── TOTALES (derecha) ──
-    +'<div class="tot-area"><table class="tot-tbl">'
-    +'<tr><th>Exento I.V.A.</th><th>Base I.V.A.</th><th>Cuota I.V.A.</th><th class="totf">TOTAL FACTURA</th></tr>'
-    +'<tr><td>&nbsp;</td><td>'+fmtES(t.base)+'</td><td>'+fmtES(t.cuota)+'</td><td class="totf">'+fmtES(t.total)+'</td></tr>'
+    // ── TOTALES ──
+    +'<div class="totrow"><table class="ttbl">'
+    +'<tr><th>Exento I.V.A.</th><th>Base  I.V.A.</th><th>Cuota  I.V.A.</th><th class="tf">TOTAL FACTURA</th></tr>'
+    +'<tr><td>&nbsp;</td><td>'+fmtES(t.base)+'</td><td>'+fmtES(t.cuota)+'</td><td class="tf">'+fmtES(t.total)+'</td></tr>'
     +'</table></div>'
 
     // ── DESGLOSE IVA + PAGO ──
-    +'<div class="bottom">'
-    +'<table class="ivab">'
-    +'<tr><th>Base imponible</th><th>% IVA</th><th>Cuota I.V.A.</th><th>% RE</th><th>Cuota R.E.</th></tr>'
+    +'<div class="botrow">'
+    +'<table class="ivatbl">'
+    +'<tr><th>Base imponible</th><th>% IVA</th><th>Cuota  I.V.A.</th><th>% RE</th><th>Cuota R.E.</th></tr>'
     +ivaRows
     +'</table>'
     +'<div class="pago">'
-    +'<b>Forma de pago:</b> '+x(d.fpago||'TRANSFERENCIA')+'<br>'
-    +'<b>Vencimientos .:</b> '+x(d.venc||'A LA VISTA')+'<br>'
-    +'<b>Banco (IBAN) .:</b> '+x(cfg.iban||'')+'<br>'
-    +'<b>Notas .............:</b>'
+    +'<span class="lbl">Forma de pago:</span> '+x(d.fpago||'TRANSFERENCIA')+'<br>'
+    +'<span class="lbl">Vencimientos .:</span> '+x(d.venc||'A LA VISTA')+'<br>'
+    +'<span class="lbl">Banco (IBAN) .:</span> '+x(cfg.iban||'')+'<br>'
+    +'<span class="lbl">Notas .............:</span>'
     +'</div></div>'
 
     // ── PIE ──
     +'<div class="pie"><span class="mail">'+x(cfg.email||'')+'</span><br>Instalación y mantenim de A/A. Climatización Industrial, RITE. Inst. Electric. B.T.Instal./manten.autorizado dgindustria caib '+x(cfg.ri||'')+' '+x(cfg.rm||'')+'</div>'
-    +'<div class="legal">'+x(cfg.res||'')+', con el domicilio arriba indicado, de conformidad con la normativa vigente en materia de protección de datos de carácter personal, le informa que los datos personales que nos ha facilitado serán incorporados a un fichero titularidad de la empresa con la finalidad del mantenimiento de la relación comercial y remitirle información de nuestros productos o servicios. En ningún caso serán cedidos a terceros y podrá ejercitar sus derechos de acceso, rectificación, cancelación u oposición al tratamiento de los mismos dirigiendo una comunicación escrita a la dirección anteriormente indicada o enviando un correo electrónico a: '+x(cfg.email||'')+'</div>'
+    +'<div class="legal">'+x(cfg.res||'')+', con el domicilio arriba indicado, de conformidad con la normativa vigente en materia de protección de datos de carácter personal, le informa que los datos personales que nos ha facilitado serán incorporados a un fichero titularidad de la empresa con la finalidad del mantenimiento de la relación comercial y remitirle información de nuestros productos o servicios.  En ningún caso serán cedidos a terceros y podrá ejercitar sus derechos de acceso, rectificación, cancelación u oposición al tratamiento de los mismos dirigiendo una comunicación escrita a la dirección anteriormente indicada o enviando un correo electrónico a:  '+x(cfg.email||'')+'</div>'
 
     +'</div></body></html>';
 
   var win=window.open('','_blank','width=900,height=800');
   if(!win){ msg('Permite ventanas emergentes para generar el PDF'); return; }
   win.document.write(html); win.document.close();
-  // Esperar a que el logo cargue completamente antes de imprimir
   win.onload=function(){
     var img=win.document.getElementById('pdf-logo');
     var doPrint=function(){ setTimeout(function(){ win.focus(); win.print(); },250); };
