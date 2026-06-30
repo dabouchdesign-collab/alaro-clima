@@ -919,9 +919,6 @@ function verParte(id) {
   if(p.fotos&&p.fotos.length) fh='<div class="lbl">Fotos ('+p.fotos.length+')</div><div style="padding:0 16px 12px;display:flex;flex-wrap:wrap;gap:7px">'+p.fotos.map(function(s){ return '<img src="'+s+'" style="width:75px;height:75px;object-fit:cover;border-radius:6px;border:1px solid var(--b1)">'; }).join('')+'</div>';
   if(p.firmaImg) fi='<div class="lbl">Firma del cliente</div><div style="padding:0 16px 12px"><img src="'+p.firmaImg+'" style="max-width:100%;border:1px solid var(--b1);border-radius:8px;background:#fff;display:block"></div>';
 
-  // Obtener email del cliente si existe
-  var cliEmail='';
-  if(p.cliId){ var c=DB.clientes().find(function(z){ return z.id===p.cliId; }); if(c&&c.e) cliEmail=c.e; }
 
   document.getElementById('ver-body').innerHTML=
     '<div class="res-card"><div class="res-row"><span class="res-k">Fecha</span><span class="res-v">'+x(df(p.fecha))+'</span></div><div class="res-row"><span class="res-k">Operario</span><span class="res-v">'+x(p.op)+'</span></div><div class="res-row"><span class="res-k">Cliente</span><span class="res-v">'+x(p.cliNom)+'</span></div>'+(p.cliDir?'<div class="res-row"><span class="res-k">Domicilio</span><span class="res-v">'+x(p.cliDir)+'</span></div>':'')+'<div class="res-row"><span class="res-k">Obra</span><span class="res-v">'+x(p.obraNom||p.obraDir||'—')+'</span></div><div class="res-row"><span class="res-k">Tipo</span><span class="res-v">'+x(p.tipo)+'</span></div></div>'
@@ -1093,7 +1090,7 @@ function _hacerPDF_legacy(p){
 
 // ── GUARDAR PDF (PC: carpeta directa · iPad/móvil: compartir) ──
 var dirPartesHandle=null;
-(function(){ if(window.indexedDB){ try{ idbGet('dirPartes').then(function(h){ if(h) dirPartesHandle=h; }).catch(function(){}); idbGet('dirFacturas').then(function(h){ if(h) dirFacturasHandle=h; }).catch(function(){}); }catch(e){} } })();
+(function(){ if(window.indexedDB){ try{ idbGet('dirPartes').then(function(h){ if(h) dirPartesHandle=h; }).catch(function(){}); idbGet('dirFacturas').then(function(h){ if(h) dirFacturasHandle=h; }).catch(function(){}); idbGet('dirPresupuestos').then(function(h){ if(h) dirPresupuestosHandle=h; }).catch(function(){}); }catch(e){} } })();
 
 // ── SUBIDA A GOOGLE DRIVE (móvil/tablet · Opción A: drive.file + Picker) ──
 var GDRIVE = {
@@ -1531,6 +1528,14 @@ function pedirPermisoCarpetaFacturas(){
   }
   return window.showDirectoryPicker({mode:'readwrite', id:'facturas'}).then(function(h){ dirFacturasHandle=h; try{ idbSet('dirFacturas', h); }catch(e){} return h; });
 }
+var dirPresupuestosHandle=null;
+function pedirPermisoCarpetaPresupuestos(){
+  var opts={mode:'readwrite'};
+  if(dirPresupuestosHandle){
+    return dirPresupuestosHandle.requestPermission(opts).then(function(pp){ if(pp==='granted') return dirPresupuestosHandle; throw new Error('permiso denegado'); });
+  }
+  return window.showDirectoryPicker({mode:'readwrite', id:'presupuestos'}).then(function(h){ dirPresupuestosHandle=h; try{ idbSet('dirPresupuestos', h); }catch(e){} return h; });
+}
 function nombreFactura(d){
   var t={factura:'Factura',presupuesto:'Presupuesto',albaran:'Albaran'}[d.tipo]||'Documento';
   var cli=(d.cliNom||'').replace(/[^\w\sáéíóúñÁÉÍÓÚÑ\-]/g,'').trim().replace(/\s+/g,'_');
@@ -1542,9 +1547,12 @@ function guardarFacturaArchivo(d){
   var blob;
   try{ var doc=new JsPDF({unit:'mm',format:'a4',orientation:'portrait'}); drawFactura(doc, d, DB.cfg()); blob=doc.output('blob'); }catch(e){ msg('Error al generar el PDF'); return; }
   var fname=nombreFactura(d);
+  var esPres=(d.tipo==='presupuesto');
+  var permisoFn=esPres?pedirPermisoCarpetaPresupuestos:pedirPermisoCarpetaFacturas;
+  var carpeta=esPres?'00_Presupuestos':'00_Facturas';
   if(window.showDirectoryPicker){
-    pedirPermisoCarpetaFacturas().then(function(dir){
-      guardarEnCarpeta(dir, blob, fname).then(function(){ msg('Factura guardada en 00_Facturas'); }).catch(function(){ descargarPDF(blob, fname); });
+    permisoFn().then(function(dir){
+      guardarEnCarpeta(dir, blob, fname).then(function(){ msg('Guardado en '+carpeta); }).catch(function(){ descargarPDF(blob, fname); });
     }).catch(function(){ descargarPDF(blob, fname); });
   } else {
     compartirPDF(blob, fname);
