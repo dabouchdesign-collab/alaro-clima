@@ -1277,6 +1277,75 @@ function guardarEnCarpeta(dir, blob, fname){
 // ── GENERADOR PDF VECTORIAL (parte de trabajo profesional) ──
 function drawParte(doc, p, cfg){
   cfg=cfg||{}; p=p||{};
+  var PW=210, M=6, R=PW-M, CW=PW-2*M;
+  var BK=[0,0,0], BORD=[70,90,165], FILL=[221,230,247], GRY=[90,90,90], LGT=[130,130,130];
+  function df(s){ if(!s) return ''; var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s); return m?(m[3]+'-'+m[2]+'-'+m[1]):s; }
+  function T(c){ doc.setTextColor(c[0],c[1],c[2]); }
+  function D(c){ doc.setDrawColor(c[0],c[1],c[2]); }
+  function F(c){ doc.setFillColor(c[0],c[1],c[2]); }
+  function ft(s,w){ doc.setFontSize(s); doc.setFont('helvetica',w||'normal'); }
+  var LOGO=cfg.logo||null;
+
+  D(BK); doc.setLineWidth(0.5); doc.rect(M,8,94,44);
+  T(BK); ft(13,'bold'); doc.text((cfg.emp||'ALARO CLIMA').toUpperCase(), M+6, 16.5);
+  ft(10,'normal'); var yy=23;
+  [cfg.res, cfg.nif?('NIF: '+cfg.nif):'', cfg.dir, cfg.cp2||'', cfg.cp, cfg.mov?('Telf.: '+cfg.mov):''].forEach(function(l){ if(l){ doc.text(l,M+6,yy); yy+=5.4; } });
+  if(LOGO){ try{ doc.addImage(LOGO,'JPEG',116,10,88,30); }catch(e){ try{ doc.addImage(LOGO,'PNG',116,10,88,30);}catch(e2){} } }
+
+  ft(10,'normal'); T(BK); doc.text('Nº de Parte:  '+(p.num||''), M, 62);
+  var cw=[30,34,22], ty=66, accx=M;
+  D(BORD); doc.setLineWidth(0.4);
+  ['FECHA','Nº PARTE','PÁGINA'].forEach(function(h,i){ doc.rect(accx,ty,cw[i],9); ft(9.5,'bold'); T(BK); doc.text(h,accx+cw[i]/2,ty+6,{align:'center'}); accx+=cw[i]; });
+  accx=M; [df(p.fecha),String(p.num||''),'1'].forEach(function(v,i){ doc.rect(accx,ty+9,cw[i],11); ft(i===1?13:12,'bold'); T(BK); doc.text(v,accx+cw[i]/2,ty+9+7.2,{align:'center'}); accx+=cw[i]; });
+
+  var cx=112, cw2=R-cx;
+  F(FILL); D(BORD); doc.rect(cx,44,cw2,9,'FD');
+  ft(11,'bold'); T(BK); doc.setCharSpace(2); doc.text('CLIENTE',cx+cw2/2,50,{align:'center'}); doc.setCharSpace(0);
+  doc.rect(cx,53,cw2,34);
+  T(BK); ft(11,'bold'); doc.text((p.cliNom||'—').toUpperCase(),cx+4,60);
+  ft(10,'normal'); var yc=66; [p.cliDir,p.cliNif?('NIF: '+p.cliNif):'',p.cliTel?('Tel: '+p.cliTel):'',p.tipo?('Tipo: '+p.tipo):''].forEach(function(l){ if(l){ doc.text(l,cx+4,yc); yc+=5.4; } });
+
+  var hy=96, hH=9; F(FILL); D(BORD); doc.rect(M,hy,CW,hH,'FD');
+  ft(11,'bold'); T(BK); doc.text('Descripción del trabajo / incidencia / asistencia', M+3, hy+6);
+  var bT=hy+hH, bH=104; doc.rect(M,bT,CW,bH);
+  T(BK); ft(10,'normal'); var dyy=bT+6;
+  var L=[]; if(p.obraNom) L.push(p.obraNom);
+  if(p.obraDir) L.push(p.obraDir);
+  L.push('Operario: '+(p.op||cfg.res||'—')); L.push('');
+  doc.splitTextToSize(p.desc||'—',CW-6).forEach(function(l){ L.push(l); });
+  if(p.obs){ L.push(''); L.push('OBSERVACIONES:'); doc.splitTextToSize(p.obs,CW-6).forEach(function(l){ L.push(l); }); }
+  if(p.mat){ L.push(''); L.push('MATERIALES:'); doc.splitTextToSize(p.mat,CW-6).forEach(function(l){ L.push(l); }); }
+  L.forEach(function(l){ if(dyy<bT+bH-4){ doc.text(l,M+2,dyy); dyy+=5.2; } });
+
+  var y=bT+bH+6;
+  if(p.fotos&&p.fotos.length){
+    ft(8,'bold'); T([90,110,60]); doc.setCharSpace(0.4); doc.text('FOTOGRAFÍAS DE LA VISITA ('+p.fotos.length+')',M,y); doc.setCharSpace(0); y+=3;
+    var cols=4,fg=3,fw=(CW-(cols-1)*fg)/cols,fh=fw*0.60,col=0,rowY=y;
+    p.fotos.slice(0,4).forEach(function(src){
+      var x=M+col*(fw+fg); F([238,238,236]); D(BORD); doc.setLineWidth(0.3); doc.rect(x,rowY,fw,fh,'FD');
+      try{ doc.addImage(src,'JPEG',x+0.5,rowY+0.5,fw-1,fh-1);}catch(e){ try{ doc.addImage(src,'PNG',x+0.5,rowY+0.5,fw-1,fh-1);}catch(e2){} }
+      col++; if(col>=cols){ col=0; rowY+=fh+fg; }
+    });
+    if(col>0) rowY+=fh+fg; y=rowY+2;
+  }
+
+  var firmaH=26, fT=252; var gap=6, fbw=(CW-gap)/2;
+  D(BORD); doc.setLineWidth(0.4);
+  function fb(x,lab,img,pie){
+    doc.rect(x,fT,fbw,firmaH);
+    T(GRY); ft(8.5,'normal'); doc.text(lab,x+4,fT+6);
+    if(img){ try{ doc.addImage(img,'PNG',x+5,fT+8,fbw*0.5,15);}catch(e){} }
+    T(BK); ft(8.5,'normal'); if(pie) doc.text(pie,x+4,fT+firmaH-3);
+  }
+  fb(M,'Conforme / Firma del cliente:',p.firmaImg,(p.firmaNom?('Nombre: '+p.firmaNom):'')+(p.firmaDni?('  DNI: '+p.firmaDni):''));
+  fb(M+fbw+gap,'Firma del técnico / Operario:',null,(p.op||cfg.res||''));
+
+  var pY=284; T(BK); ft(9.5,'bold'); doc.text(cfg.email||'alaroclima@gmail.com',PW/2,pY,{align:'center'});
+  T(GRY); ft(7.5,'normal');
+  doc.text('Instalación y mantenim. de A/A. Climatización Industrial, RITE. Inst. Electric. B.T.Instal./manten.autorizado dgindustria caib '+(cfg.ri||'')+' Nima '+(cfg.rm||''),PW/2,pY+4.5,{align:'center'});
+}
+function _drawParte_v2old(doc, p, cfg){
+  cfg=cfg||{}; p=p||{};
   var PW=210, M=12, R=PW-M, CW=PW-2*M;
   var NAVY=[27,32,104], GREEN=[22,140,70], INK=[20,20,20], GRY=[95,95,95], LGT=[150,150,150];
   var BLU=[224,231,246], BRD=[120,130,175], LINE=[205,205,215], BG=[252,252,251];
@@ -1676,6 +1745,95 @@ function guardarFacturaArchivo(d){
   }
 }
 function drawFactura(doc, d, cfg){
+  cfg=cfg||{}; d=d||{};
+  var PW=210, M=6, R=PW-M, CW=PW-2*M;
+  var BK=[0,0,0], BLUE=[41,55,140], BORD=[70,90,165], FILL=[221,230,247], GRY=[90,90,90], LGT=[130,130,130];
+  function df(s){ if(!s) return ''; var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s); return m?(m[3]+'-'+m[2]+'-'+m[1]):s; }
+  function n2(v){ return (Math.round(v*100)/100).toFixed(2).replace('.',','); }
+  function T(c){ doc.setTextColor(c[0],c[1],c[2]); }
+  function D(c){ doc.setDrawColor(c[0],c[1],c[2]); }
+  function F(c){ doc.setFillColor(c[0],c[1],c[2]); }
+  function ft(s,w){ doc.setFontSize(s); doc.setFont('helvetica',w||'normal'); }
+  var base=parseFloat(d.base)||0, iva=(d.iva===''||d.iva==null)?21:parseFloat(d.iva)||0;
+  var cuota=base*iva/100, total=base+cuota;
+  var TL={factura:'FACTURA',presupuesto:'PRESUPUESTO',albaran:'ALBARÁN'}[d.tipo]||'FACTURA';
+  var LOGO=cfg.logo||null;
+  var LET={ email:cfg.email||'alaroclima@gmail.com', iban:cfg.iban||'ES70 2100 5992 2213 0037 5713', formaPago:cfg.formaPago||'TRANSFERENCIA', venc:cfg.venc||'A LA VISTA' };
+
+  D(BK); doc.setLineWidth(0.5); doc.rect(M,8,94,44);
+  T(BK); ft(13,'bold'); doc.text((cfg.emp||'ALARO CLIMA').toUpperCase(), M+6, 16.5);
+  ft(10,'normal'); var yy=23;
+  [cfg.res, cfg.nif?('NIF: '+cfg.nif):'', cfg.dir, cfg.cp2||'', cfg.cp, cfg.mov?('Telf.: '+cfg.mov):''].forEach(function(l){ if(l){ doc.text(l,M+6,yy); yy+=5.4; } });
+
+  if(LOGO){ try{ doc.addImage(LOGO,'JPEG',116,10,88,30); }catch(e){ try{ doc.addImage(LOGO,'PNG',116,10,88,30);}catch(e2){} } }
+
+  ft(10,'normal'); T(BK); doc.text('Nº de Albarán:  '+(d.num||''), M, 62);
+
+  var tX=M, cw=[30,34,22], tH1=9, tH2=11, ty=66;
+  D(BORD); doc.setLineWidth(0.4);
+  var heads=['FECHA','Nº '+TL,'PÁGINA'], accx=tX;
+  heads.forEach(function(h,i){ doc.rect(accx,ty,cw[i],tH1); ft(9.5,'bold'); T(BK); doc.text(h,accx+cw[i]/2,ty+6,{align:'center'}); accx+=cw[i]; });
+  accx=tX; [df(d.fecha),String(d.num||''),'1'].forEach(function(v,i){ doc.rect(accx,ty+tH1,cw[i],tH2); ft(i===1?13:12,'bold'); T(BK); doc.text(v,accx+cw[i]/2,ty+tH1+7.2,{align:'center'}); accx+=cw[i]; });
+
+  var cx=112, cw2=R-cx;
+  F(FILL); D(BORD); doc.setLineWidth(0.4); doc.rect(cx,44,cw2,9,'FD');
+  ft(11,'bold'); T(BK); doc.setCharSpace(2); doc.text('CLIENTE',cx+cw2/2,50,{align:'center'}); doc.setCharSpace(0);
+  doc.rect(cx,53,cw2,34);
+  T(BK); ft(11,'bold'); doc.text((d.cliNom||'—').toUpperCase(),cx+4,60);
+  ft(10,'normal'); var yc=66; (d.cliLines||[]).forEach(function(l){ if(l){ doc.text(l,cx+4,yc); yc+=5.4; } });
+
+  var cols=[{t:'Descripción',x:M,w:118,a:'left'},{t:'Cantidad',x:M+118,w:24,a:'c'},{t:'Precio',x:M+142,w:24,a:'c'},{t:'Importe',x:M+166,w:24,a:'c'},{t:'%IVA',x:M+190,w:CW-190,a:'c'}];
+  var hy=96, hH=9;
+  F(FILL); D(BORD); doc.setLineWidth(0.4); doc.rect(M,hy,CW,hH,'FD');
+  ft(11,'bold'); T(BK);
+  cols.forEach(function(c){ if(c.a==='left'){ doc.text(c.t,c.x+3,hy+6); } else if(c.t==='%IVA'){ ft(7.5,'bold'); doc.text('%',c.x+c.w/2,hy+3.6,{align:'center'}); doc.text('IVA',c.x+c.w/2,hy+7.2,{align:'center'}); ft(11,'bold'); } else { doc.text(c.t,c.x+c.w/2,hy+6,{align:'center'}); } });
+  cols.forEach(function(c){ if(c.x>M) doc.line(c.x,hy,c.x,hy+hH); });
+  var bT=hy+hH, bH=126; doc.rect(M,bT,CW,bH);
+  cols.forEach(function(c){ if(c.x>M) doc.line(c.x,bT,c.x,bT+bH); });
+  T(BK); ft(10,'normal'); var dyy=bT+6;
+  var L=[]; if(d.obraNom) L.push(d.obraNom); (d.obraLines||[]).forEach(function(l){ L.push(l); });
+  if(L.length) L.push('');
+  doc.splitTextToSize(d.desc||'Servicios de climatización',112).forEach(function(l){ L.push(l); });
+  L.forEach(function(l){ doc.text(l,M+2,dyy); dyy+=5.2; });
+  var ry=bT+6; ft(10,'normal'); T(BK);
+  doc.text('1,00',M+118+cols[1].w-3,ry,{align:'right'});
+  doc.text(n2(base),M+142+cols[2].w-3,ry,{align:'right'});
+  doc.text(n2(base),M+166+cols[3].w-3,ry,{align:'right'});
+  doc.text(iva.toFixed(1).replace('.',','),M+190+(CW-190)/2,ry,{align:'center'});
+
+  var tY=bT+bH+8, TX=104, TW=R-TX, twc=[TW*0.24,TW*0.26,TW*0.26,TW*0.24];
+  var tacc=TX; var thd=['Exento I.V.A.','Base I.V.A.','Cuota I.V.A.','TOTAL '+TL];
+  D(BORD); thd.forEach(function(h,i){ F(FILL); doc.rect(tacc,tY,twc[i],8,'FD'); tacc+=twc[i]; });
+  tacc=TX; thd.forEach(function(h,i){ ft(i===3?8:8.5,'bold'); T(BK); doc.text(h,tacc+twc[i]/2,tY+5.2,{align:'center'}); tacc+=twc[i]; });
+  tacc=TX; [' ',n2(base),n2(cuota),n2(total)].forEach(function(v,i){ doc.rect(tacc,tY+8,twc[i],9); ft(i===3?11:10,i===3?'bold':'normal'); T(BK); doc.text(v,tacc+twc[i]-3,tY+8+6,{align:'right'}); tacc+=twc[i]; });
+
+  var bY=260, bhd=['Base imponible','% IVA','Cuota I.V.A.','% RE','Cuota R.E.'], bwd=[30,14,22,14,18], bx=M;
+  D(BORD); bhd.forEach(function(h,i){ F(FILL); doc.rect(bx,bY,bwd[i],6,'FD'); bx+=bwd[i]; });
+  bx=M; bhd.forEach(function(h,i){ ft(7,'bold'); T(BK); doc.text(h,bx+bwd[i]/2,bY+4,{align:'center'}); bx+=bwd[i]; });
+  var rates=[[4,0.5],[10,1.4],[21,5.2]];
+  rates.forEach(function(rt,ri){
+    var rry=bY+6+ri*5.5, bx2=M;
+    D(BORD); bwd.forEach(function(w){ doc.rect(bx2,rry,w,5.5); bx2+=w; });
+    ft(8,'normal'); T(BK);
+    doc.text(rt[0].toFixed(1).replace('.',','),M+bwd[0]+bwd[1]-2,rry+3.8,{align:'right'});
+    doc.text(rt[1].toFixed(1).replace('.',','),M+bwd[0]+bwd[1]+bwd[2]+bwd[3]-2,rry+3.8,{align:'right'});
+    if(rt[0]===iva){ doc.text(n2(base),M+bwd[0]-2,rry+3.8,{align:'right'}); doc.text(n2(cuota),M+bwd[0]+bwd[1]+bwd[2]-2,rry+3.8,{align:'right'}); }
+  });
+
+  var px=112; ft(10,'normal'); T(BK);
+  doc.text('Forma de pago .:  '+LET.formaPago,px,bY+4);
+  doc.text('Vencimientos .:  '+LET.venc,px,bY+9.5);
+  doc.text('Banco (IBAN) .:  '+(LET.iban||''),px,bY+15);
+  doc.text('Notas ............:',px,bY+20.5);
+
+  var fY=285; T(BK); ft(9.5,'bold'); doc.text(LET.email,PW/2,fY,{align:'center'});
+  ft(7.5,'normal');
+  doc.text('Instalación y mantenim. de A/A. Climatización Industrial, RITE. Inst. Electric. B.T.Instal./manten.autorizado dgindustria caib '+(cfg.ri||'')+' Nima '+(cfg.rm||''),PW/2,fY+4.5,{align:'center'});
+  T(LGT); ft(5.5,'normal');
+  var legal=(cfg.res||'')+', con el domicilio arriba indicado, de conformidad con la normativa vigente en materia de protección de datos de carácter personal, le informa que los datos personales que nos ha facilitado serán incorporados a un fichero titularidad de la empresa con la finalidad del mantenimiento de la relación comercial y remitirle información de nuestros productos o servicios. Puede ejercer sus derechos de acceso, rectificación, cancelación y oposición dirigiendo una comunicación escrita a la dirección anteriormente indicada o enviando un correo electrónico a: '+LET.email;
+  doc.splitTextToSize(legal,CW).forEach(function(l,i){ doc.text(l,PW/2,fY+9+i*3,{align:'center'}); });
+}
+function _drawFactura_v2old(doc, d, cfg){
   cfg=cfg||{}; d=d||{};
   var PW=210, M=12, R=PW-M, CW=PW-2*M;
   var NAVY=[27,32,104], RED=[206,26,26], INK=[20,20,20], GRY=[90,90,90], LGT=[140,140,140];
