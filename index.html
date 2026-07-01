@@ -190,6 +190,21 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'Inter',s
 .modal-t{font-size:14px;font-weight:600;margin-bottom:6px;color:var(--t1)}
 .modal-s{font-size:13px;color:var(--t2);margin-bottom:20px;line-height:1.5}
 
+/* ── CALENDARIO ── */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;padding:14px 16px}
+.cal-mes{font-size:15px;font-weight:600;color:var(--t1);text-transform:capitalize}
+.cal-navbtn{width:36px;height:36px;border:1px solid var(--b2);background:var(--s1);border-radius:9px;font-size:18px;cursor:pointer;color:var(--t1);display:flex;align-items:center;justify-content:center}
+.cal-navbtn:active{background:var(--s2)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:0 12px}
+.cal-wd{font-size:10px;font-weight:600;color:var(--t3);text-align:center;text-transform:uppercase;letter-spacing:.05em;padding:4px 0}
+.cal-day{aspect-ratio:1;border:1px solid var(--b1);border-radius:8px;display:flex;flex-direction:column;align-items:center;padding-top:6px;font-size:13px;color:var(--t1);cursor:pointer;background:var(--bg);position:relative}
+.cal-day:active{background:var(--s1)}
+.cal-day.empty{border:none;background:none;cursor:default}
+.cal-day.hoy{border-color:var(--g);font-weight:700}
+.cal-day.sel{background:var(--s2);border-color:var(--b3)}
+.cal-dot{width:6px;height:6px;border-radius:50%;background:var(--g);margin-top:4px}
+.cal-badge{position:absolute;top:2px;right:5px;font-size:9px;color:var(--g);font-weight:700}
+
 /* ══ VISTA ESCRITORIO (PC) ══ pantalla completa + textos más grandes; el móvil no se toca */
 @media (min-width:860px){
   html,body{font-size:16.5px}
@@ -232,12 +247,15 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'Inter',s
 <!-- ══ TOP BAR ══ -->
 <div class="topbar" id="topbar">
   <div class="topbar-row1">
-    <span class="tb-brand">Alaro Clima</span>
+    <span class="tb-brand" id="tb-brand"><img id="tb-logo" alt="Alaró Clima" style="height:26px;display:none;vertical-align:middle"><span id="tb-brand-txt">Alaro Clima</span></span>
     <span class="tb-date" id="hoy"></span>
     <div class="tb-sync">
       <div class="tb-dot" id="sync-dot"></div>
       <span id="sync-txt">—</span>
     </div>
+    <button class="tb-cfg" onclick="abrirCalendario()" title="Calendario de visitas">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    </button>
     <button class="tb-cfg" onclick="goSub('s-cfg','s-partes')" title="Ajustes">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
@@ -705,6 +723,19 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'Inter',s
   <div class="gap"></div>
 </div>
 
+<!-- ══ CALENDARIO DE VISITAS ══ -->
+<div id="s-calendario" class="scr">
+  <div class="subhdr"><button class="back-btn" id="back-calendario">←</button><span class="subhdr-tit">Calendario de visitas</span><button class="subhdr-act" onclick="calHoy()" title="Hoy">•</button></div>
+  <div class="cal-nav">
+    <button class="cal-navbtn" onclick="calMover(-1)">‹</button>
+    <span class="cal-mes" id="cal-mes"></span>
+    <button class="cal-navbtn" onclick="calMover(1)">›</button>
+  </div>
+  <div class="cal-grid" id="cal-grid"></div>
+  <div id="cal-dia"></div>
+  <div class="gap"></div>
+</div>
+
 </div><!-- #app -->
 
 <div class="modal-bg" id="modal">
@@ -922,15 +953,84 @@ function df(d){ if(!d) return ''; var p=d.split('-'); return p[2]+'/'+p[1]+'/'+p
 function ini(n){ return (n||'?').split(' ').slice(0,2).map(function(w){ return (w[0]||'').toUpperCase(); }).join(''); }
 function hoy(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 
+// ── CALENDARIO DE VISITAS ─────────────────────────────
+var calY=null, calM=null, calSel=null;
+function getVisitas(){ return DB.cfg()._visitas||[]; }
+function saveVisitas(arr){ var c=DB.cfg(); c._visitas=arr; DB.s('cfg',c); }
+function abrirCalendario(){
+  var d=new Date();
+  if(calY===null){ calY=d.getFullYear(); calM=d.getMonth(); }
+  calSel=hoy();
+  goSub('s-calendario','s-partes');
+  renderCalendario(); selDia(calSel);
+}
+function calHoy(){ var d=new Date(); calY=d.getFullYear(); calM=d.getMonth(); calSel=hoy(); renderCalendario(); selDia(calSel); }
+function calMover(delta){ calM+=delta; if(calM<0){calM=11;calY--;} if(calM>11){calM=0;calY++;} renderCalendario(); }
+function renderCalendario(){
+  var meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  var lbl=document.getElementById('cal-mes'); if(lbl) lbl.textContent=meses[calM]+' '+calY;
+  var grid=document.getElementById('cal-grid'); if(!grid) return;
+  var wd=['L','M','X','J','V','S','D'];
+  var html=wd.map(function(w){ return '<div class="cal-wd">'+w+'</div>'; }).join('');
+  var startDay=(new Date(calY,calM,1).getDay()+6)%7;
+  var dim=new Date(calY,calM+1,0).getDate();
+  for(var i=0;i<startDay;i++) html+='<div class="cal-day empty"></div>';
+  var vis=getVisitas(), tStr=hoy();
+  for(var d=1;d<=dim;d++){
+    var f=calY+'-'+String(calM+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    var n=vis.filter(function(v){ return v.fecha===f; }).length;
+    var cls='cal-day'+(f===tStr?' hoy':'')+(f===calSel?' sel':'');
+    html+='<div class="'+cls+'" onclick="selDia(\''+f+'\')">'+d+(n?'<div class="cal-dot"></div>':'')+(n>1?'<div class="cal-badge">'+n+'</div>':'')+'</div>';
+  }
+  grid.innerHTML=html;
+}
+function selDia(f){
+  calSel=f; renderCalendario();
+  var cont=document.getElementById('cal-dia'); if(!cont) return;
+  var vis=getVisitas().filter(function(v){ return v.fecha===f; }).sort(function(a,b){ return (a.hora||'').localeCompare(b.hora||''); });
+  var html='<div class="lbl">Visitas · '+df(f)+'</div>';
+  if(vis.length){
+    html+='<div class="grp">'+vis.map(function(v){
+      var t=(v.hora?'<b>'+x(v.hora)+'</b> · ':'')+x(v.obraNom||v.nota||'Visita');
+      var sub=[v.cliNom?x(v.cliNom):'', (v.obraNom&&v.nota)?x(v.nota):''].filter(Boolean).join(' · ');
+      return '<div class="fld" style="align-items:flex-start"><div style="flex:1"><div style="font-size:13px;color:var(--t1)">'+t+'</div>'+(sub?'<div style="font-size:11px;color:var(--t2);margin-top:2px">'+sub+'</div>':'')+'</div><button onclick="borrarVisita(\''+v.id+'\')" style="border:none;background:none;color:var(--red);font-size:15px;cursor:pointer;padding:0 4px">✕</button></div>';
+    }).join('')+'</div>';
+  } else {
+    html+='<div class="grp"><div class="fld"><span style="font-size:13px;color:var(--t3)">Sin visitas este día</span></div></div>';
+  }
+  var obras=DB.obras();
+  var opts='<option value="">Sin obra asignada</option>'+obras.map(function(o){ return '<option value="'+o.id+'">'+x(o.n)+(o.cliNom?' · '+x(o.cliNom):'')+'</option>'; }).join('');
+  html+='<div class="lbl">Añadir visita</div><div class="grp">'
+    +'<div class="fld"><span class="fld-l">Hora</span><input id="vis-hora" type="time"></div>'
+    +'<div class="fld"><span class="fld-l">Obra</span><select id="vis-obra">'+opts+'</select></div>'
+    +'<div class="fld"><textarea id="vis-nota" rows="2" placeholder="Nota (opcional)"></textarea></div>'
+    +'</div>'
+    +'<button class="btn" onclick="guardarVisita()">Añadir visita</button>';
+  cont.innerHTML=html;
+}
+function guardarVisita(){
+  if(!calSel) return;
+  var obraId=(document.getElementById('vis-obra')||{}).value||'';
+  var hora=(document.getElementById('vis-hora')||{}).value||'';
+  var nota=((document.getElementById('vis-nota')||{}).value||'').trim();
+  if(!obraId && !nota){ msg('Indica una obra o una nota'); return; }
+  var o=obraId?DB.obras().find(function(z){ return z.id===obraId; }):null;
+  var arr=getVisitas();
+  arr.push({id:'v'+Date.now(),fecha:calSel,hora:hora,obraId:obraId,obraNom:o?o.n:'',cliNom:o?(o.cliNom||''):'',nota:nota});
+  saveVisitas(arr); msg('Visita guardada'); selDia(calSel);
+}
+function borrarVisita(id){ saveVisitas(getVisitas().filter(function(v){ return v.id!==id; })); msg('Visita eliminada'); selDia(calSel); }
+
 // ── CONFIG ────────────────────────────────────────────
 function cargarCfg() {
   var c=DB.cfg();
   ['emp','res','dir','cp','nif','mov','ri','rm'].forEach(function(k){
     var e=document.getElementById('cfg-'+k); if(e) e.value=c[k]||'';
   });
-  pintarLogoPrev(c.logo);
+  pintarLogoPrev(c.logo); pintarLogoHeader(c.logo);
 }
 function pintarLogoPrev(data){ var e=document.getElementById('cfg-logo-prev'); if(e) e.innerHTML=data?('<img src="'+data+'" style="max-width:190px;max-height:70px;border:1px solid var(--b1);border-radius:6px;padding:5px;background:#fff">'):'<span style="font-size:12px;color:var(--t3)">Sin logo</span>'; }
+function pintarLogoHeader(data){ var img=document.getElementById('tb-logo'), txt=document.getElementById('tb-brand-txt'); if(img&&txt){ if(data){ img.src=data; img.style.display='inline-block'; txt.style.display='none'; } else { img.style.display='none'; txt.style.display='inline'; } } }
 function subirLogo(inp){
   var f=inp.files&&inp.files[0]; if(!f) return;
   var r=new FileReader();
@@ -942,7 +1042,7 @@ function subirLogo(inp){
       cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
       var data=cv.toDataURL('image/jpeg',0.9);
       var cfg=DB.cfg(); cfg.logo=data; DB.s('cfg',cfg);
-      pintarLogoPrev(data); msg('Logo guardado');
+      pintarLogoPrev(data); pintarLogoHeader(data); msg('Logo guardado');
     };
     img.src=e.target.result;
   };
@@ -2298,6 +2398,7 @@ window.borrarParte=borrarParte; window.pdfDe=pdfDe; window.cancelar=cancelar;
 window.cerrarModal=cerrarModal; window.descartar=descartar;
 window.setTabPartes=setTabPartes; window.elegirEstado=elegirEstado; window.toggleEstado=toggleEstado;
 window.setTabCont=setTabCont; window.abrirDocCont=abrirDocCont; window.guardarDocCont=guardarDocCont; window.borrarDocCont=borrarDocCont; window.llenarObraSelCont=llenarObraSelCont; window.generarPDFFactura=generarPDFFactura; window.nuevoDocMenu=nuevoDocMenu; window.cerrarModalDoc=cerrarModalDoc; window.crearDocCont=crearDocCont; window.toggleFiltrosCont=toggleFiltrosCont;
+window.abrirCalendario=abrirCalendario; window.calHoy=calHoy; window.calMover=calMover; window.selDia=selDia; window.guardarVisita=guardarVisita; window.borrarVisita=borrarVisita;
 window.setTabProv=setTabProv; window.cargarMarcaFija=cargarMarcaFija; window.abrirProvCust=abrirProvCust; window.guardarProv=guardarProv; window.borrarProv=borrarProv;
 window.abrirFicha=abrirFicha; window.guardarFicha=guardarFicha; window.borrarFicha=borrarFicha;
 </script>
