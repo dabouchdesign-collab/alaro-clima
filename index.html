@@ -190,23 +190,36 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'Inter',s
 .modal-t{font-size:14px;font-weight:600;margin-bottom:6px;color:var(--t1)}
 .modal-s{font-size:13px;color:var(--t2);margin-bottom:20px;line-height:1.5}
 
-/* ══ VISTA ESCRITORIO (PC) ══ solo pantallas anchas; el móvil no se toca */
+/* ══ VISTA ESCRITORIO (PC) ══ pantalla completa + textos más grandes; el móvil no se toca */
 @media (min-width:860px){
-  body{background:#e9ebee}
-  #app{max-width:1000px;border-left:1px solid var(--b2);border-right:1px solid var(--b2);box-shadow:0 0 40px rgba(0,0,0,.06)}
-  .topbar{padding:0 26px}
-  .home-hero{margin:20px 26px}
-  .stats-row,.resumen-hdr,.filtros,#home-list,.search-wrap,.tabs,.est-g,.steps,.step-lbl,.tipo-g,.foto-wrap,.firma-wrap,.emp-grid{padding-left:26px;padding-right:26px}
-  .lbl{padding-left:26px;padding-right:26px}
-  .grp{margin-left:26px;margin-right:26px;border-radius:var(--rl);border:1px solid var(--b1)}
-  .stats-row{grid-template-columns:repeat(4,1fr)}
+  html,body{font-size:16.5px}
+  body{background:#eef0f3}
+  #app{max-width:100%}
+  .topbar{padding:0 48px}
+  .topbar-row1{height:54px}
+  .tb-brand{font-size:19px}
+  .nav-tab{font-size:12.5px;padding:15px 6px}
+  .subhdr{height:58px;padding:0 48px}
+  .subhdr-tit{font-size:16px}
+  .home-hero{margin:24px 48px;padding:22px}
+  .hero-t{font-size:17px}.hero-s{font-size:13px}
+  .stats-row,.resumen-hdr,.filtros,#home-list,.search-wrap,.tabs,.est-g,.steps,.step-lbl,.tipo-g,.foto-wrap,.firma-wrap,.emp-grid,#ver-body,#lista-partes,#lista-cli,#lista-obra,#lista-buscar,#lista-cont,#lista-prov,#lista-fichas,#marcas-list,#res-fotos{padding-left:48px;padding-right:48px}
+  .lbl{padding-left:48px;padding-right:48px;font-size:11px}
+  .grp,.res-card{margin-left:48px;margin-right:48px;border-radius:var(--rl);border:1px solid var(--b1)}
+  .item{padding-left:48px;padding-right:48px;min-height:66px}
+  .stats-row{grid-template-columns:repeat(6,1fr)}
   .tipo-g{grid-template-columns:repeat(4,1fr)}
   .emp-grid{grid-template-columns:repeat(3,1fr)}
-  .foto-g{grid-template-columns:repeat(6,1fr)}
-  .res-card{margin-left:26px;margin-right:26px;border-radius:var(--rl);border:1px solid var(--b1)}
-  .item{padding-left:26px;padding-right:26px}
-  .btn,.btn2,.btnd{width:auto;min-width:300px;max-width:440px;margin-left:26px;margin-right:26px}
-  .fld-l{min-width:180px}
+  .foto-g{grid-template-columns:repeat(8,1fr)}
+  .btn,.btn2,.btnd{width:auto;min-width:340px;max-width:520px;margin-left:48px;margin-right:48px;font-size:14px}
+  .fld{min-height:56px;padding:15px 18px}
+  .fld-l{min-width:210px;font-size:14px}
+  .fld input,.fld select,.fld textarea{font-size:16.5px}
+  .item-t{font-size:15px}.item-s{font-size:12.5px}
+  .stat-n{font-size:30px}.stat-l{font-size:11px}
+  .emp-card-l{font-size:13px}.emp-card-s{font-size:12px}
+  .tipo-tx{font-size:13px}
+  .res-row{font-size:14px;padding:12px 18px}
   .item:hover{background:var(--s1)}
   .stat:hover,.emp-card:hover,.tipo-b:hover,.home-hero:hover{border-color:var(--b3)}
 }
@@ -255,15 +268,17 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'Inter',s
       <div class="stat-l">Pendientes</div>
     </div>
   </div>
-  <!-- Resumen reciente con filtros -->
+  <!-- Resumen reciente con buscador -->
   <div class="resumen-hdr">
     <span class="resumen-hdr-tit">Partes recientes</span>
-    <button class="resumen-toggle" onclick="toggleFiltros()" id="btn-filtros">Filtrar ↓</button>
+    <button class="resumen-toggle" onclick="toggleFiltros()" id="btn-filtros">Fecha ↓</button>
+  </div>
+  <div class="search-wrap">
+    <input class="search-inp" id="home-q" type="text" placeholder="Buscar parte por cliente u obra..." oninput="renderHome()">
   </div>
   <div class="filtros" id="filtros-panel">
     <div class="filtros-row">
-      <input class="fil-inp" id="fil-cli" type="text" placeholder="Buscar por cliente..." oninput="renderHome()">
-      <input class="fil-inp" id="fil-fecha" type="date" onchange="renderHome()" style="max-width:148px">
+      <input class="fil-inp" id="fil-fecha" type="date" onchange="renderHome()">
     </div>
   </div>
   <div id="home-list"></div>
@@ -893,10 +908,9 @@ var _filtrosVisible = false;
 function toggleFiltros() {
   _filtrosVisible = !_filtrosVisible;
   document.getElementById('filtros-panel').classList.toggle('on', _filtrosVisible);
-  document.getElementById('btn-filtros').textContent = _filtrosVisible ? 'Cerrar ↑' : 'Filtrar ↓';
+  document.getElementById('btn-filtros').textContent = _filtrosVisible ? 'Cerrar ↑' : 'Fecha ↓';
   if(!_filtrosVisible){
-    document.getElementById('fil-cli').value='';
-    document.getElementById('fil-fecha').value='';
+    var ff=document.getElementById('fil-fecha'); if(ff) ff.value='';
   }
   renderHome();
 }
@@ -908,14 +922,19 @@ function renderHome() {
   var cntPend = document.getElementById('cnt-pend'); if(cntPend) cntPend.textContent=pendientes.length;
 
   var cont = document.getElementById('home-list'); if(!cont) return;
-  var filCli = (document.getElementById('fil-cli')||{}).value||'';
+  var q = ((document.getElementById('home-q')||{}).value||'').toLowerCase().trim();
   var filFecha = (document.getElementById('fil-fecha')||{}).value||'';
 
   var lista = partes.slice().reverse();
-  if(filCli) lista = lista.filter(function(p){ return (p.cliNom||'').toLowerCase().includes(filCli.toLowerCase()); });
+  if(q) lista = lista.filter(function(p){
+    return (p.cliNom||'').toLowerCase().includes(q)
+        || (p.obraNom||'').toLowerCase().includes(q)
+        || (p.obraDir||'').toLowerCase().includes(q)
+        || String(p.num||'').toLowerCase().includes(q);
+  });
   if(filFecha) lista = lista.filter(function(p){ return p.fecha===filFecha; });
   if(!lista.length) {
-    cont.innerHTML='<div class="empty"><div class="empty-t">'+(filCli||filFecha?'Sin resultados':'Sin partes aún')+'</div><div class="empty-s">'+(filCli||filFecha?'Prueba con otros filtros':'Pulsa "Nuevo parte" para empezar')+'</div></div>';
+    cont.innerHTML='<div class="empty"><div class="empty-t">'+(q||filFecha?'Sin resultados':'Sin partes aún')+'</div><div class="empty-s">'+(q||filFecha?'Prueba con otra búsqueda':'Pulsa "Nuevo parte" para empezar')+'</div></div>';
     return;
   }
   cont.innerHTML = lista.map(function(p){
