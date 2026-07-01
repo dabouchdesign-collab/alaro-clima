@@ -272,7 +272,7 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'Inter',s
   <!-- Resumen reciente con buscador -->
   <div class="resumen-hdr">
     <span class="resumen-hdr-tit">Partes recientes</span>
-    <button class="resumen-toggle" onclick="toggleFiltros()" id="btn-filtros">Fecha ↓</button>
+    <button class="resumen-toggle" onclick="toggleFiltros()" id="btn-filtros">Filtros ↓</button>
   </div>
   <div class="search-wrap">
     <input class="search-inp" id="home-q" type="text" placeholder="Buscar parte por cliente u obra..." oninput="renderHome()">
@@ -280,6 +280,11 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'Inter',s
   <div class="filtros" id="filtros-panel">
     <div class="filtros-row">
       <input class="fil-inp" id="fil-fecha" type="date" onchange="renderHome()">
+      <select class="fil-inp" id="fil-estado" onchange="renderHome()">
+        <option value="">Todos los estados</option>
+        <option value="realizado">Realizados</option>
+        <option value="pendiente">Pendientes</option>
+      </select>
     </div>
   </div>
   <div id="home-list"></div>
@@ -442,32 +447,29 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'Inter',s
 
 <!-- ══ PÁGINA 2: CLIENTES / OBRAS ══ -->
 <div id="s-clientes-obras" class="scr">
-  <div class="tabs" style="margin-top:0">
-    <button class="tab-btn on" id="tab-clis" onclick="setTabCO('cli')">Clientes</button>
-    <button class="tab-btn" id="tab-obras" onclick="setTabCO('obra')">Obras</button>
-    <button class="tab-btn" id="tab-buscar" onclick="setTabCO('buscar')">Buscar</button>
-  </div>
-  <!-- Clientes -->
-  <div id="panel-cli">
-    <div style="display:flex;justify-content:flex-end;padding:10px 16px 0">
-      <button class="subhdr-act" onclick="abrirCli(null)" style="color:var(--t2);font-size:22px;font-weight:300;border:none;background:none;cursor:pointer">+</button>
+  <!-- Hero nuevo cliente/obra -->
+  <div class="home-hero" onclick="nuevoCliObra()">
+    <div class="hero-ic">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
     </div>
-    <div id="lista-cli"></div>
+    <div><div class="hero-t">Nuevo cliente / obra</div><div class="hero-s">Añadir cliente u obra</div></div>
   </div>
-  <!-- Obras -->
-  <div id="panel-obra" style="display:none">
-    <div style="display:flex;justify-content:flex-end;padding:10px 16px 0">
-      <button class="subhdr-act" onclick="abrirObra(null)" style="color:var(--t2);font-size:22px;font-weight:300;border:none;background:none;cursor:pointer">+</button>
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat" id="stat-cli" onclick="setTabCO('cli')">
+      <div class="stat-n" id="cnt-cli">0</div><div class="stat-l">Clientes</div>
     </div>
-    <div id="lista-obra"></div>
+    <div class="stat" id="stat-obra" onclick="setTabCO('obra')">
+      <div class="stat-n" id="cnt-obra">0</div><div class="stat-l">Obras</div>
+    </div>
   </div>
   <!-- Buscador -->
-  <div id="panel-buscar" style="display:none">
-    <div class="search-wrap">
-      <input class="search-inp" id="buscar-inp" type="text" placeholder="Buscar clientes y obras..." oninput="renderBuscar()">
-    </div>
-    <div id="lista-buscar"></div>
+  <div class="search-wrap">
+    <input class="search-inp" id="co-q" type="text" placeholder="Buscar cliente u obra..." oninput="onSearchCO()">
   </div>
+  <div id="panel-cli"><div id="lista-cli"></div></div>
+  <div id="panel-obra" style="display:none"><div id="lista-obra"></div></div>
+  <div id="panel-buscar" style="display:none"><div id="lista-buscar"></div></div>
 </div>
 
 <!-- Formularios clientes/obras (subpages) -->
@@ -477,11 +479,16 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'Inter',s
   <div class="grp">
     <div class="fld"><span class="fld-l">Nombre</span><input id="cl-n" type="text" placeholder="Nombre o empresa"></div>
     <div class="fld"><span class="fld-l">Domicilio</span><input id="cl-d" type="text" placeholder="Calle, número..."></div>
-    <div class="fld"><span class="fld-l">CP Población</span><input id="cl-cp" type="text" placeholder="07000 Palma"></div>
+    <div class="fld"><span class="fld-l">Población</span><input id="cl-cp" type="text" placeholder="Palma"></div>
+    <div class="fld"><span class="fld-l">Código postal</span><input id="cl-cpost" type="text" placeholder="07000"></div>
     <div class="fld"><span class="fld-l">NIF/CIF</span><input id="cl-nif" type="text" placeholder="00000000X"></div>
     <div class="fld"><span class="fld-l">Teléfono</span><input id="cl-t" type="tel" placeholder="000 000 000"></div>
     <div class="fld"><span class="fld-l">Email</span><input id="cl-e" type="email" placeholder="correo@ejemplo.com"></div>
+    <div class="fld"><span class="fld-l">Email 2</span><input id="cl-e2" type="email" placeholder="Segundo correo (opcional)"></div>
+    <div class="fld"><span class="fld-l">IBAN</span><input id="cl-iban" type="text" placeholder="ES00 0000 0000 0000 0000 0000"></div>
   </div>
+  <div class="lbl">Observaciones</div>
+  <div class="grp"><div class="fld"><textarea id="cl-obs" rows="3" placeholder="Notas, condiciones, observaciones..."></textarea></div></div>
   <div class="gap"></div>
   <button class="btn" onclick="guardarCli()">Guardar cliente</button>
   <button class="btnd" id="btn-del-cli" onclick="borrarCli()" style="display:none">Eliminar cliente</button>
@@ -550,11 +557,35 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'Inter',s
 
 <!-- ══ CONTABILIDAD ══ -->
 <div id="s-contabilidad" class="scr">
-  <div class="subhdr"><button class="back-btn" onclick="goSub('s-empresa','s-empresa')">←</button><span class="subhdr-tit">Contabilidad</span><button class="subhdr-act" onclick="abrirDocCont(null)">+</button></div>
-  <div class="tabs">
-    <button class="tab-btn on" id="tab-fact" onclick="setTabCont('factura')">Facturas</button>
-    <button class="tab-btn" id="tab-pres" onclick="setTabCont('presupuesto')">Presupuestos</button>
-    <button class="tab-btn" id="tab-alba" onclick="setTabCont('albaran')">Albaranes</button>
+  <div class="subhdr"><button class="back-btn" onclick="goSub('s-empresa','s-empresa')">←</button><span class="subhdr-tit">Contabilidad</span></div>
+  <div class="home-hero" onclick="nuevoDocMenu()">
+    <div class="hero-ic">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+    </div>
+    <div><div class="hero-t">Nuevo documento</div><div class="hero-s">Factura · Presupuesto · Albarán</div></div>
+  </div>
+  <div class="stats-row" style="grid-template-columns:repeat(3,1fr)">
+    <div class="stat" id="stat-fact" onclick="setTabCont('factura')"><div class="stat-n" id="cnt-fact">0</div><div class="stat-l">Facturas</div></div>
+    <div class="stat" id="stat-pres" onclick="setTabCont('presupuesto')"><div class="stat-n" id="cnt-pres">0</div><div class="stat-l">Presupuestos</div></div>
+    <div class="stat" id="stat-alba" onclick="setTabCont('albaran')"><div class="stat-n" id="cnt-alba">0</div><div class="stat-l">Albaranes</div></div>
+  </div>
+  <div class="search-wrap">
+    <input class="search-inp" id="cont-q" type="text" placeholder="Buscar por cliente u obra..." oninput="renderCont()">
+  </div>
+  <div class="resumen-hdr">
+    <span class="resumen-hdr-tit">Documentos</span>
+    <button class="resumen-toggle" onclick="toggleFiltrosCont()" id="btn-filtros-cont">Filtros ↓</button>
+  </div>
+  <div class="filtros" id="filtros-cont">
+    <div class="filtros-row">
+      <input class="fil-inp" id="cont-fecha" type="date" onchange="renderCont()">
+      <select class="fil-inp" id="cont-estado" onchange="renderCont()">
+        <option value="">Todos los estados</option>
+        <option value="pagado">Pagados</option>
+        <option value="pendiente">Pendientes</option>
+        <option value="cancelado">Cancelados</option>
+      </select>
+    </div>
   </div>
   <div id="lista-cont"></div>
 </div>
@@ -687,6 +718,29 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'Inter',s
   </div>
 </div>
 
+<div class="modal-bg" id="modal-co" onclick="if(event.target===this)cerrarModalCO()">
+  <div class="modal">
+    <div class="modal-t">¿Qué quieres crear?</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn" style="width:100%;margin:0" onclick="cerrarModalCO();abrirCli(null)">Nuevo cliente</button>
+      <button class="btn2" style="width:100%;margin:0" onclick="cerrarModalCO();abrirObra(null)">Nueva obra</button>
+      <button class="btn2" style="width:100%;margin:0;opacity:.7" onclick="cerrarModalCO()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-doc" onclick="if(event.target===this)cerrarModalDoc()">
+  <div class="modal">
+    <div class="modal-t">¿Qué quieres crear?</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn" style="width:100%;margin:0" onclick="crearDocCont('factura')">Nueva factura</button>
+      <button class="btn2" style="width:100%;margin:0" onclick="crearDocCont('presupuesto')">Nuevo presupuesto</button>
+      <button class="btn2" style="width:100%;margin:0" onclick="crearDocCont('albaran')">Nuevo albarán</button>
+      <button class="btn2" style="width:100%;margin:0;opacity:.7" onclick="cerrarModalDoc()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -737,7 +791,7 @@ function aplicarSnapshot(data) {
   if(activa){
     var id=activa.id;
     if(id==='s-partes') renderHome();
-    if(id==='s-clientes-obras') { renderCli(); renderObras(); }
+    if(id==='s-clientes-obras') { renderObras(); setTabCO('cli'); }
   }
 }
 
@@ -813,7 +867,7 @@ function navTo(tab) {
   var map = { partes:'s-partes', clientes:'s-clientes-obras', empresa:'s-empresa' };
   showScr(map[tab]);
   if(tab==='partes') renderHome();
-  if(tab==='clientes') { renderCli(); renderObras(); }
+  if(tab==='clientes') { renderObras(); setTabCO('cli'); }
 }
 
 // navTo con alias para el tab de clientes
@@ -834,8 +888,8 @@ function goSub(id, backId) {
   var btn = document.getElementById('back-'+id.replace('s-',''));
   if(btn) btn.onclick = function(){ goBack(id); };
   showScr(id);
-  if(id==='s-clientes-obras') { renderCli(); renderObras(); }
-  if(id==='s-contabilidad') renderCont();
+  if(id==='s-clientes-obras') { renderObras(); setTabCO('cli'); }
+  if(id==='s-contabilidad'){ var cq=document.getElementById('cont-q'); if(cq) cq.value=''; setTabCont('factura'); }
   if(id==='s-proveedores') renderProv();
   if(id==='s-empresa') {} // nada extra
 }
@@ -909,9 +963,10 @@ var _filtrosVisible = false;
 function toggleFiltros() {
   _filtrosVisible = !_filtrosVisible;
   document.getElementById('filtros-panel').classList.toggle('on', _filtrosVisible);
-  document.getElementById('btn-filtros').textContent = _filtrosVisible ? 'Cerrar ↑' : 'Fecha ↓';
+  document.getElementById('btn-filtros').textContent = _filtrosVisible ? 'Cerrar ↑' : 'Filtros ↓';
   if(!_filtrosVisible){
     var ff=document.getElementById('fil-fecha'); if(ff) ff.value='';
+    var fe=document.getElementById('fil-estado'); if(fe) fe.value='';
   }
   renderHome();
 }
@@ -925,6 +980,7 @@ function renderHome() {
   var cont = document.getElementById('home-list'); if(!cont) return;
   var q = ((document.getElementById('home-q')||{}).value||'').toLowerCase().trim();
   var filFecha = (document.getElementById('fil-fecha')||{}).value||'';
+  var filEstado = (document.getElementById('fil-estado')||{}).value||'';
 
   var lista = partes.slice().reverse();
   if(q) lista = lista.filter(function(p){
@@ -934,8 +990,10 @@ function renderHome() {
         || String(p.num||'').toLowerCase().includes(q);
   });
   if(filFecha) lista = lista.filter(function(p){ return p.fecha===filFecha; });
+  if(filEstado) lista = lista.filter(function(p){ return (p.estado||'realizado')===filEstado; });
   if(!lista.length) {
-    cont.innerHTML='<div class="empty"><div class="empty-t">'+(q||filFecha?'Sin resultados':'Sin partes aún')+'</div><div class="empty-s">'+(q||filFecha?'Prueba con otra búsqueda':'Pulsa "Nuevo parte" para empezar')+'</div></div>';
+    var hayFiltro=(q||filFecha||filEstado);
+    cont.innerHTML='<div class="empty"><div class="empty-t">'+(hayFiltro?'Sin resultados':'Sin partes aún')+'</div><div class="empty-s">'+(hayFiltro?'Prueba con otra búsqueda':'Pulsa "Nuevo parte" para empezar')+'</div></div>';
     return;
   }
   cont.innerHTML = lista.map(function(p){
@@ -1604,26 +1662,36 @@ function imprimirPDFClasico(html, btn){
 // ── CLIENTES / OBRAS ─────────────────────────────────
 function setTabCO(tab){
   tabCO=tab;
-  // tabs
-  document.getElementById('tab-clis').classList.toggle('on',tab==='cli');
-  document.getElementById('tab-obras').classList.toggle('on',tab==='obra');
-  document.getElementById('tab-buscar').classList.toggle('on',tab==='buscar');
-  // panels
+  var sc=document.getElementById('stat-cli'), so=document.getElementById('stat-obra');
+  if(sc) sc.style.borderColor=(tab==='cli')?'var(--g)':'';
+  if(so) so.style.borderColor=(tab==='obra')?'var(--g)':'';
   document.getElementById('panel-cli').style.display=tab==='cli'?'block':'none';
   document.getElementById('panel-obra').style.display=tab==='obra'?'block':'none';
   document.getElementById('panel-buscar').style.display=tab==='buscar'?'block':'none';
-  if(tab==='buscar'){
-    setTimeout(function(){ var e=document.getElementById('buscar-inp'); if(e){ e.focus(); e.value=''; } renderBuscar(); },80);
-  }
-  if(tab==='cli') renderCli();
-  if(tab==='obra') renderObras();
+  var q=document.getElementById('co-q');
+  if(tab==='cli'){ if(q) q.value=''; renderCli(); }
+  if(tab==='obra'){ if(q) q.value=''; renderObras(); }
+  if(tab==='buscar') renderBuscar();
 }
+function onSearchCO(){
+  var q=((document.getElementById('co-q')||{}).value||'').trim();
+  if(q){
+    document.getElementById('panel-cli').style.display='none';
+    document.getElementById('panel-obra').style.display='none';
+    document.getElementById('panel-buscar').style.display='block';
+    var sc=document.getElementById('stat-cli'),so=document.getElementById('stat-obra');
+    if(sc) sc.style.borderColor=''; if(so) so.style.borderColor='';
+    tabCO='buscar'; renderBuscar();
+  } else { setTabCO('cli'); }
+}
+function nuevoCliObra(){ document.getElementById('modal-co').classList.add('on'); }
+function cerrarModalCO(){ document.getElementById('modal-co').classList.remove('on'); }
 function renderBuscar(){
-  var q=(document.getElementById('buscar-inp').value||'').toLowerCase();
+  var q=((document.getElementById('co-q')||{}).value||'').toLowerCase().trim();
   var cont=document.getElementById('lista-buscar'); if(!cont) return;
   if(!q){ cont.innerHTML='<div class="empty"><div class="empty-t">Escribe para buscar</div></div>'; return; }
-  var clis=DB.clientes().filter(function(c){ return (c.n||'').toLowerCase().includes(q)||(c.cp||'').toLowerCase().includes(q); });
-  var obras=DB.obras().filter(function(o){ return (o.n||'').toLowerCase().includes(q)||(o.cliNom||'').toLowerCase().includes(q); });
+  var clis=DB.clientes().filter(function(c){ return (c.n||'').toLowerCase().includes(q)||(c.cp||'').toLowerCase().includes(q)||(c.d||'').toLowerCase().includes(q)||(c.nif||'').toLowerCase().includes(q)||(c.t||'').toLowerCase().includes(q); });
+  var obras=DB.obras().filter(function(o){ return (o.n||'').toLowerCase().includes(q)||(o.cliNom||'').toLowerCase().includes(q)||(o.d||'').toLowerCase().includes(q)||(o.p||'').toLowerCase().includes(q); });
   if(!clis.length&&!obras.length){ cont.innerHTML='<div class="empty"><div class="empty-t">Sin resultados</div></div>'; return; }
   var html='';
   if(clis.length){ html+='<div class="lbl">Clientes ('+clis.length+')</div>'+clis.map(function(c){ return '<div class="item" onclick="abrirCli(\''+c.id+'\')"><div class="ava">'+ini(c.n)+'</div><div class="item-inf"><div class="item-t">'+x(c.n)+'</div><div class="item-s">'+x(c.cp||'')+(c.t?' · '+c.t:'')+'</div></div><span class="chev">›</span></div>'; }).join(''); }
@@ -1631,7 +1699,9 @@ function renderBuscar(){
   cont.innerHTML=html;
 }
 function renderCli(){
-  var lista=DB.clientes(),cont=document.getElementById('lista-cli'); if(!cont) return;
+  var lista=DB.clientes(),cont=document.getElementById('lista-cli');
+  var cc=document.getElementById('cnt-cli'); if(cc) cc.textContent=lista.length;
+  if(!cont) return;
   if(!lista.length){ cont.innerHTML='<div class="empty"><div class="empty-t">Sin clientes</div><div class="empty-s">Pulsa + para añadir el primero</div></div>'; return; }
   cont.innerHTML=lista.map(function(c){ return '<div class="item" onclick="abrirCli(\''+c.id+'\')"><div class="ava">'+ini(c.n)+'</div><div class="item-inf"><div class="item-t">'+x(c.n)+'</div><div class="item-s">'+x(c.cp||'')+(c.t?' · '+c.t:'')+'</div></div><span class="chev">›</span></div>'; }).join('');
 }
@@ -1640,21 +1710,23 @@ function abrirCli(id){
   document.getElementById('cli-tit').textContent=id?'Editar cliente':'Nuevo cliente';
   document.getElementById('btn-del-cli').style.display=id?'block':'none';
   var sv=function(el,v){ var e=document.getElementById(el); if(e) e.value=v||''; };
-  if(id){ var c=DB.clientes().find(function(z){ return z.id===id; }); if(c){ sv('cl-n',c.n); sv('cl-d',c.d); sv('cl-cp',c.cp); sv('cl-nif',c.nif); sv('cl-t',c.t); sv('cl-e',c.e||''); } }
-  else { ['cl-n','cl-d','cl-cp','cl-nif','cl-t','cl-e'].forEach(function(i){ sv(i,''); }); }
+  if(id){ var c=DB.clientes().find(function(z){ return z.id===id; }); if(c){ sv('cl-n',c.n); sv('cl-d',c.d); sv('cl-cp',c.cp); sv('cl-cpost',c.cpost); sv('cl-nif',c.nif); sv('cl-t',c.t); sv('cl-e',c.e||''); sv('cl-e2',c.e2||''); sv('cl-iban',c.iban||''); sv('cl-obs',c.obs||''); } }
+  else { ['cl-n','cl-d','cl-cp','cl-cpost','cl-nif','cl-t','cl-e','cl-e2','cl-iban','cl-obs'].forEach(function(i){ sv(i,''); }); }
   goSub('s-cli-form','s-clientes-obras');
 }
 function guardarCli(){
   var n=document.getElementById('cl-n').value.trim(); if(!n){ msg('El nombre es obligatorio'); return; }
   var lista=DB.clientes();
-  var c={id:editCliId||('c'+Date.now()),n:n,d:document.getElementById('cl-d').value.trim(),cp:document.getElementById('cl-cp').value.trim(),nif:document.getElementById('cl-nif').value.trim(),t:document.getElementById('cl-t').value.trim(),e:document.getElementById('cl-e').value.trim()};
+  var c={id:editCliId||('c'+Date.now()),n:n,d:document.getElementById('cl-d').value.trim(),cp:document.getElementById('cl-cp').value.trim(),cpost:document.getElementById('cl-cpost').value.trim(),nif:document.getElementById('cl-nif').value.trim(),t:document.getElementById('cl-t').value.trim(),e:document.getElementById('cl-e').value.trim(),e2:document.getElementById('cl-e2').value.trim(),iban:document.getElementById('cl-iban').value.trim(),obs:document.getElementById('cl-obs').value.trim()};
   if(editCliId){ var i=lista.findIndex(function(z){ return z.id===editCliId; }); if(i>=0) lista[i]=c; else lista.push(c); } else lista.push(c);
   DB.s('cli',lista); msg('Cliente guardado'); goSub('s-clientes-obras','s-clientes-obras');
 }
 function borrarCli(){ DB.s('cli',DB.clientes().filter(function(c){ return c.id!==editCliId; })); msg('Cliente eliminado'); goSub('s-clientes-obras','s-clientes-obras'); }
 
 function renderObras(){
-  var lista=DB.obras(),cont=document.getElementById('lista-obra'); if(!cont) return;
+  var lista=DB.obras(),cont=document.getElementById('lista-obra');
+  var co=document.getElementById('cnt-obra'); if(co) co.textContent=lista.length;
+  if(!cont) return;
   if(!lista.length){ cont.innerHTML='<div class="empty"><div class="empty-t">Sin obras</div><div class="empty-s">Pulsa + para añadir la primera</div></div>'; return; }
   cont.innerHTML=lista.map(function(o){ return '<div class="item" onclick="abrirObra(\''+o.id+'\')"><div class="ava">OB</div><div class="item-inf"><div class="item-t">'+x(o.n)+'</div><div class="item-s">'+x(o.d||o.p||'')+(o.cliNom?' · '+o.cliNom:'')+'</div></div><span class="chev">›</span></div>'; }).join('');
 }
@@ -1687,20 +1759,31 @@ function borrarObra(){ DB.s('obras',DB.obras().filter(function(o){ return o.id!=
 // ── CONTABILIDAD ──────────────────────────────────────
 function setTabCont(tipo){
   tabCont=tipo;
+  var m={factura:'fact',presupuesto:'pres',albaran:'alba'};
   ['fact','pres','alba'].forEach(function(t){
-    var m={fact:'factura',pres:'presupuesto',alba:'albaran'};
-    var b=document.getElementById('tab-'+t); if(b) b.classList.toggle('on',m[t]===tipo);
+    var s=document.getElementById('stat-'+t); if(s) s.style.borderColor=(m[tipo]===t)?'var(--g)':'';
   });
   renderCont();
 }
 function renderCont(){
-  var lista=(DB.cfg()._cont||[]).filter(function(d){ return d.tipo===tabCont; });
+  var all=DB.cfg()._cont||[];
+  var cf=document.getElementById('cnt-fact'); if(cf) cf.textContent=all.filter(function(d){return d.tipo==='factura';}).length;
+  var cp=document.getElementById('cnt-pres'); if(cp) cp.textContent=all.filter(function(d){return d.tipo==='presupuesto';}).length;
+  var ca=document.getElementById('cnt-alba'); if(ca) ca.textContent=all.filter(function(d){return d.tipo==='albaran';}).length;
+  var q=((document.getElementById('cont-q')||{}).value||'').toLowerCase().trim();
+  var lista=all.filter(function(d){ return d.tipo===tabCont; });
+  if(q) lista=lista.filter(function(d){ return (d.cliNom||'').toLowerCase().includes(q)||(d.obraNom||'').toLowerCase().includes(q)||String(d.num||'').toLowerCase().includes(q); });
+  var cfecha=(document.getElementById('cont-fecha')||{}).value||'';
+  var cest=(document.getElementById('cont-estado')||{}).value||'';
+  if(cfecha) lista=lista.filter(function(d){ return d.fecha===cfecha; });
+  if(cest) lista=lista.filter(function(d){ return (d.estado||'pendiente')===cest; });
   var cont=document.getElementById('lista-cont'); if(!cont) return;
-  if(!lista.length){ var lbl={factura:'facturas',presupuesto:'presupuestos',albaran:'albaranes'}; cont.innerHTML='<div class="empty"><div class="empty-t">Sin '+lbl[tabCont]+'</div><div class="empty-s">Pulsa + para añadir</div></div>'; return; }
-  var ec={pagado:'tag-real',pendiente:'tag-pend',cancelado:'tag-pend'};
+  var hayF=(q||cfecha||cest);
+  if(!lista.length){ var lbl={factura:'facturas',presupuesto:'presupuestos',albaran:'albaranes'}; cont.innerHTML='<div class="empty"><div class="empty-t">'+(hayF?'Sin resultados':'Sin '+lbl[tabCont])+'</div><div class="empty-s">'+(hayF?'Prueba con otra búsqueda':'Pulsa "Nuevo documento" para añadir')+'</div></div>'; return; }
   cont.innerHTML=lista.slice().reverse().map(function(d){
     var base=parseFloat(d.base)||0,iva=parseFloat(d.iva)||21,total=(base*(1+iva/100)).toFixed(2);
-    return '<div class="item" onclick="abrirDocCont(\''+d.id+'\')"><div class="ava">'+d.tipo.slice(0,2).toUpperCase()+'</div><div class="item-inf"><div class="item-t">'+x(d.num||'—')+' · '+x(d.cliNom||'Sin cliente')+'</div><div class="item-s">'+x(df(d.fecha))+' · '+total+' €'+(d.obraNom?' · '+x(d.obraNom):'')+'</div></div><span class="tag '+ec[d.estado||'pendiente']+'">'+x(d.estado||'pend')+'</span></div>';
+    var tagCls=(d.estado==='pagado')?'tag tag-real':'tag tag-pend';
+    return '<div class="item" onclick="abrirDocCont(\''+d.id+'\')"><div class="ava">'+d.tipo.slice(0,2).toUpperCase()+'</div><div class="item-inf"><div class="item-t">'+x(d.cliNom||'Sin cliente')+'</div><div class="item-s">'+x(df(d.fecha))+' · '+total+' €'+(d.obraNom?' · '+x(d.obraNom):'')+'</div></div><div class="'+tagCls+'">#'+x(d.num||'')+'</div></div>';
   }).join('');
 }
 function llenarObraSelCont(){
@@ -1710,6 +1793,20 @@ function llenarObraSelCont(){
   var obras=DB.obras(); var fil=cliId?obras.filter(function(o){ return o.cliId===cliId; }):obras;
   sel.innerHTML='<option value="">Sin asignar</option>'+fil.map(function(o){ return '<option value="'+o.id+'">'+x(o.n)+'</option>'; }).join('');
   sel.value=actual;
+}
+function nuevoDocMenu(){ document.getElementById('modal-doc').classList.add('on'); }
+function cerrarModalDoc(){ document.getElementById('modal-doc').classList.remove('on'); }
+function crearDocCont(t){ cerrarModalDoc(); tabCont=t; abrirDocCont(null); }
+var _filtrosContVisible=false;
+function toggleFiltrosCont(){
+  _filtrosContVisible=!_filtrosContVisible;
+  document.getElementById('filtros-cont').classList.toggle('on',_filtrosContVisible);
+  document.getElementById('btn-filtros-cont').textContent=_filtrosContVisible?'Cerrar ↑':'Filtros ↓';
+  if(!_filtrosContVisible){
+    var cf=document.getElementById('cont-fecha'); if(cf) cf.value='';
+    var ce=document.getElementById('cont-estado'); if(ce) ce.value='';
+    renderCont();
+  }
 }
 function abrirDocCont(id){
   editContId=id;
@@ -2048,7 +2145,7 @@ function generarPDFFactura(){
   if(!d){ msg('Guarda el documento primero'); return; }
   var dd=Object.assign({}, d);
   var c=d.cliId?DB.clientes().find(function(z){ return z.id===d.cliId; }):null;
-  dd.cliLines = c ? [c.d||'', c.cp||'', c.nif?('NIF: '+c.nif):'', c.t?('Tel: '+c.t):''].filter(Boolean) : [];
+  dd.cliLines = c ? [c.d||'', ((c.cpost||'')+' '+(c.cp||'')).trim(), c.nif?('NIF: '+c.nif):'', c.t?('Tel: '+c.t):''].filter(Boolean) : [];
   var o=d.obraId?DB.obras().find(function(z){ return z.id===d.obraId; }):null;
   dd.obraLines = o ? [o.d||'', o.p||''].filter(Boolean) : [];
   guardarFacturaArchivo(dd);
@@ -2192,7 +2289,7 @@ window.navTo=navTo; window.goSub=goSub; window.goBack=goBack;
 window.toggleFiltros=toggleFiltros; window.renderHome=renderHome;
 window.guardarCfg=guardarCfg; window.abrirCli=abrirCli; window.guardarCli=guardarCli; window.borrarCli=borrarCli;
 window.abrirObra=abrirObra; window.guardarObra=guardarObra; window.borrarObra=borrarObra;
-window.setTabCO=setTabCO; window.renderBuscar=renderBuscar;
+window.setTabCO=setTabCO; window.renderBuscar=renderBuscar; window.onSearchCO=onSearchCO; window.nuevoCliObra=nuevoCliObra; window.cerrarModalCO=cerrarModalCO;
 window.nuevoParte=nuevoParte; window.elegirCli=elegirCli; window.elegirObra=elegirObra;
 window.irP2=irP2; window.elegirTipo=elegirTipo; window.irP3=irP3; window.irP4=irP4; window.irP5=irP5;
 window.añadirFotos=añadirFotos; window.quitarFoto=quitarFoto; window.borrarFirma=borrarFirma;
@@ -2200,7 +2297,7 @@ window.soloGuardar=soloGuardar; window.generarPDF=generarPDF; window.verParte=ve
 window.borrarParte=borrarParte; window.pdfDe=pdfDe; window.cancelar=cancelar;
 window.cerrarModal=cerrarModal; window.descartar=descartar;
 window.setTabPartes=setTabPartes; window.elegirEstado=elegirEstado; window.toggleEstado=toggleEstado;
-window.setTabCont=setTabCont; window.abrirDocCont=abrirDocCont; window.guardarDocCont=guardarDocCont; window.borrarDocCont=borrarDocCont; window.llenarObraSelCont=llenarObraSelCont; window.generarPDFFactura=generarPDFFactura;
+window.setTabCont=setTabCont; window.abrirDocCont=abrirDocCont; window.guardarDocCont=guardarDocCont; window.borrarDocCont=borrarDocCont; window.llenarObraSelCont=llenarObraSelCont; window.generarPDFFactura=generarPDFFactura; window.nuevoDocMenu=nuevoDocMenu; window.cerrarModalDoc=cerrarModalDoc; window.crearDocCont=crearDocCont; window.toggleFiltrosCont=toggleFiltrosCont;
 window.setTabProv=setTabProv; window.cargarMarcaFija=cargarMarcaFija; window.abrirProvCust=abrirProvCust; window.guardarProv=guardarProv; window.borrarProv=borrarProv;
 window.abrirFicha=abrirFicha; window.guardarFicha=guardarFicha; window.borrarFicha=borrarFicha;
 </script>
