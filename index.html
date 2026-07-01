@@ -189,6 +189,27 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'Inter',s
 .modal{background:var(--s1);border:1px solid var(--b2);border-radius:14px 14px 0 0;padding:24px 18px 32px;width:100%;max-width:480px;margin:0 auto}
 .modal-t{font-size:14px;font-weight:600;margin-bottom:6px;color:var(--t1)}
 .modal-s{font-size:13px;color:var(--t2);margin-bottom:20px;line-height:1.5}
+
+/* ══ VISTA ESCRITORIO (PC) ══ solo pantallas anchas; el móvil no se toca */
+@media (min-width:860px){
+  body{background:#e9ebee}
+  #app{max-width:1000px;border-left:1px solid var(--b2);border-right:1px solid var(--b2);box-shadow:0 0 40px rgba(0,0,0,.06)}
+  .topbar{padding:0 26px}
+  .home-hero{margin:20px 26px}
+  .stats-row,.resumen-hdr,.filtros,#home-list,.search-wrap,.tabs,.est-g,.steps,.step-lbl,.tipo-g,.foto-wrap,.firma-wrap,.emp-grid{padding-left:26px;padding-right:26px}
+  .lbl{padding-left:26px;padding-right:26px}
+  .grp{margin-left:26px;margin-right:26px;border-radius:var(--rl);border:1px solid var(--b1)}
+  .stats-row{grid-template-columns:repeat(4,1fr)}
+  .tipo-g{grid-template-columns:repeat(4,1fr)}
+  .emp-grid{grid-template-columns:repeat(3,1fr)}
+  .foto-g{grid-template-columns:repeat(6,1fr)}
+  .res-card{margin-left:26px;margin-right:26px;border-radius:var(--rl);border:1px solid var(--b1)}
+  .item{padding-left:26px;padding-right:26px}
+  .btn,.btn2,.btnd{width:auto;min-width:300px;max-width:440px;margin-left:26px;margin-right:26px}
+  .fld-l{min-width:180px}
+  .item:hover{background:var(--s1)}
+  .stat:hover,.emp-card:hover,.tipo-b:hover,.home-hero:hover{border-color:var(--b3)}
+}
 </style>
 </head>
 <body>
@@ -1290,7 +1311,11 @@ function drawParte(doc, p, cfg){
   T(BK); ft(13,'bold'); doc.text((cfg.emp||'ALARO CLIMA').toUpperCase(), M+6, 16.5);
   ft(10,'normal'); var yy=23;
   [cfg.res, cfg.nif?('NIF: '+cfg.nif):'', cfg.dir, cfg.cp2||'', cfg.cp, cfg.mov?('Telf.: '+cfg.mov):''].forEach(function(l){ if(l){ doc.text(l,M+6,yy); yy+=5.4; } });
-  if(LOGO){ try{ doc.addImage(LOGO,'JPEG',116,10,88,30); }catch(e){ try{ doc.addImage(LOGO,'PNG',116,10,88,30);}catch(e2){} } }
+  if(LOGO){ try{
+    var lp=doc.getImageProperties(LOGO), lw=88, lh=lw*lp.height/lp.width;
+    if(lh>28){ lh=28; lw=lh*lp.width/lp.height; }
+    doc.addImage(LOGO, lp.fileType||'JPEG', R-lw, 13, lw, lh);
+  }catch(e){ try{ doc.addImage(LOGO,'JPEG',116,15,88,22);}catch(e2){} } }
 
   ft(10,'normal'); T(BK); doc.text('Nº de Parte:  '+(p.num||''), M, 62);
   var cw=[30,34,22], ty=66, accx=M;
@@ -1765,7 +1790,11 @@ function drawFactura(doc, d, cfg){
   ft(10,'normal'); var yy=23;
   [cfg.res, cfg.nif?('NIF: '+cfg.nif):'', cfg.dir, cfg.cp2||'', cfg.cp, cfg.mov?('Telf.: '+cfg.mov):''].forEach(function(l){ if(l){ doc.text(l,M+6,yy); yy+=5.4; } });
 
-  if(LOGO){ try{ doc.addImage(LOGO,'JPEG',116,10,88,30); }catch(e){ try{ doc.addImage(LOGO,'PNG',116,10,88,30);}catch(e2){} } }
+  if(LOGO){ try{
+    var lp=doc.getImageProperties(LOGO), lw=88, lh=lw*lp.height/lp.width;
+    if(lh>28){ lh=28; lw=lh*lp.width/lp.height; }
+    doc.addImage(LOGO, lp.fileType||'JPEG', R-lw, 13, lw, lh);
+  }catch(e){ try{ doc.addImage(LOGO,'JPEG',116,15,88,22);}catch(e2){} } }
 
   ft(10,'normal'); T(BK); doc.text('Nº de Albarán:  '+(d.num||''), M, 62);
 
