@@ -501,6 +501,12 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'Inter',s
     <div class="fld"><span class="fld-l">Reg. Medioamb</span><input id="cfg-rm" type="text" placeholder="NIMA 0700010246"></div>
   </div>
   <div class="gap"></div>
+  <div class="lbl">Logo de empresa</div>
+  <div class="grp"><div class="fld"><span class="fld-l">Logo</span>
+    <input type="file" id="cfg-logo-inp" accept="image/*" style="display:none" onchange="subirLogo(this)">
+    <button class="btn2" style="width:auto;margin:0;padding:8px 14px" onclick="document.getElementById('cfg-logo-inp').click()">Subir / cambiar logo</button>
+  </div></div>
+  <div id="cfg-logo-prev" style="padding:8px 16px 4px"></div>
   <button class="btn" onclick="guardarCfg()">Guardar cambios</button>
   <div class="gap"></div>
 </div>
@@ -831,6 +837,25 @@ function cargarCfg() {
   ['emp','res','dir','cp','nif','mov','ri','rm'].forEach(function(k){
     var e=document.getElementById('cfg-'+k); if(e) e.value=c[k]||'';
   });
+  pintarLogoPrev(c.logo);
+}
+function pintarLogoPrev(data){ var e=document.getElementById('cfg-logo-prev'); if(e) e.innerHTML=data?('<img src="'+data+'" style="max-width:190px;max-height:70px;border:1px solid var(--b1);border-radius:6px;padding:5px;background:#fff">'):'<span style="font-size:12px;color:var(--t3)">Sin logo</span>'; }
+function subirLogo(inp){
+  var f=inp.files&&inp.files[0]; if(!f) return;
+  var r=new FileReader();
+  r.onload=function(e){
+    var img=new Image();
+    img.onload=function(){
+      var maxW=600, sc=Math.min(1, maxW/img.width);
+      var cv=document.createElement('canvas'); cv.width=Math.round(img.width*sc); cv.height=Math.round(img.height*sc);
+      cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+      var data=cv.toDataURL('image/jpeg',0.9);
+      var cfg=DB.cfg(); cfg.logo=data; DB.s('cfg',cfg);
+      pintarLogoPrev(data); msg('Logo guardado');
+    };
+    img.src=e.target.result;
+  };
+  r.readAsDataURL(f); inp.value='';
 }
 function guardarCfg() {
   var c={};
@@ -838,7 +863,7 @@ function guardarCfg() {
     var e=document.getElementById('cfg-'+k); c[k]=e?e.value.trim():'';
   });
   // preservar datos extra
-  var prev=DB.cfg(); c._cont=prev._cont||[]; c._prov=prev._prov||[]; c._fichas=prev._fichas||[];
+  var prev=DB.cfg(); c._cont=prev._cont||[]; c._prov=prev._prov||[]; c._fichas=prev._fichas||[]; c.logo=prev.logo||'';
   DB.s('cfg',c); msg('Datos guardados'); navTo('empresa');
 }
 
@@ -1252,6 +1277,81 @@ function guardarEnCarpeta(dir, blob, fname){
 // ── GENERADOR PDF VECTORIAL (parte de trabajo profesional) ──
 function drawParte(doc, p, cfg){
   cfg=cfg||{}; p=p||{};
+  var PW=210, M=12, R=PW-M, CW=PW-2*M;
+  var NAVY=[27,32,104], GREEN=[22,140,70], INK=[20,20,20], GRY=[95,95,95], LGT=[150,150,150];
+  var BLU=[224,231,246], BRD=[120,130,175], LINE=[205,205,215], BG=[252,252,251];
+  var LOGO=cfg.logo||null;
+  function df(s){ if(!s) return ''; var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s); return m?(m[3]+'-'+m[2]+'-'+m[1]):s; }
+  function T(c){ doc.setTextColor(c[0],c[1],c[2]); }
+  function D(c){ doc.setDrawColor(c[0],c[1],c[2]); }
+  function F(c){ doc.setFillColor(c[0],c[1],c[2]); }
+  function ft(s,w){ doc.setFontSize(s); doc.setFont('helvetica',w||'normal'); }
+  function label(t,x,y){ ft(7,'bold'); T(GREEN); doc.setCharSpace(0.4); doc.text(t.toUpperCase(),x,y); doc.setCharSpace(0); }
+
+  D(INK); doc.setLineWidth(0.4); doc.rect(M,12,96,42);
+  T(INK); ft(13,'bold'); doc.text((cfg.emp||'ALARO CLIMA').toUpperCase(), M+5, 20);
+  ft(8.5,'normal'); var yy=25.5;
+  [cfg.res, cfg.nif?('NIF: '+cfg.nif):'', cfg.dir, cfg.cp, cfg.mov?('Telf.: '+cfg.mov):''].forEach(function(l){ if(l){ doc.text(l,M+5,yy); yy+=4.8; } });
+  if(LOGO){ try{ doc.addImage(LOGO,'JPEG',120,16,78,24); }catch(e){ try{ doc.addImage(LOGO,'PNG',120,16,78,24);}catch(e2){} } }
+
+  var by=60; F(NAVY); doc.rect(M,by,CW,9,'F');
+  T([255,255,255]); ft(12,'bold'); doc.setCharSpace(0.5); doc.text('PARTE DE TRABAJO', M+4, by+6.2); doc.setCharSpace(0);
+  ft(9.5,'normal'); doc.text('Nº '+(p.num||'')+'     Fecha: '+df(p.fecha), R-4, by+6, {align:'right'});
+  var y=by+9+7;
+
+  var gap=6, bw=(CW-gap)/2, bh=30;
+  function box(x,lab,nombre,lineas,extra){
+    F([255,255,255]); D(BRD); doc.setLineWidth(0.3); doc.roundedRect(x,y,bw,bh,1.5,1.5,'FD');
+    label(lab,x+5,y+6);
+    T(INK); ft(11,'bold'); doc.text(doc.splitTextToSize(nombre||'—',bw-10)[0], x+5, y+12);
+    T(GRY); ft(8.5,'normal'); var yy=y+17;
+    (lineas||[]).forEach(function(l){ if(l){ doc.splitTextToSize(l,bw-10).forEach(function(s){ doc.text(s,x+5,yy); yy+=4.2; }); } });
+    if(extra){ T(GREEN); ft(8,'bold'); doc.text(extra,x+5,y+bh-4); }
+  }
+  box(M,'Cliente',p.cliNom,[p.cliDir,p.cliNif?('NIF: '+p.cliNif):'',p.cliTel?('Tel: '+p.cliTel):'']);
+  box(M+bw+gap,'Obra / Proyecto',(p.obraNom||p.obraDir),[(p.obraNom&&p.obraDir)?p.obraDir:'','Operario: '+(p.op||cfg.res||'—')],p.tipo);
+  y+=bh+7;
+
+  function seccion(lab,txt){
+    label(lab,M,y); y+=2.5;
+    var lines=doc.splitTextToSize((txt&&String(txt).trim())||'—',CW-8);
+    var h=Math.max(11,lines.length*4.6+5);
+    F(BG); D(LINE); doc.setLineWidth(0.3); doc.roundedRect(M,y,CW,h,1.5,1.5,'FD');
+    T([55,55,55]); ft(10,'normal'); doc.text(lines,M+4,y+5.5); y+=h+6;
+  }
+  seccion('Descripción del trabajo / incidencia / asistencia',p.desc);
+  if(p.obs) seccion('Observaciones / incidencias',p.obs);
+  if(p.mat) seccion('Materiales utilizados',p.mat);
+
+  if(p.fotos&&p.fotos.length){
+    label('Fotografías de la visita ('+p.fotos.length+')',M,y); y+=3;
+    var cols=3,fg=4,fw=(CW-(cols-1)*fg)/cols,fh=fw*0.72,col=0,rowY=y;
+    p.fotos.forEach(function(src){
+      var x=M+col*(fw+fg); F([238,238,236]); D(LINE); doc.setLineWidth(0.3); doc.roundedRect(x,rowY,fw,fh,1.5,1.5,'FD');
+      try{ doc.addImage(src,'JPEG',x+0.6,rowY+0.6,fw-1.2,fh-1.2);}catch(e){ try{ doc.addImage(src,'PNG',x+0.6,rowY+0.6,fw-1.2,fh-1.2);}catch(e2){} }
+      col++; if(col>=cols){ col=0; rowY+=fh+fg; }
+    });
+    if(col>0) rowY+=fh+fg; y=rowY+2;
+  }
+
+  var firmaH=34, footerY=283, firmaTop=footerY-6-firmaH; if(y>firmaTop) firmaTop=y+2;
+  var fbw=(CW-gap)/2;
+  function firmaBox(x,lab,img,pie){
+    F([255,255,255]); D(BRD); doc.setLineWidth(0.3); doc.roundedRect(x,firmaTop,fbw,firmaH,1.5,1.5,'FD');
+    T(GRY); ft(8,'normal'); doc.text(lab,x+4,firmaTop+6);
+    if(img){ try{ doc.addImage(img,'PNG',x+5,firmaTop+8,fbw*0.5,16);}catch(e){} }
+    D(LINE); doc.setLineWidth(0.2); doc.line(x+4,firmaTop+firmaH-7,x+fbw-4,firmaTop+firmaH-7);
+    T([60,60,60]); ft(8,'normal'); if(pie) doc.text(pie,x+4,firmaTop+firmaH-3);
+  }
+  firmaBox(M,'Conforme / Firma del cliente:',p.firmaImg,(p.firmaNom?('Nombre: '+p.firmaNom):'')+(p.firmaDni?('  ·  DNI: '+p.firmaDni):''));
+  firmaBox(M+fbw+gap,'Firma del técnico / Operario:',null,(p.op||cfg.res||''));
+
+  D(LINE); doc.setLineWidth(0.2); doc.line(M,footerY-2,R,footerY-2);
+  T(LGT); ft(7.5,'normal');
+  doc.text(((cfg.emp||'Alaro Clima')+'  ·  NIF: '+(cfg.nif||'—')+'  ·  '+(cfg.ri||'')+'  ·  '+(cfg.rm||'')).replace(/ · $/,''), PW/2, footerY+2, {align:'center'});
+}
+function _drawParte_old(doc, p, cfg){
+  cfg=cfg||{}; p=p||{};
   var PW=210, M=14, CW=PW-2*M;
   var GREEN=[22,163,74], DARK=[34,34,34], GRY=[110,110,110], LGT=[150,150,150];
   var BRD=[210,210,205], BG=[252,252,251], DARKBG=[20,20,22];
@@ -1576,6 +1676,99 @@ function guardarFacturaArchivo(d){
   }
 }
 function drawFactura(doc, d, cfg){
+  cfg=cfg||{}; d=d||{};
+  var PW=210, M=12, R=PW-M, CW=PW-2*M;
+  var NAVY=[27,32,104], RED=[206,26,26], INK=[20,20,20], GRY=[90,90,90], LGT=[140,140,140];
+  var BLU=[224,231,246], BRD=[120,130,175], LINE=[200,205,220];
+  function df(s){ if(!s) return ''; var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s); return m?(m[3]+'-'+m[2]+'-'+m[1]):s; }
+  function T(c){ doc.setTextColor(c[0],c[1],c[2]); }
+  function D(c){ doc.setDrawColor(c[0],c[1],c[2]); }
+  function F(c){ doc.setFillColor(c[0],c[1],c[2]); }
+  function ft(s,w){ doc.setFontSize(s); doc.setFont('helvetica',w||'normal'); }
+  var base=parseFloat(d.base)||0, iva=(d.iva===''||d.iva==null)?21:parseFloat(d.iva)||0;
+  var cuota=base*iva/100, total=base+cuota;
+  var tipoLabel={factura:'FACTURA',presupuesto:'PRESUPUESTO',albaran:'ALBARÁN'}[d.tipo]||'DOCUMENTO';
+  var estadoCol={pagado:[34,197,94],pendiente:[245,158,11],cancelado:[239,68,68]}[d.estado||'pendiente']||[136,136,136];
+  var LOGO=cfg.logo||null;
+  var LET={ email:cfg.email||'alaroclima@gmail.com', iban:cfg.iban||'', formaPago:cfg.formaPago||'TRANSFERENCIA', venc:cfg.venc||'A LA VISTA' };
+
+  D(INK); doc.setLineWidth(0.4); doc.rect(M,12,96,44);
+  T(INK); ft(13,'bold'); doc.text((cfg.emp||'ALARO CLIMA').toUpperCase(), M+5, 20);
+  T(INK); ft(9,'normal'); var yy=26;
+  [cfg.res, cfg.nif?('NIF: '+cfg.nif):'', cfg.dir, cfg.cp, cfg.mov?('Telf.: '+cfg.mov):''].forEach(function(l){ if(l){ doc.text(l, M+5, yy); yy+=5.2; } });
+
+  if(LOGO){ try{ doc.addImage(LOGO,'JPEG',120,14,78,26); }catch(e){ try{ doc.addImage(LOGO,'PNG',120,14,78,26);}catch(e2){} } }
+
+  ft(9.5,'bold'); T(INK); doc.text('Nº de '+tipoLabel+':  '+(d.num||''), M, 66);
+
+  var tw=64, cH=8, cw=tw/3, ty=70;
+  F(BLU); D(BRD); doc.setLineWidth(0.3);
+  ['FECHA','Nº '+tipoLabel.slice(0,7),'PÁGINA'].forEach(function(h,i){ doc.rect(M+i*cw,ty,cw,cH,'FD'); });
+  ft(7.5,'bold'); T(NAVY); doc.text('FECHA',M+cw/2,ty+5,{align:'center'}); doc.text('Nº '+tipoLabel.slice(0,3),M+cw+cw/2,ty+5,{align:'center'}); doc.text('PÁGINA',M+2*cw+cw/2,ty+5,{align:'center'});
+  D(BRD); for(var i=0;i<3;i++) doc.rect(M+i*cw,ty+cH,cw,9);
+  ft(11,'bold'); T(INK); doc.text(df(d.fecha),M+cw/2,ty+cH+6,{align:'center'}); doc.text(String(d.num||''),M+cw+cw/2,ty+cH+6,{align:'center'}); doc.text('1',M+2*cw+cw/2,ty+cH+6,{align:'center'});
+
+  var cbx=110, cbw=R-cbx;
+  F(BLU); D(BRD); doc.setLineWidth(0.3); doc.rect(cbx,58,cbw,8,'FD');
+  ft(10,'bold'); T(NAVY); doc.setCharSpace(1.5); doc.text('CLIENTE', cbx+cbw/2, 63.5, {align:'center'}); doc.setCharSpace(0);
+  D(BRD); doc.rect(cbx,66,cbw,32);
+  T(INK); ft(9.5,'bold'); doc.text((d.cliNom||'—').toUpperCase(), cbx+4, 72);
+  ft(9,'normal'); var cy=77.5; (d.cliLines||[]).forEach(function(l){ if(l){ doc.text(l,cbx+4,cy); cy+=5; } });
+
+  var ty2=104, cols=[ {t:'Descripción',x:M,w:104,a:'left'},{t:'Cantidad',x:M+104,w:22,a:'center'},{t:'Precio',x:M+126,w:24,a:'center'},{t:'Importe',x:M+150,w:26,a:'center'},{t:'IVA %',x:M+176,w:CW-176,a:'center'} ];
+  F(BLU); D(BRD); doc.setLineWidth(0.3); doc.rect(M,ty2,CW,8,'FD');
+  ft(9,'bold'); T(NAVY);
+  cols.forEach(function(c){ if(c.a==='left') doc.text(c.t,c.x+2,ty2+5.4); else doc.text(c.t,c.x+c.w/2,ty2+5.4,{align:'center'}); });
+  D(BRD); cols.forEach(function(c){ doc.line(c.x,ty2,c.x,ty2+8); });
+  var bodyTop=ty2+8, bodyH=98; D(BRD); doc.rect(M,bodyTop,CW,bodyH);
+  cols.forEach(function(c){ if(c.x>M) doc.line(c.x,bodyTop,c.x,bodyTop+bodyH); });
+  T(INK); ft(9.5,'normal'); var dy=bodyTop+6;
+  var descLines=[];
+  if(d.obraNom) descLines.push(d.obraNom);
+  (d.obraLines||[]).forEach(function(l){ descLines.push(l); });
+  if(descLines.length) descLines.push('');
+  doc.splitTextToSize(d.desc||'Servicios de climatización', 100).forEach(function(l){ descLines.push(l); });
+  descLines.forEach(function(l){ doc.text(l, M+2, dy); dy+=5; });
+  var ry=bodyTop+6;
+  ft(9.5,'normal'); T(INK);
+  doc.text('1,00', M+104+11, ry, {align:'center'});
+  doc.text(base.toFixed(2).replace('.',','), M+126+12, ry, {align:'center'});
+  doc.text(base.toFixed(2).replace('.',','), M+150+13, ry, {align:'center'});
+  doc.text(iva.toFixed(1).replace('.',','), M+176+(CW-176)/2, ry, {align:'center'});
+
+  var totY=bodyTop+bodyH+6, tX=110, tW=R-tX, tc=tW/4;
+  var th=['Exento I.V.A.','Base I.V.A.','Cuota I.V.A.','TOTAL'];
+  F(BLU); D(BRD); for(var j=0;j<4;j++) doc.rect(tX+j*tc,totY,tc,7,'FD');
+  ft(7.5,'bold'); T(NAVY); th.forEach(function(h,j){ doc.text(h,tX+j*tc+tc/2,totY+4.6,{align:'center'}); });
+  D(BRD); for(var j2=0;j2<4;j2++) doc.rect(tX+j2*tc,totY+7,tc,8);
+  ft(9.5,'normal'); T(INK);
+  doc.text(base.toFixed(2).replace('.',','), tX+tc+tc/2, totY+12.2, {align:'center'});
+  doc.text(cuota.toFixed(2).replace('.',','), tX+2*tc+tc/2, totY+12.2, {align:'center'});
+  ft(10.5,'bold'); doc.text(total.toFixed(2).replace('.',','), tX+3*tc+tc/2, totY+12.2, {align:'center'});
+
+  var bY=250, bh=['Base imponible','% IVA','Cuota I.V.A.','% RE','Cuota R.E.'], bw=[30,14,24,14,20];
+  var bx=M; F(BLU); D(BRD);
+  bh.forEach(function(h,k){ doc.rect(bx,bY,bw[k],6,'FD'); ft(6.5,'bold'); T(NAVY); doc.text(h,bx+bw[k]/2,bY+4,{align:'center'}); bx+=bw[k]; });
+  bx=M; D(BRD); bh.forEach(function(h,k){ doc.rect(bx,bY+6,bw[k],7); bx+=bw[k]; });
+  ft(8,'normal'); T(INK);
+  doc.text(base.toFixed(2).replace('.',','), M+bw[0]-2, bY+10.6, {align:'right'});
+  doc.text(iva.toFixed(1).replace('.',','), M+bw[0]+bw[1]-2, bY+10.6, {align:'right'});
+  doc.text(cuota.toFixed(2).replace('.',','), M+bw[0]+bw[1]+bw[2]-2, bY+10.6, {align:'right'});
+
+  var px=110; ft(9,'normal'); T(INK);
+  doc.text('Forma de pago .:  '+LET.formaPago, px, bY+2);
+  doc.text('Vencimientos .:  '+LET.venc, px, bY+7);
+  doc.text('Banco (IBAN) .:  '+(LET.iban||''), px, bY+12);
+  doc.text('Notas ............:', px, bY+17);
+
+  var fY=280; T(NAVY); ft(9,'bold'); doc.text(LET.email, PW/2, fY, {align:'center'});
+  T(GRY); ft(7,'normal');
+  doc.text('Instalación y mantenim. de A/A · Climatización Industrial · RITE · Inst. Electric. B.T. · Autorizado DGIndustria CAIB '+(cfg.ri||'')+' · NIMA '+(cfg.rm||''), PW/2, fY+4, {align:'center'});
+  T(LGT); ft(5.5,'normal');
+  var legal=(cfg.res||'')+', con el domicilio arriba indicado, de conformidad con la normativa vigente en materia de protección de datos de carácter personal, le informa que los datos personales facilitados serán incorporados a un fichero titularidad de la empresa con la finalidad del mantenimiento de la relación comercial. Puede ejercer sus derechos de acceso, rectificación, cancelación y oposición dirigiendo una comunicación escrita a la dirección indicada o a '+LET.email+'.';
+  doc.splitTextToSize(legal, CW).forEach(function(l,idx){ doc.text(l, PW/2, fY+9+idx*3, {align:'center'}); });
+}
+function _drawFactura_old(doc, d, cfg){
   cfg=cfg||{}; d=d||{};
   var PW=210, M=16, CW=PW-2*M;
   var DARK=[34,34,34], GRY=[110,110,110], LGT=[150,150,150], BRD=[210,210,205], BG=[252,252,251], DARKBG=[20,20,22];
